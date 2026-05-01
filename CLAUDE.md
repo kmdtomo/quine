@@ -67,7 +67,8 @@ import alias: `@/*` = `apps/frontend/*`、`@convex/*` = `convex/*`。
 
 ## 設計ドキュメント
 
-**実装着手時は必ず [.docs/INDEX.md](.docs/INDEX.md) を最初に読む**。タスク種別から必要な docs を絞り込む。
+**新規セッション開始時は [.docs/STATUS.md](.docs/STATUS.md) を最初に読む**（進捗状況・次のタスク・既知課題）。  
+**実装着手時は [.docs/INDEX.md](.docs/INDEX.md) も読む**。タスク種別から必要な docs を絞り込む。
 
 実装タスクの基本セットは `05`〜`08`:
 

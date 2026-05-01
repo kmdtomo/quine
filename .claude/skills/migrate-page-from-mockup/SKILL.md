@@ -1,240 +1,114 @@
 ---
 name: migrate-page-from-mockup
-description: mockup/ の HTML 1 ページを Next.js + Tailwind + Convex の構成に移植する。CSS の Tailwind 化、shadcn primitive 適用、`*View` / `*Content` 分割、ハードコードデータの Convex query 置換までを行う。
+description: mockup/ の HTML 1 ページを Next.js + Tailwind + Convex の構成に移植する。CSS の Tailwind 化、shadcn primitive 適用、`*View` / `*Content` 分割、ハードコードデータの Convex query 置換、必要なら schema 追加までを行い、**動くアプリの一部として完成させる**。
 ---
 
 あなたは Quine の UI 移植エンジニアとして $ARGUMENTS のページを mockup から実装側に移植する。
 
-$ARGUMENTS が空、またはページ名が不明確な場合は、対象ページ（例: `user-profile`, `product-detail`, `products`, `lp`）をユーザーに確認してから進む。
+$ARGUMENTS が空、またはページ名が不明確な場合は、対象ページ（例: `lp`, `users`, `user-profile`, `products`, `product-detail`, `product-edit`, `tech-stack-detail`, `tech-stack-edit`, `signup-*`）をユーザーに確認してから進む。
 
-## 0. 前提 docs を確認（スキップ厳禁）
+## ゴール
 
-**最初に必ず [`.docs/INDEX.md`](../../../.docs/INDEX.md) を読む**。本スキルで参照する基本 docs:
+**「mockup と見た目が同じで、データが Convex から流れ、ボタンを押すと実際に動くページ」を 1 枚成立させる**。
 
-- `08_mockup.md` — mockup の役割・構造・移植方針
-- `05_directory-structure.md` — ルート構造、View/Content の分割ルール
-- `06_convex.md` — query / mutation / 権限分岐（公開・認証・所有者）
-- `07_coding-guidelines.md` — Tailwind の書き方、Server/Client の使い分け
+「見た目だけの移植」「ハードコードのモック」「TODO だらけ」は不可。最小でも:
+- 公開ページなら → 必要な query を Convex に追加し、レコードがあれば表示できる状態
+- 認証ページなら → mutation も含めて、フォーム送信が DB に書き込まれる状態
+- ボタン / リンクの遷移先が存在しないなら、せめて空ページを置く（404 にしない）
 
-要件確認が必要な場合のみ `01_product.md` `02_account.md` 等を追加で読む。
+## 必読 docs
 
-## パスの前提
+実装に入る前に必ず:
 
-- mockup 側: `mockup/<page-name>.html` + `mockup/components.css` + `mockup/common.css`
-- 実装側: `apps/frontend/app/`, `apps/frontend/features/`, `apps/frontend/components/` 配下
-- Convex: root の `convex/`
+- [`.docs/INDEX.md`](../../../.docs/INDEX.md) — タスク種別から関連 docs を絞る
+- [`.docs/08_mockup.md`](../../../.docs/08_mockup.md) — mockup の構造と移植方針
+- [`.docs/05_directory-structure.md`](../../../.docs/05_directory-structure.md) — 配置、依存方向、View/Content
+- [`.docs/06_convex.md`](../../../.docs/06_convex.md) — schema、query/mutation、権限分岐
+- [`.docs/07_coding-guidelines.md`](../../../.docs/07_coding-guidelines.md) — Tailwind の書き方、Server/Client
 
-### 技術スタック関連で既に揃っているリソース
+要件確認が必要な場合のみ `01_product.md` `02_account.md` `04_login.md` 等を追加で読む。
 
-技術スタック系のページ（`tech-stack-detail`, `tech-stack-edit`, `user-profile` の TechStack 部分など）を移植する際は **新規作成せず** 以下を使う:
+## 絶対ルール（破ったらやり直し）
 
-| リソース | 場所 |
-|---|---|
-| 技術カタログ（key / name / description / category） | `convex/seeds/technologies.ts` |
-| ロゴ画像 628 ファイル | `apps/frontend/public/tech_stack_logo/<key>.png` |
-| 技術名 → ロゴパス変換 helper | `apps/frontend/lib/technology-logo.ts` |
+- **mockup を直接編集しない**（read-only 参照元）
+- **デザインを勝手に簡素化しない**（mockup の見た目を 100% 再現、崩す前にユーザーに確認）
+- **モックデータを残さない**: HTML 内のハードコード配列、`mockup/data/*.js` 等は Convex query 経由に置換。空なら EmptyState を表示。「TODO: 後で繋ぐ」は不可
+- **必要なら schema を増やす**: query が無くて諦めない。`convex/schema.ts` への追加が必要なら追加する（破壊的変更だけはユーザーに確認）
+- **`useEffect + fetch` 禁止**（`*View` で `preloadQuery`）
+- **`components.css` を import しない**（必要なクラスだけ Tailwind 化）
+- **shadcn primitive で代替できるものは shadcn を使う**（Dialog / Popover / DropdownMenu / Tabs / Tooltip / Sonner）
 
-mockup 側の `mockup/data/technologies.js` と `mockup/assets/tech_stack_logo/` は同じ内容のサブセットなので、実装側ではこちらは使わない。
+## 既に揃っているリソース（再生成しない）
 
-## 絶対ルール
+- `data/technologies.ts` — 技術カタログ（580 件、`@data/technologies` で import）
+- `apps/frontend/public/tech_stack_logo/<key>.png` — ロゴ画像 628 ファイル
+- `apps/frontend/lib/technology-logo.ts` — 技術名 → ロゴパス helper
+- shadcn primitive 13 種（`apps/frontend/components/ui/`）
+- Tailwind theme（`apps/frontend/app/globals.css` に Quine dark palette 反映済み）
 
-- **IMPORTANT**: mockup を直接編集しない。mockup は read-only の参照元
-- **デザインを勝手に簡素化しない**。mockup の見た目を 100% 再現する。崩したい場合はユーザーに確認
-- **`useEffect + fetch` で初期データを取らない**。`*View` で `preloadQuery` する
-- **components.css 全体を import しない**。必要なクラスだけ Tailwind 化していく
-- **shadcn primitive で代替できるものは shadcn を使う**（Dialog / Popover / DropdownMenu / Tabs / Toast / Tooltip）
+mockup 側の `mockup/data/technologies.js` と `mockup/assets/tech_stack_logo/` は同じ内容のサブセット。**実装側ではこれらを使わない**。
 
-## 1. mockup を読み込む（スキップ厳禁）
+## 手順
 
-対象ページの mockup を構造的に読む。
+### 1. mockup を読む
+- 対象 HTML を全文読み、`<!-- ========== Section ========== -->` でセクション分割の単位を把握
+- 使われている class、依存 JS（`header.js`, `lp.js`, `notion-editor.js` 等）、ハードコードデータを列挙
+- 該当 class の CSS 定義を `mockup/components.css` から `grep` で抽出
 
-```bash
-cat mockup/<page-name>.html
-```
+### 2. ルートと feature ディレクトリを決める
+- ルート: `05_directory-structure.md` §2（公開は `app/(public)/`、認証は `app/(app)/`、`/@username` 形式は `04_login.md` §4）
+- feature: `apps/frontend/features/<feature>/components/{<Feature>View,<Feature>Content,<Section>...}.tsx`
 
-- HTML 内の `<!-- ========== ComponentName ========== -->` 区切りを抽出 → コンポーネント分割の単位とする
-- 使われている class を全て列挙
-- 使われている JS 機能（state, dropdown 開閉, タブ切替など）を洗い出す
-- `mockup/data/technologies.js` 等のモックデータ参照を確認
+### 3. データ層を整える
+- 必要なテーブルが [`convex/schema.ts`](../../../convex/schema.ts) にあるか確認。なければ追加（schema は **1 ファイル集約**、テーブルごとに分割しない）
+- query / mutation / action が `convex/<table>.ts` にあるか確認。なければ追加
+- 公開度に応じた権限分岐（`06_convex.md` §5）
+  - 公開: auth チェックなし
+  - 認証必須: `requireUser(ctx)`
+  - 所有者限定: `requireUser` + `authorId === user._id`
+- schema 変更後は `pnpm dlx convex dev --once --until-success` を叩いて push + codegen 更新
 
-該当する CSS クラスの定義を `mockup/components.css` から `grep` で抽出する。
+### 4. View / Content を実装
+- `*View` (Server): `preloadQuery` で初期データ取得
+- `*Content` (Client): `usePreloadedQuery` でリアルタイム購読、`useMutation` で更新
+- 例は `06_convex.md` §6
 
-```bash
-grep -n "\.<class-name>" mockup/components.css
-```
+### 5. HTML → JSX に変換
+- 構造はそのまま、class → className、for → htmlFor
+- CSS クラスを Tailwind utility に置換（`mockup/components.css` で定義を確認しながら）
+- インライン style も Tailwind に
+- shadcn で代替できる UI（modal, dropdown, tabs, tooltip 等）は置換
+- mockup の JS インタラクションは React state / hook に
 
-## 2. ルート（route）を決める
+### 6. ボタン / リンクの遷移先
+- 遷移先が未実装でも 404 にしない。最低限 `app/<route>/page.tsx` を空ページで作る、または disabled にして TODO コメント残す（ただし**主要導線**は disabled で済ませない）
 
-`05_directory-structure.md` の §2 に従う。
-
-| ページ | ルート | 公開度 |
-|---|---|---|
-| LP | `app/(public)/page.tsx` | 公開 |
-| プロフィール | `apps/frontend/app/(public)/@[username]/page.tsx` | 公開 |
-| プロダクト詳細 | `apps/frontend/app/(public)/@[username]/[productSlug]/page.tsx` | 公開 |
-| プロダクト一覧 | `apps/frontend/app/(public)/products/page.tsx` | 公開 |
-| プロダクト編集 | `apps/frontend/app/(app)/@[username]/[productSlug]/edit/page.tsx` | 所有者のみ |
-| プロフィール編集 | `apps/frontend/app/(app)/@[username]/edit/page.tsx` | 所有者のみ |
-| 設定 | `apps/frontend/app/(app)/settings/page.tsx` | 認証必須 |
-| サインアップ各ステップ | `apps/frontend/app/signup/<step>/page.tsx` | 認証 |
-
-## 3. feature ディレクトリを作る
-
-```
-apps/frontend/features/<feature>/
-├── components/
-│   ├── <Feature>View.tsx       # Server: preloadQuery
-│   ├── <Feature>Content.tsx    # Client: usePreloadedQuery
-│   ├── <Section1>.tsx          # mockup の <!-- ========== Section1 ========== --> ごとに分割
-│   └── <Section2>.tsx
-├── lib/                        # 必要な定数・helper
-└── schema.ts                   # フォーム validation（編集ページ）
-```
-
-セクション分割の判断基準は `08_mockup.md` §5 の表を参照。
-
-## 4. Convex スキーマと query を確認 / 追加
-
-このページで必要なデータが Convex 側にあるか確認。なければ追加。
+### 7. 確認
 
 ```bash
-ls convex/
+pnpm typecheck   # エラー 0 になるまで
+pnpm dev         # ブラウザで mockup と並べて見比べる
 ```
 
-- 必要なテーブルが `convex/schema.ts` にあるか
-- query / mutation が `convex/<table>.ts` にあるか
-- 公開ページは auth チェックなし、認証必須は `requireUser`、所有者限定は `authorId` チェック（`06_convex.md` §5）
+ブラウザ確認項目:
+- レイアウト / 色 / 余白 / ホバー状態が mockup と一致
+- mutation 実行で dashboard.convex.dev のデータが実際に変わる
+- 公開 / 認証必須 / 所有者限定の出し分けが効く
 
-不足があれば追加するが、**スキーマの破壊的変更が必要な場合は先にユーザーに確認**する。
-
-## 5. View / Content を実装
-
-### View（Server Component）
-
-```tsx
-// apps/frontend/features/<feature>/components/<Feature>View.tsx
-import { preloadQuery } from "convex/nextjs";
-import { api } from "@convex/_generated/api";
-import { <Feature>Content } from "./<Feature>Content";
-
-export async function <Feature>View({ ...params }: Props) {
-  const preloaded = await preloadQuery(api.<table>.<query>, { ...params });
-  return <<Feature>Content preloaded={preloaded} />;
-}
-```
-
-### Content（Client Component）
-
-```tsx
-"use client";
-import { usePreloadedQuery, useMutation } from "convex/react";
-import { api } from "@convex/_generated/api";
-
-export function <Feature>Content({ preloaded }: Props) {
-  const data = usePreloadedQuery(preloaded);
-  // 状態管理 / ハンドラ
-  return <>...</>;
-}
-```
-
-## 6. mockup の HTML を JSX に変換
-
-機械的に変換していく。
-
-### 6-1. 構造はそのまま JSX に
-
-mockup の HTML タグ構造をそのまま JSX に。class → className、`for` → `htmlFor` など。
-
-### 6-2. CSS クラスを Tailwind に置換
-
-各クラスを `mockup/components.css` で確認 → Tailwind utility に置換 → JSX の `className` に書く。
-
-```bash
-# クラス定義を引く
-grep -A 20 "^\.<class-name>" mockup/components.css
-```
-
-- 共通トークン（カラー、スペーシング）は `tailwind.config.ts` の `theme.extend` に移し、Tailwind 経由で参照
-- 複雑な複合スタイルは `cn()` で組み立てる
-- ホバー / focus 等の状態は Tailwind の `hover:` `focus:` で表現
-
-### 6-3. インライン style を Tailwind に
-
-```html
-<!-- mockup -->
-<div style="margin-top: 20px; color: #666;">
-
-<!-- → -->
-<div className="mt-5 text-gray-600">
-```
-
-dynamic な値（progress bar の幅など）でやむを得ない場合のみ `style={{ ... }}` を残す。
-
-### 6-4. shadcn primitive 適用
-
-mockup で実装されている UI のうち、shadcn で代替できるものは置換する。
-
-| mockup | shadcn |
-|---|---|
-| `.modal`, `.modal__overlay` | `<Dialog>` |
-| `.popover`, `.dropdown` | `<Popover>`, `<DropdownMenu>` |
-| `.tab`, `.tab--active` | `<Tabs>` |
-| `.toast` | `<Toaster>` + `useToast()` |
-| `.tooltip` | `<Tooltip>` |
-| `.btn`（汎用ボタン） | `<Button>` |
-
-未インストールなら `pnpm dlx shadcn@latest add <component>` で追加。
-
-### 6-5. インタラクション JS を React state / hook に
-
-mockup の `header.js` `lp.js` などの DOM 操作を、React の `useState` / `useEffect` / カスタムフックに変換する。
-
-## 7. モックデータを Convex に置換
-
-mockup でハードコードされていた配列・オブジェクトを、Convex query 経由に置き換える。
-
-- `data/technologies.js` の参照 → `convex/techStacks.ts` の query 経由
-- HTML 内ベタ書き（ユーザー一覧、プロダクト一覧）→ `usePreloadedQuery` 経由
-
-ハードコードを残してはいけない。空の場合は EmptyState コンポーネントを表示。
-
-## 8. 型チェック（スキップ厳禁）
-
-```bash
-pnpm typecheck
-```
-
-- エラー 0 まで完了ではない
-- Convex の型が変わった場合は `pnpm convex:dev` で codegen 更新
-
-## 9. ブラウザ確認（スキップ厳禁）
-
-`pnpm dev` を起動して該当ページにアクセスし、mockup と並べて見比べる。
-
-- レイアウト一致
-- 色・余白一致
-- ホバー / アクティブ状態一致
-- インタラクション動作（モーダル開閉、タブ切替等）
-- 公開 / 認証必須 / 所有者限定の出し分けが正しい
-
-## 10. レポート
-
-以下を簡潔にユーザーへ報告。
-
-- 追加・変更したファイル一覧
-- 移植元 mockup ファイルとの対応関係
-- 追加した Convex スキーマ / query / mutation
-- shadcn で導入した primitive 一覧
-- mockup と差異がある箇所（あれば理由付きで）
-- 型チェック結果
-- ブラウザ確認の結果
+### 8. レポート
+- 追加・変更したファイル
+- 追加した schema / query / mutation
+- shadcn で追加した primitive
+- mockup と差異がある箇所（あれば理由付き）
+- 動作確認結果（query / mutation が DB に反映されたか）
 
 ## 禁止
 
-- mockup の HTML / CSS を直接書き換えること
-- `components.css` を直接 import すること
-- ハードコードのモックデータを残すこと
-- デザインを勝手に簡素化すること
-- `useEffect + fetch` で初期取得すること
-- 公開ページの query で auth を必須にすること
-- 型チェック未実施で完了報告すること
+- mockup を直接編集する
+- `components.css` を直接 import する
+- **ハードコードモックデータを残す**（必ず Convex query 経由）
+- デザインを勝手に簡素化する
+- `useEffect + fetch` で初期取得する
+- 公開ページの query で auth 必須にする
+- 型チェック未実施 / ブラウザ確認未実施で完了報告する
+- 「データ繋ぎは別タスク」として分離する（このスキルの範囲）
