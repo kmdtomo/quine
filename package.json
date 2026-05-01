@@ -1,0 +1,17 @@
+{
+  "name": "quine",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter frontend dev",
+    "convex:dev": "convex dev",
+    "build": "pnpm --filter frontend build",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "convex": "^1.37.0"
+  },
+  "dependencies": {
+    "@auth/core": "^0.37.0",
+    "@convex-dev/auth": "^0.0.92"
+  }
+}

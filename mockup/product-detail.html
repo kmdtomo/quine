@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mintlify - Quine</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+  <!-- ========== Header ========== -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo">
+        <a href="user-profile.html">
+          <img src="assets/quine_logo.png" alt="Quine Logo">
+        </a>
+      </div>
+
+      <nav class="header__nav">
+        <ul class="header__nav-list">
+          <li>
+            <a href="user-profile.html" class="header__nav-item" aria-label="Home">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V10"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="products.html" class="header__nav-item header__nav-item--active" aria-label="Products">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+              <span class="header__nav-dot"></span>
+            </a>
+          </li>
+          <li>
+            <a href="users.html" class="header__nav-item" aria-label="Search">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="product-edit.html" class="header__nav-item" aria-label="Create new">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </a>
+          </li>
+          <li>
+            <button class="header__nav-item" aria-label="Copy profile link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ヘッダー右側アクション -->
+      <div class="header__actions">
+        <!-- 通知 -->
+        <button type="button" class="header__notify" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="header__notify-dot"></span>
+        </button>
+
+        <!-- 言語切替 -->
+        <div class="lang-toggle" role="tablist" aria-label="Language">
+          <button type="button" class="lang-toggle__btn is-active" data-lang="ja" role="tab" aria-selected="true">JP</button>
+          <button type="button" class="lang-toggle__btn" data-lang="en" role="tab" aria-selected="false">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== Main ========== -->
+  <main class="product-edit">
+    <div class="product-edit__container product-edit__container--detail">
+
+      <!-- ========== Workbench (2-column) ========== -->
+      <div class="product-edit-workbench">
+
+        <!-- ========== ProductDetailMain (左カラム) ========== -->
+        <div class="product-edit-form product-edit-form--detail">
+
+          <!-- ========== OverviewSection ========== -->
+          <section class="product-edit-form__section product-edit-form__project-header">
+            <div class="product-edit-form__logo-row">
+              <div class="detail-logo">
+                <img src="assets/e3a219709558fc2fb9798a695896d1dfc970774a.png" alt="Mintlify">
+              </div>
+
+              <div class="detail-title-stack">
+                <div class="detail-title-stack__title-row">
+                  <h2 class="detail-title-stack__title">Mintlify</h2>
+                  <button type="button" class="detail-title-stack__devs" id="openDevModalBtn" aria-label="View developers">
+                    <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Evgen Ledo" class="detail-dev-avatar">
+                    <img src="../frontend/public/avatar.png" alt="Vitaliy Akterskiy" class="detail-dev-avatar">
+                    <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Maksym Karafizi" class="detail-dev-avatar">
+                    <img src="../frontend/public/avatar.png" alt="Rosaline Kumbirai" class="detail-dev-avatar">
+                    <span class="detail-dev-add" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </span>
+                  </button>
+                </div>
+                <p class="detail-title-stack__tagline">Modern standard for documentation — Beautiful out of the box, optimized for engagement.</p>
+              </div>
+            </div>
+
+            <!-- ========== MetadataRow (meta + links inline) ========== -->
+            <div class="detail-meta-row">
+              <span class="detail-meta">
+                <svg class="detail-meta__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M6 9v3a3 3 0 003 3h6a3 3 0 003-3V9"/></svg>
+                Open Source
+              </span>
+              <span class="detail-meta">
+                <svg class="detail-meta__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="9" r="2.5"/><circle cx="18" cy="9" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M2 20v-1a3 3 0 013-3h2a3 3 0 013 3v1"/><path d="M14 20v-1a3 3 0 013-3h2a3 3 0 013 3v1"/></svg>
+                6-10 people
+              </span>
+              <span class="detail-meta">
+                <svg class="detail-meta__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="2" y1="13" x2="22" y2="13"/></svg>
+                Full Stack Engineer
+              </span>
+              <a href="https://mintlify.com" target="_blank" rel="noopener" class="detail-link">
+                <svg class="detail-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                <span class="detail-link__text">mintlify.com</span>
+              </a>
+              <a href="https://github.com/mintlify/mint" target="_blank" rel="noopener" class="detail-link">
+                <svg class="detail-link__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.65 5.58.65 11.85c0 5.01 3.25 9.26 7.76 10.76.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.1-3.16.69-3.83-1.34-3.83-1.34-.52-1.31-1.26-1.66-1.26-1.66-1.03-.71.08-.69.08-.69 1.14.08 1.74 1.17 1.74 1.17 1.01 1.74 2.66 1.24 3.31.95.1-.74.4-1.24.72-1.53-2.52-.29-5.18-1.26-5.18-5.62 0-1.24.44-2.26 1.17-3.06-.12-.29-.51-1.45.11-3.02 0 0 .95-.31 3.12 1.17.91-.25 1.88-.38 2.84-.39.96.01 1.93.13 2.84.39 2.17-1.47 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.17 1.82 1.17 3.06 0 4.37-2.67 5.33-5.2 5.61.41.35.77 1.04.77 2.1 0 1.51-.01 2.73-.01 3.1 0 .3.21.66.79.55 4.5-1.5 7.75-5.75 7.75-10.76C23.35 5.58 18.27.5 12 .5z"/></svg>
+                <span class="detail-link__text">github.com/mintlify/mint</span>
+              </a>
+            </div>
+          </section>
+
+          <!-- ========== DescriptionSection ========== -->
+          <section class="product-edit-form__section">
+            <h2 class="product-edit-form__label">Description</h2>
+            <p class="detail-body">The modern standard for public facing documentation. Mintlify makes it effortless to build beautiful, fast, and interactive docs sites that developers actually want to read.
+
+Ship API references auto-generated from OpenAPI specs, embed runnable code snippets, and track reader engagement — all in one platform. Loved by teams at Anthropic, Cursor, Resend, and hundreds more.</p>
+          </section>
+
+          <!-- ========== ScreenshotsSection ========== -->
+          <section class="product-edit-form__section">
+            <h2 class="product-edit-form__label">Screenshots</h2>
+            <div class="product-edit-form__images">
+              <div class="screenshot-slot screenshot-slot--preview">
+                <img src="assets/1588ca151e20d1683d7baaa6f744cec3a6683afd.jpg" alt="Screenshot 1" class="screenshot-slot__img">
+              </div>
+              <div class="screenshot-slot screenshot-slot--preview">
+                <img src="assets/e2c6d77061e4132c024e22c3ce03ce5ad324e6b8.jpg" alt="Screenshot 2" class="screenshot-slot__img">
+              </div>
+              <div class="screenshot-slot screenshot-slot--preview">
+                <img src="assets/79e901243e244645eb287331350b34ba29d0332d.jpg" alt="Screenshot 3" class="screenshot-slot__img">
+              </div>
+              <div class="screenshot-slot screenshot-slot--preview">
+                <img src="assets/55764d71fae8c6538356dc52b3f6857349496f54.jpg" alt="Screenshot 4" class="screenshot-slot__img">
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ========== DetailSidebar (右カラム) ========== -->
+        <aside class="detail-sidebar">
+
+          <!-- ========== ProductCreatorCard ========== -->
+          <a href="user-profile.html" class="connected-user">
+            <div class="connected-user__top">
+              <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Evgen Ledo" class="connected-user__avatar">
+              <div class="connected-user__info">
+                <div class="connected-user__name">Evgen Ledo</div>
+                <div class="connected-user__company">Techno Chain Co., Ltd</div>
+              </div>
+            </div>
+            <div class="connected-user__bottom">
+              <div class="connected-user__stacks">
+                <img src="../frontend/public/tech_stack_logo/python.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/react.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/nodejs.png" alt="" class="connected-user__stack-icon">
+                <span class="connected-user__stack-more">+7</span>
+              </div>
+            </div>
+          </a>
+
+          <!-- ========== ProductTechPanel ========== -->
+          <div class="product-tech-panel">
+          <header class="product-tech-panel__head">
+            <h3 class="product-tech-panel__title">Product Tech Stack</h3>
+          </header>
+
+          <div class="product-tech-panel__body">
+            <!-- Language -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">Language</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/typescript.png" alt="TypeScript"></div>
+                  <span class="product-tech-panel__tech-name">TypeScript</span>
+                </div>
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/javascript.png" alt="JavaScript"></div>
+                  <span class="product-tech-panel__tech-name">JavaScript</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Frontend -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">Frontend</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/react.png" alt="React"></div>
+                  <span class="product-tech-panel__tech-name">React</span>
+                </div>
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/nextjs.png" alt="Next.js"></div>
+                  <span class="product-tech-panel__tech-name">Next.js</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Backend -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">Backend</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/nodejs.png" alt="Node.js"></div>
+                  <span class="product-tech-panel__tech-name">Node.js</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Database -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">Database</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/postgresql.png" alt="PostgreSQL"></div>
+                  <span class="product-tech-panel__tech-name">PostgreSQL</span>
+                </div>
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/redis.png" alt="Redis"></div>
+                  <span class="product-tech-panel__tech-name">Redis</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- UI Library -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">UI Library</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/tailwind_css.png" alt="Tailwind CSS"></div>
+                  <span class="product-tech-panel__tech-name">Tailwind</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Cloud -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">Cloud</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/vercel.png" alt="Vercel"></div>
+                  <span class="product-tech-panel__tech-name">Vercel</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- DevOps -->
+            <section class="product-tech-panel__group">
+              <h4 class="product-tech-panel__group-name">DevOps</h4>
+              <div class="product-tech-panel__grid">
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/docker.png" alt="Docker"></div>
+                  <span class="product-tech-panel__tech-name">Docker</span>
+                </div>
+                <div class="product-tech-panel__tech">
+                  <div class="product-tech-panel__tech-logo"><img src="../frontend/public/tech_stack_logo/github_actions.png" alt="GitHub Actions"></div>
+                  <span class="product-tech-panel__tech-name">GH Actions</span>
+                </div>
+              </div>
+            </section>
+          </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ========== DevelopersModal ========== -->
+    <div class="dev-modal" id="devModal" aria-hidden="true">
+      <div class="dev-modal__backdrop" id="devModalBackdrop"></div>
+      <div class="dev-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="devModalTitle">
+        <button type="button" class="dev-modal__close" id="devModalClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+
+        <header class="dev-modal__head">
+          <div class="dev-modal__eyebrow">Developers</div>
+          <h2 class="dev-modal__title" id="devModalTitle">
+            Meet the <span class="dev-modal__title-accent">Engineers</span>
+          </h2>
+          <p class="dev-modal__subtitle">
+            <strong>4 engineers</strong> are shipping <strong>Mintlify</strong>, each owning their part of the product. Open a profile to read their story, or join the team and add yours.
+          </p>
+        </header>
+
+        <div class="dev-modal__body">
+          <div class="dev-row">
+            <a href="#" class="connected-user">
+              <div class="connected-user__top">
+                <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Evgen Ledo" class="connected-user__avatar">
+                <div class="connected-user__info">
+                  <div class="connected-user__name">Evgen Ledo</div>
+                  <div class="connected-user__company">Tech Lead · Full Stack Engineer</div>
+                </div>
+              </div>
+              <div class="connected-user__bottom">
+                <div class="connected-user__stacks">
+                  <img src="../frontend/public/tech_stack_logo/react.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/nodejs.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="" class="connected-user__stack-icon">
+                  <span class="connected-user__stack-more">+2</span>
+                </div>
+              </div>
+            </a>
+
+            <a href="#" class="connected-user">
+              <div class="connected-user__top">
+                <img src="../frontend/public/avatar.png" alt="Vitaliy Akterskiy" class="connected-user__avatar">
+                <div class="connected-user__info">
+                  <div class="connected-user__name">Vitaliy Akterskiy</div>
+                  <div class="connected-user__company">Frontend Engineer</div>
+                </div>
+              </div>
+              <div class="connected-user__bottom">
+                <div class="connected-user__stacks">
+                  <img src="../frontend/public/tech_stack_logo/react.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/tailwind_css.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+                </div>
+              </div>
+            </a>
+
+            <a href="#" class="connected-user">
+              <div class="connected-user__top">
+                <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Maksym Karafizi" class="connected-user__avatar">
+                <div class="connected-user__info">
+                  <div class="connected-user__name">Maksym Karafizi</div>
+                  <div class="connected-user__company">Backend Engineer</div>
+                </div>
+              </div>
+              <div class="connected-user__bottom">
+                <div class="connected-user__stacks">
+                  <img src="../frontend/public/tech_stack_logo/nodejs.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/redis.png" alt="" class="connected-user__stack-icon">
+                </div>
+              </div>
+            </a>
+
+            <a href="#" class="connected-user">
+              <div class="connected-user__top">
+                <img src="../frontend/public/avatar.png" alt="Rosaline Kumbirai" class="connected-user__avatar">
+                <div class="connected-user__info">
+                  <div class="connected-user__name">Rosaline Kumbirai</div>
+                  <div class="connected-user__company">DevOps Engineer</div>
+                </div>
+              </div>
+              <div class="connected-user__bottom">
+                <div class="connected-user__stacks">
+                  <img src="../frontend/public/tech_stack_logo/docker.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="" class="connected-user__stack-icon">
+                  <img src="../frontend/public/tech_stack_logo/redis.png" alt="" class="connected-user__stack-icon">
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <footer class="dev-modal__foot">
+          <span class="dev-modal__foot-hint">Become part of this product's story.</span>
+          <button type="button" class="btn btn--gradient">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Join as Developer
+          </button>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== Lang Toggle Script ========== -->
+  <script>
+    (function () {
+      document.querySelectorAll('.lang-toggle').forEach(function (toggle) {
+        toggle.addEventListener('click', function (e) {
+          var btn = e.target.closest('.lang-toggle__btn');
+          if (!btn) return;
+          toggle.querySelectorAll('.lang-toggle__btn').forEach(function (b) {
+            var active = b === btn;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+        });
+      });
+    })();
+  </script>
+
+  <!-- ========== DevModal Toggle Script ========== -->
+  <script>
+    (function () {
+      const modal = document.getElementById('devModal');
+      const openBtn = document.getElementById('openDevModalBtn');
+      const closeBtn = document.getElementById('devModalClose');
+      const backdrop = document.getElementById('devModalBackdrop');
+      if (!modal || !openBtn) return;
+
+      function open() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      openBtn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      backdrop.addEventListener('click', close);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+      });
+    })();
+  </script>
+
+  <script src="header.js"></script>
+</body>
+</html>

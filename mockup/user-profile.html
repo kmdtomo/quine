@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ユーザープロフィール - Quine</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+  <!-- ========== Header ========== -->
+  <header class="header">
+    <div class="header__inner">
+      <!-- ロゴ -->
+      <div class="header__logo">
+        <a href="#">
+          <img src="assets/quine_logo.png" alt="Quine Logo">
+        </a>
+      </div>
+
+      <!-- ナビゲーション -->
+      <nav class="header__nav">
+        <ul class="header__nav-list">
+          <li>
+            <a href="user-profile.html" class="header__nav-item header__nav-item--active" aria-label="Home">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V10"/></svg>
+              <span class="header__nav-dot"></span>
+            </a>
+          </li>
+          <li>
+            <a href="products.html" class="header__nav-item" aria-label="Products">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="users.html" class="header__nav-item" aria-label="Search">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <button class="header__nav-item" id="headerEditBtn" aria-label="Create new">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+          </li>
+          <li>
+            <button class="header__nav-item" aria-label="Copy profile link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ヘッダー右側アクション -->
+      <div class="header__actions">
+        <!-- 通知 -->
+        <button type="button" class="header__notify" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="header__notify-dot"></span>
+        </button>
+
+        <!-- 言語切替 -->
+        <div class="lang-toggle" role="tablist" aria-label="Language">
+          <button type="button" class="lang-toggle__btn is-active" data-lang="ja" role="tab" aria-selected="true">JP</button>
+          <button type="button" class="lang-toggle__btn" data-lang="en" role="tab" aria-selected="false">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== Main ========== -->
+  <main class="page-layout">
+    <div class="page-layout__grid" id="pageGrid">
+
+      <!-- ========== UserCard ========== -->
+      <div class="user-card" id="userCard">
+        <!-- Banner -->
+        <div class="user-card__banner">
+          <img src="assets/1588ca151e20d1683d7baaa6f744cec3a6683afd.jpg" alt="Banner" id="userBannerImg">
+          <!-- Edit Toggle -->
+          <button class="user-card__edit-btn" id="userCardEditBtn" aria-label="プロフィールを編集" title="プロフィールを編集">
+            <svg class="user-card__edit-icon-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <svg class="user-card__edit-icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <!-- Banner Image Picker -->
+          <button class="user-card__image-btn user-card__image-btn--banner" id="bannerImageBtn" aria-label="Change banner image" title="Change banner image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </button>
+          <!-- Banner Choice Menu -->
+          <div class="image-menu" id="bannerImageMenu" aria-hidden="true">
+            <button type="button" class="image-menu__item" data-action="upload">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Upload from device</span>
+            </button>
+            <button type="button" class="image-menu__item" data-action="gallery">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Choose from gallery</span>
+            </button>
+          </div>
+          <!-- Avatar -->
+          <div class="user-card__avatar">
+            <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Evgen Ledo" id="userAvatarImg">
+            <button class="user-card__image-btn user-card__image-btn--avatar" id="avatarImageBtn" aria-label="Change profile photo" title="Change profile photo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </button>
+          </div>
+          <!-- Hidden file inputs -->
+          <input type="file" id="bannerFileInput" accept="image/*" hidden>
+          <input type="file" id="avatarFileInput" accept="image/*" hidden>
+        </div>
+
+        <!-- Body -->
+        <div class="user-card__body">
+          <!-- Name -->
+          <div class="user-card__name" data-editable data-placeholder="名前を入力">Evgen Ledo</div>
+          <div class="user-card__handle">@ledoteam</div>
+
+          <!-- Social Links -->
+          <div class="social-links" id="socialLinks">
+            <!-- X / Twitter -->
+            <span class="social-links__icon" data-sns="x" data-url="https://x.com/ledoteam" aria-label="X">
+              <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </span>
+            <!-- Instagram -->
+            <span class="social-links__icon" data-sns="instagram" data-url="https://instagram.com/ledoteam" aria-label="Instagram">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </span>
+            <!-- GitHub -->
+            <span class="social-links__icon" data-sns="github" data-url="https://github.com/ledoteam" aria-label="GitHub">
+              <svg viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            </span>
+            <!-- Facebook -->
+            <span class="social-links__icon" data-sns="facebook" data-url="https://facebook.com/ledoteam" aria-label="Facebook">
+              <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </span>
+            <!-- Add SNS -->
+            <button class="social-links__add" id="snsAddBtn" aria-label="Add social link" title="Add social link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          <!-- Introduction -->
+          <div class="user-card__intro-wrapper">
+            <p class="user-card__intro" id="userIntro" data-editable data-placeholder="自己紹介を入力">
+              Hello, I'm a Full-Stack Engineer & UX/UI Designer based in Tokyo. I specialize in building scalable web applications with React, Next.js, and Node.js. Currently focused on developer tools and open-source projects. Always open to new collaborations and exciting challenges. Let's build something amazing together.
+            </p>
+            <button class="user-card__intro-toggle" id="introToggle" aria-label="全文を表示">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="user-card__divider"></div>
+
+          <!-- Company -->
+          <div class="user-card__info-row">
+            <img src="../frontend/public/icons/company_icon.svg" alt="" class="user-card__info-icon">
+            <span class="user-card__info-text" data-editable data-placeholder="会社名">Techno Chain Co., Ltd</span>
+          </div>
+
+          <!-- Position -->
+          <div class="user-card__info-row">
+            <img src="../frontend/public/icons/layer_icon.svg" alt="" class="user-card__info-icon">
+            <span class="user-card__role-wrap">
+              <select class="user-card__role-select" aria-label="役職">
+                <option>Software Engineer</option>
+                <option>Senior Software Engineer</option>
+                <option>Staff Software Engineer</option>
+                <option>Tech Lead</option>
+                <option>Engineering Manager</option>
+                <option>Frontend Engineer</option>
+                <option>Backend Engineer</option>
+                <option>Full-Stack Engineer</option>
+                <option>Mobile Engineer</option>
+                <option>iOS Engineer</option>
+                <option>Android Engineer</option>
+                <option>DevOps Engineer</option>
+                <option>SRE</option>
+                <option>Data Scientist</option>
+                <option>Data Engineer</option>
+                <option>ML Engineer</option>
+                <option>QA Engineer</option>
+                <option>UX/UI Designer</option>
+                <option>Product Designer</option>
+                <option>Product Manager</option>
+                <option>Project Manager</option>
+                <option>CTO</option>
+                <option>VP of Engineering</option>
+                <option>Founder</option>
+                <option>Student</option>
+              </select>
+              <svg class="user-card__role-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- Divider -->
+          <div class="user-card__divider user-card__divider--summary"></div>
+
+          <!-- Stacks Summary -->
+          <div class="user-card__summary">
+            <div class="user-card__summary-label">
+              <img src="../frontend/public/icons/teck_stack.svg" alt="">
+              Stacks
+            </div>
+            <div class="user-card__summary-chips">
+              <span class="user-card__chip">Frontend <strong>1</strong></span>
+              <span class="user-card__chip">Backend <strong>4</strong></span>
+              <span class="user-card__chip">Mobile <strong>4</strong></span>
+              <span class="user-card__chip">Infra <strong>3</strong></span>
+              <span class="user-card__chip">Other <strong>3</strong></span>
+            </div>
+          </div>
+
+          <!-- Projects Summary -->
+          <div class="user-card__summary">
+            <div class="user-card__summary-label">
+              <img src="../frontend/public/icons/project_type.svg" alt="">
+              Projects
+            </div>
+            <div class="user-card__summary-chips">
+              <span class="user-card__chip">OSS <strong>1</strong></span>
+              <span class="user-card__chip">Personal <strong>4</strong></span>
+              <span class="user-card__chip">Work <strong>4</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== CenterColumn ========== -->
+      <div class="center-column">
+
+        <!-- ========== TechStackCard ========== -->
+        <div class="tech-stack-card">
+          <div class="tech-stack-card__scroll-wrapper">
+            <!-- 左スクロールボタン (scrollLeft > 0 のときのみ表示) -->
+            <button class="tech-stack-card__btn tech-stack-card__btn--left" id="techScrollLeft" aria-label="左にスクロール">
+              <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            <!-- スクロールコンテナ -->
+            <div class="tech-stack-card__list" id="techScrollContainer">
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/python.png" alt="Python" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Python</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/java.png" alt="Java" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Java</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/typescript.png" alt="TypeScript" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Type Script</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/javascript.png" alt="JavaScript" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Java Script</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/nextjs.png" alt="Next.js" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Next.js</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/nodejs.png" alt="Node.js" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Node.js</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/react.png" alt="React" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">React</span></div>
+                </div>
+                <div class="tech-item__years">3 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/vuejs.png" alt="Vue.js" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Vue.js</span></div>
+                </div>
+                <div class="tech-item__years">2 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/go.png" alt="Go" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Go</span></div>
+                </div>
+                <div class="tech-item__years">4 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/ruby.png" alt="Ruby" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Ruby</span></div>
+                </div>
+                <div class="tech-item__years">3 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/docker.png" alt="Docker" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Docker</span></div>
+                </div>
+                <div class="tech-item__years">4 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/postgresql.png" alt="PostgreSQL" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">PostgreSQL</span></div>
+                </div>
+                <div class="tech-item__years">5 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/mongodb.png" alt="MongoDB" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">MongoDB</span></div>
+                </div>
+                <div class="tech-item__years">2 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/redis.png" alt="Redis" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Redis</span></div>
+                </div>
+                <div class="tech-item__years">3 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/graphql.png" alt="GraphQL" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">GraphQL</span></div>
+                </div>
+                <div class="tech-item__years">2 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/tailwind_css.png" alt="Tailwind CSS" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Tailwind</span></div>
+                </div>
+                <div class="tech-item__years">3 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/swift.png" alt="Swift" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Swift</span></div>
+                </div>
+                <div class="tech-item__years">2 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/kotlin.png" alt="Kotlin" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Kotlin</span></div>
+                </div>
+                <div class="tech-item__years">1 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/php.png" alt="PHP" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">PHP</span></div>
+                </div>
+                <div class="tech-item__years">4 year</div>
+              </div>
+
+              <div class="tech-item-wrapper">
+                <div class="tech-item">
+                  <div class="tech-item__bg"></div>
+                  <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/webpack.png" alt="Webpack" class="tech-item__logo"></div>
+                  <div class="tech-item__name-wrapper"><span class="tech-item__name">Webpack</span></div>
+                </div>
+                <div class="tech-item__years">3 year</div>
+              </div>
+
+            </div>
+
+            <!-- 右ボタン: カテゴリ一覧表示 (hover:scale-110) -->
+            <button class="tech-stack-card__btn tech-stack-card__btn--right" id="techCategoryBtn" aria-label="カテゴリー別一覧を表示" title="カテゴリー別一覧を表示">
+              <svg viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            </button>
+          </div>
+
+          <!-- ========== TechStackByCategory ========== -->
+          <div class="tech-stack-category" id="techStackCategory">
+            <!-- Category List -->
+            <div class="tech-stack-category__list">
+
+              <!-- Language -->
+              <div class="tech-stack-category__group">
+                <div class="tech-stack-category__group-header">
+                  <h4 class="tech-stack-category__name">Language</h4>
+                  <button class="tech-stack-category__back" id="techCategoryBack" aria-label="一覧に戻る">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+                <div class="tech-stack-category__items">
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/python.png" alt="Python" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Python</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/java.png" alt="Java" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Java</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/typescript.png" alt="TypeScript" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Type Script</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/javascript.png" alt="JavaScript" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Java Script</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/go.png" alt="Go" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Go</span></div>
+                    </div>
+                    <div class="tech-item__years">4 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/ruby.png" alt="Ruby" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Ruby</span></div>
+                    </div>
+                    <div class="tech-item__years">3 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/swift.png" alt="Swift" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Swift</span></div>
+                    </div>
+                    <div class="tech-item__years">2 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/kotlin.png" alt="Kotlin" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Kotlin</span></div>
+                    </div>
+                    <div class="tech-item__years">1 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/php.png" alt="PHP" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">PHP</span></div>
+                    </div>
+                    <div class="tech-item__years">4 year</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Frontend -->
+              <div class="tech-stack-category__group">
+                <h4 class="tech-stack-category__name">Frontend</h4>
+                <div class="tech-stack-category__items">
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/react.png" alt="React" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">React</span></div>
+                    </div>
+                    <div class="tech-item__years">3 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/nextjs.png" alt="Next.js" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Next.js</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/vuejs.png" alt="Vue.js" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Vue.js</span></div>
+                    </div>
+                    <div class="tech-item__years">2 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/tailwind_css.png" alt="Tailwind CSS" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Tailwind</span></div>
+                    </div>
+                    <div class="tech-item__years">3 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/webpack.png" alt="Webpack" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Webpack</span></div>
+                    </div>
+                    <div class="tech-item__years">3 year</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Backend -->
+              <div class="tech-stack-category__group">
+                <h4 class="tech-stack-category__name">Backend</h4>
+                <div class="tech-stack-category__items">
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/nodejs.png" alt="Node.js" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Node.js</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/graphql.png" alt="GraphQL" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">GraphQL</span></div>
+                    </div>
+                    <div class="tech-item__years">2 year</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Database -->
+              <div class="tech-stack-category__group">
+                <h4 class="tech-stack-category__name">Database</h4>
+                <div class="tech-stack-category__items">
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/postgresql.png" alt="PostgreSQL" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">PostgreSQL</span></div>
+                    </div>
+                    <div class="tech-item__years">5 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/mongodb.png" alt="MongoDB" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">MongoDB</span></div>
+                    </div>
+                    <div class="tech-item__years">2 year</div>
+                  </div>
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/redis.png" alt="Redis" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Redis</span></div>
+                    </div>
+                    <div class="tech-item__years">3 year</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- DevOps -->
+              <div class="tech-stack-category__group">
+                <h4 class="tech-stack-category__name">DevOps</h4>
+                <div class="tech-stack-category__items">
+                  <div class="tech-item-wrapper">
+                    <div class="tech-item">
+                      <div class="tech-item__bg"></div>
+                      <div class="tech-item__logo-wrapper"><img src="../frontend/public/tech_stack_logo/docker.png" alt="Docker" class="tech-item__logo"></div>
+                      <div class="tech-item__name-wrapper"><span class="tech-item__name">Docker</span></div>
+                    </div>
+                    <div class="tech-item__years">4 year</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ========== ProductCard ========== -->
+        <div class="product-card">
+          <!-- Tabs -->
+          <div class="product-card__tabs">
+            <span class="product-card__tab product-card__tab--active">Product</span>
+            <span class="product-card__tab product-card__tab--disabled">Blogs</span>
+          </div>
+
+          <!-- Product List -->
+          <div class="product-card__list">
+            <!-- Mintlify -->
+            <a href="product-detail.html" class="product-item">
+              <div class="product-item__header">
+                <img src="assets/e3a219709558fc2fb9798a695896d1dfc970774a.png" alt="Mintlify" class="product-item__icon">
+                <div class="product-item__info">
+                  <div class="product-item__title-row">
+                    <div class="product-item__title-group">
+                      <span class="product-item__title">Mintlify</span>
+                      <span class="product-item__tag-separator">·</span>
+                      <span class="product-item__tag">Open Source</span>
+                    </div>
+                    <div class="product-item__tech-badges">
+                      <img src="../frontend/public/tech_stack_logo/react.png" alt="React" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="Next.js" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/typescript.png" alt="TypeScript" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/nodejs.png" alt="Node.js" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/tailwind_css.png" alt="Tailwind CSS" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="PostgreSQL" class="product-item__tech-badge">
+                      <span class="product-item__tech-more">...</span>
+                    </div>
+                  </div>
+                  <span class="product-item__catchphrase">Modern standard for documentation</span>
+                </div>
+              </div>
+              <p class="product-item__description">
+                The modern standard for public facing documentation. Beautiful out of the box, easy to maintain, and optimized for user engagement.
+              </p>
+            </a>
+
+            <!-- Screen Studio -->
+            <a href="product-detail.html" class="product-item">
+              <div class="product-item__header">
+                <img src="assets/e2c6d77061e4132c024e22c3ce03ce5ad324e6b8.jpg" alt="Screen Studio" class="product-item__icon">
+                <div class="product-item__info">
+                  <div class="product-item__title-row">
+                    <div class="product-item__title-group">
+                      <span class="product-item__title">Screen Studio</span>
+                      <span class="product-item__tag-separator">·</span>
+                      <span class="product-item__tag">Personal</span>
+                    </div>
+                    <div class="product-item__tech-badges">
+                      <img src="../frontend/public/tech_stack_logo/typescript.png" alt="TypeScript" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/php.png" alt="PHP" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/ruby.png" alt="Ruby" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/swift.png" alt="Swift" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/react.png" alt="React" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/docker.png" alt="Docker" class="product-item__tech-badge">
+                      <span class="product-item__tech-more">...</span>
+                    </div>
+                  </div>
+                  <span class="product-item__catchphrase">Beautiful screen recordings in minutes</span>
+                </div>
+              </div>
+              <p class="product-item__description">
+                Screen Studio makes your mouse movement smooth, automatically zooms in on clicks, applies cinematic motion blur to all the anim...
+              </p>
+            </a>
+
+            <!-- Dental Saas -->
+            <a href="product-detail.html" class="product-item">
+              <div class="product-item__header">
+                <img src="assets/79e901243e244645eb287331350b34ba29d0332d.jpg" alt="Dental Saas" class="product-item__icon">
+                <div class="product-item__info">
+                  <div class="product-item__title-row">
+                    <div class="product-item__title-group">
+                      <span class="product-item__title">Dental Saas</span>
+                      <span class="product-item__tag-separator">·</span>
+                      <span class="product-item__tag">Work</span>
+                    </div>
+                    <div class="product-item__tech-badges">
+                      <img src="../frontend/public/tech_stack_logo/javascript.png" alt="JavaScript" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="Next.js" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/docker.png" alt="Docker" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/go.png" alt="Go" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="PostgreSQL" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/redis.png" alt="Redis" class="product-item__tech-badge">
+                      <span class="product-item__tech-more">...</span>
+                    </div>
+                  </div>
+                  <span class="product-item__catchphrase">Dental clinic management platform</span>
+                </div>
+              </div>
+              <p class="product-item__description">
+                A comprehensive SaaS platform for dental clinics, streamlining appointment scheduling, patient records, and billing workflows.
+              </p>
+            </a>
+
+            <!-- Love Thunder -->
+            <a href="product-detail.html" class="product-item">
+              <div class="product-item__header">
+                <img src="assets/55764d71fae8c6538356dc52b3f6857349496f54.jpg" alt="Love Thunder" class="product-item__icon">
+                <div class="product-item__info">
+                  <div class="product-item__title-row">
+                    <div class="product-item__title-group">
+                      <span class="product-item__title">Love Thunder</span>
+                      <span class="product-item__tag-separator">·</span>
+                      <span class="product-item__tag">Personal</span>
+                    </div>
+                    <div class="product-item__tech-badges">
+                      <img src="../frontend/public/tech_stack_logo/python.png" alt="Python" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="PostgreSQL" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/redis.png" alt="Redis" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/graphql.png" alt="GraphQL" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/java.png" alt="Java" class="product-item__tech-badge">
+                      <img src="../frontend/public/tech_stack_logo/mongodb.png" alt="MongoDB" class="product-item__tech-badge">
+                      <span class="product-item__tech-more">...</span>
+                    </div>
+                  </div>
+                  <span class="product-item__catchphrase">Real-time collaboration tool</span>
+                </div>
+              </div>
+              <p class="product-item__description">
+                A real-time collaboration platform for creative teams, featuring live cursors, instant syncing, and seamless project management.
+              </p>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== ConnectionUserList ========== -->
+      <div class="connection-list">
+        <div class="connection-list__head">
+          <div>
+            <div class="connection-list__title">Connections <span class="connection-list__count"><strong>5</strong>/12</span></div>
+            <div class="connection-list__subtitle">Engineers in your network</div>
+          </div>
+          <button type="button" class="connection-list__add" id="connectionAddBtn" aria-label="Add connection" title="Add connection">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          </button>
+        </div>
+
+        <div class="connection-list__items">
+          <!-- User 1 (active) -->
+          <div class="connected-user">
+            <div class="connected-user__top">
+              <img src="../frontend/public/avatar.png" alt="Vitaliy" class="connected-user__avatar">
+              <div class="connected-user__info">
+                <div class="connected-user__name">Vitaliy Akterskiy</div>
+                <div class="connected-user__company">Techno Chain Co., Ltd</div>
+              </div>
+            </div>
+            <div class="connected-user__bottom">
+              <div class="connected-user__stacks">
+                <img src="../frontend/public/tech_stack_logo/python.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/react.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/docker.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/go.png" alt="" class="connected-user__stack-icon">
+                <span class="connected-user__stack-more">+7</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User 2 -->
+          <div class="connected-user">
+            <div class="connected-user__top">
+              <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Maksym" class="connected-user__avatar">
+              <div class="connected-user__info">
+                <div class="connected-user__name">Maksym Karafizi</div>
+                <div class="connected-user__company">Freelance Developer</div>
+              </div>
+            </div>
+            <div class="connected-user__bottom">
+              <div class="connected-user__stacks">
+                <img src="../frontend/public/tech_stack_logo/java.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/vuejs.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/ruby.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/nodejs.png" alt="" class="connected-user__stack-icon">
+                <span class="connected-user__stack-more">+4</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User 3 -->
+          <div class="connected-user">
+            <div class="connected-user__top">
+              <img src="../frontend/public/avatar.png" alt="Evgeniy" class="connected-user__avatar">
+              <div class="connected-user__info">
+                <div class="connected-user__name">Evgeniy Alexandrov</div>
+                <div class="connected-user__company">Google Japan</div>
+              </div>
+            </div>
+            <div class="connected-user__bottom">
+              <div class="connected-user__stacks">
+                <img src="../frontend/public/tech_stack_logo/swift.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/kotlin.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/react.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/mongodb.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/php.png" alt="" class="connected-user__stack-icon">
+                <span class="connected-user__stack-more">+3</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User 4 -->
+          <div class="connected-user">
+            <div class="connected-user__top">
+              <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Rosaline" class="connected-user__avatar">
+              <div class="connected-user__info">
+                <div class="connected-user__name">Rosaline Kumbirai</div>
+                <div class="connected-user__company">Meta Platforms</div>
+              </div>
+            </div>
+            <div class="connected-user__bottom">
+              <div class="connected-user__stacks">
+                <img src="../frontend/public/tech_stack_logo/tailwind_css.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/graphql.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/redis.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/python.png" alt="" class="connected-user__stack-icon">
+                <span class="connected-user__stack-more">+6</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User 5 -->
+          <div class="connected-user">
+            <div class="connected-user__top">
+              <img src="../frontend/public/avatar.png" alt="Takeshi" class="connected-user__avatar">
+              <div class="connected-user__info">
+                <div class="connected-user__name">Takeshi Yamamoto</div>
+                <div class="connected-user__company">LINE Corporation</div>
+              </div>
+            </div>
+            <div class="connected-user__bottom">
+              <div class="connected-user__stacks">
+                <img src="../frontend/public/tech_stack_logo/javascript.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/docker.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/java.png" alt="" class="connected-user__stack-icon">
+                <img src="../frontend/public/tech_stack_logo/webpack.png" alt="" class="connected-user__stack-icon">
+                <span class="connected-user__stack-more">+5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========== BannerGalleryModal ========== -->
+  <div class="banner-gallery-modal" id="bannerGalleryModal" aria-hidden="true">
+    <div class="banner-gallery-modal__overlay" id="bannerGalleryOverlay"></div>
+    <div class="banner-gallery-modal__content">
+      <h3 class="banner-gallery-modal__title">Choose a banner</h3>
+      <p class="banner-gallery-modal__hint">Pick from our default gallery</p>
+      <div class="banner-gallery-modal__grid">
+        <button type="button" class="banner-gallery-modal__item" data-src="../frontend/public/user_banner_1.jpg">
+          <img src="../frontend/public/user_banner_1.jpg" alt="Banner option 1">
+        </button>
+        <button type="button" class="banner-gallery-modal__item" data-src="../frontend/public/teck_stack_bg.jpg">
+          <img src="../frontend/public/teck_stack_bg.jpg" alt="Banner option 2">
+        </button>
+        <button type="button" class="banner-gallery-modal__item" data-src="../frontend/public/featured.jpg">
+          <img src="../frontend/public/featured.jpg" alt="Banner option 3">
+        </button>
+        <button type="button" class="banner-gallery-modal__item" data-src="../frontend/public/featured-dark.jpg">
+          <img src="../frontend/public/featured-dark.jpg" alt="Banner option 4">
+        </button>
+        <button type="button" class="banner-gallery-modal__item" data-src="assets/1588ca151e20d1683d7baaa6f744cec3a6683afd.jpg">
+          <img src="assets/1588ca151e20d1683d7baaa6f744cec3a6683afd.jpg" alt="Banner option 5">
+        </button>
+        <button type="button" class="banner-gallery-modal__item" data-src="assets/79e901243e244645eb287331350b34ba29d0332d.jpg">
+          <img src="assets/79e901243e244645eb287331350b34ba29d0332d.jpg" alt="Banner option 6">
+        </button>
+      </div>
+      <div class="banner-gallery-modal__actions">
+        <button type="button" class="sns-modal__btn sns-modal__btn--cancel" id="bannerGalleryCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SnsEditModal ========== -->
+  <div class="sns-modal" id="snsModal" aria-hidden="true">
+    <div class="sns-modal__overlay" id="snsModalOverlay"></div>
+    <div class="sns-modal__content">
+      <h3 class="sns-modal__title" id="snsModalTitle">Add social link</h3>
+      <p class="sns-modal__hint">Pick an icon and paste your link</p>
+      <div class="sns-modal__icons" id="snsModalIcons"></div>
+      <input type="url" class="sns-modal__url" id="snsModalUrl" placeholder="https://..." autocomplete="off">
+      <div class="sns-modal__actions">
+        <button type="button" class="sns-modal__btn sns-modal__btn--delete" id="snsModalDelete" hidden>Remove</button>
+        <button type="button" class="sns-modal__btn sns-modal__btn--cancel" id="snsModalCancel">Cancel</button>
+        <button type="button" class="sns-modal__btn sns-modal__btn--save" id="snsModalSave" disabled>Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== ConnectModal ========== -->
+  <div class="dev-modal" id="connectModal" aria-hidden="true">
+    <div class="dev-modal__backdrop" id="connectModalBackdrop"></div>
+    <div class="dev-modal__dialog dev-modal__dialog--narrow" role="dialog" aria-modal="true" aria-labelledby="connectModalTitle">
+      <button type="button" class="dev-modal__close" id="connectModalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+
+      <header class="dev-modal__head">
+        <div class="dev-modal__eyebrow">Connect</div>
+        <h2 class="dev-modal__title" id="connectModalTitle">
+          Send a request to <span class="dev-modal__title-accent">Evgen Ledo</span>
+        </h2>
+        <p class="dev-modal__subtitle">
+          Only <strong>12</strong> slots, that's the cap. Spend them on engineers sharper than you &mdash; their excellence becomes your edge. Once you both approve, you'll see each other's full picture: activity, products, and the technical story behind the profile.
+        </p>
+      </header>
+
+      <div class="dev-modal__body">
+        <div class="connected-user">
+          <div class="connected-user__top">
+            <img src="assets/8a4c9bfca03871db6fdf728e677e6b5356ed9fa1.jpg" alt="Evgen Ledo" class="connected-user__avatar">
+            <div class="connected-user__info">
+              <div class="connected-user__name">Evgen Ledo</div>
+              <div class="connected-user__company">Full-Stack Engineer · Techno Chain Co., Ltd</div>
+            </div>
+          </div>
+          <div class="connected-user__bottom">
+            <div class="connected-user__stacks">
+              <img src="../frontend/public/tech_stack_logo/react.png" alt="" class="connected-user__stack-icon">
+              <img src="../frontend/public/tech_stack_logo/nextjs.png" alt="" class="connected-user__stack-icon">
+              <img src="../frontend/public/tech_stack_logo/typescript.png" alt="" class="connected-user__stack-icon">
+              <img src="../frontend/public/tech_stack_logo/nodejs.png" alt="" class="connected-user__stack-icon">
+              <img src="../frontend/public/tech_stack_logo/postgresql.png" alt="" class="connected-user__stack-icon">
+              <span class="connected-user__stack-more">+4</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="dev-modal__foot">
+        <span class="dev-modal__foot-hint"><strong>5</strong>/12 connected</span>
+        <button type="button" class="btn btn--gradient" id="connectModalSend">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Send Request
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ========== UploadModal ========== -->
+  <div class="upload-modal" id="uploadModal" aria-hidden="true">
+    <div class="upload-modal__overlay" id="uploadModalOverlay"></div>
+
+    <div class="upload-modal__content">
+      <!-- Title -->
+      <div class="upload-modal__title-area">
+        <h1 class="upload-modal__heading">
+          <span class="upload-modal__heading-left">Upload</span>
+          <span class="upload-modal__heading-right">item</span>
+        </h1>
+        <p class="upload-modal__subtitle">
+          Visualize your <strong>tech stack</strong>, <strong>projects</strong>, and <strong>blog posts</strong> to showcase your engineering skills to the world.
+        </p>
+        <p class="upload-modal__subtitle">
+          Share your value, expand your network, and accelerate your career.
+        </p>
+      </div>
+
+      <!-- Upload Cards -->
+      <div class="upload-modal__cards">
+        <!-- TechStack -->
+        <a href="tech-stack-edit.html" class="upload-card upload-card--left" data-nav>
+          <div class="upload-card__image-wrapper">
+            <img src="../frontend/public/teck_stack_bg.jpg" alt="TechStack">
+          </div>
+          <div class="upload-card__body">
+            <h3 class="upload-card__title">TechStack</h3>
+            <div class="upload-card__row">
+              <p class="upload-card__desc">Add or edit your tech stack</p>
+              <span class="upload-card__arrow">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Product -->
+        <a href="product-edit.html" class="upload-card upload-card--right" data-nav>
+          <div class="upload-card__image-wrapper">
+            <img src="../frontend/public/user_banner_1.jpg" alt="Product">
+          </div>
+          <div class="upload-card__body">
+            <h3 class="upload-card__title">Product</h3>
+            <div class="upload-card__row">
+              <p class="upload-card__desc">Create or edit your products</p>
+              <span class="upload-card__arrow">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== TechStack Scroll Script ========== -->
+  <script>
+    (function () {
+      const container = document.getElementById('techScrollContainer');
+      const leftBtn   = document.getElementById('techScrollLeft');
+      const rightBtn  = document.getElementById('techCategoryBtn');
+
+      if (!container || !leftBtn) return;
+
+      // スクロール位置を監視し左ボタンの表示を切り替え
+      function checkScroll() {
+        const { scrollLeft, scrollWidth, clientWidth } = container;
+        leftBtn.style.display = scrollLeft > 0 ? 'flex' : 'none';
+      }
+
+      container.addEventListener('scroll', checkScroll);
+      checkScroll(); // 初期チェック
+
+      // 左ボタン: 300px スムーススクロール
+      leftBtn.addEventListener('click', function () {
+        container.scrollBy({ left: -300, behavior: 'smooth' });
+      });
+
+    })();
+  </script>
+
+  <!-- ========== UploadModal Toggle ========== -->
+  <script>
+    (function () {
+      const modal     = document.getElementById('uploadModal');
+      const openBtn   = document.getElementById('headerEditBtn');
+
+      if (!modal || !openBtn) return;
+
+      function openModal() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      function closeModal() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      openBtn.addEventListener('click', openModal);
+
+      // モーダル内どこをクリックしても閉じる (オーバーレイ / テキスト余白 / カード すべて)
+      modal.addEventListener('click', closeModal);
+
+      // data-nav 未設定カードの href="#" 遷移を抑止 (close のみ発火)
+      // data-nav 付きは通常通り遷移させる (モック→編集ページへ)
+      modal.querySelectorAll('.upload-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+          if (!card.hasAttribute('data-nav')) e.preventDefault();
+        });
+      });
+
+      // 編集ボタン以外のヘッダー・ナビを押したらモーダルを閉じる
+      document.querySelectorAll('.header__nav-item').forEach(function (item) {
+        if (item === openBtn) return;
+        item.addEventListener('click', function () {
+          if (modal.classList.contains('is-open')) closeModal();
+        });
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
+    })();
+  </script>
+
+  <!-- ========== TechStackByCategory Toggle ========== -->
+  <script>
+    (function () {
+      const grid       = document.getElementById('pageGrid');
+      const categoryBtn = document.getElementById('techCategoryBtn');
+      const backBtn    = document.getElementById('techCategoryBack');
+
+      if (!grid || !categoryBtn || !backBtn) return;
+
+      categoryBtn.addEventListener('click', function () {
+        grid.classList.add('is-category-preview');
+      });
+
+      backBtn.addEventListener('click', function () {
+        grid.classList.remove('is-category-preview');
+      });
+    })();
+  </script>
+
+  <!-- ========== TechStack Drag Scroll ========== -->
+  <script>
+    (function () {
+      const container = document.getElementById('techScrollContainer');
+      if (!container) return;
+
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      container.addEventListener('mousedown', function (e) {
+        isDown = true;
+        container.style.cursor = 'grabbing';
+        startX = e.pageX - container.offsetLeft;
+        scrollLeft = container.scrollLeft;
+      });
+
+      container.addEventListener('mouseleave', function () {
+        isDown = false;
+        container.style.cursor = 'grab';
+      });
+
+      container.addEventListener('mouseup', function () {
+        isDown = false;
+        container.style.cursor = 'grab';
+      });
+
+      container.addEventListener('mousemove', function (e) {
+        if (!isDown) return;
+        e.preventDefault();
+        var x = e.pageX - container.offsetLeft;
+        var walk = (x - startX) * 1.5;
+        container.scrollLeft = scrollLeft - walk;
+      });
+
+      container.style.cursor = 'grab';
+    })();
+  </script>
+
+  <!-- ========== Lang Toggle Script ========== -->
+  <script>
+    (function () {
+      document.querySelectorAll('.lang-toggle').forEach(function (toggle) {
+        toggle.addEventListener('click', function (e) {
+          var btn = e.target.closest('.lang-toggle__btn');
+          if (!btn) return;
+          toggle.querySelectorAll('.lang-toggle__btn').forEach(function (b) {
+            var active = b === btn;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+        });
+      });
+    })();
+  </script>
+
+  <!-- ========== UserCard Edit Mode ========== -->
+  <script>
+    (function () {
+      const card = document.getElementById('userCard');
+      const editBtn = document.getElementById('userCardEditBtn');
+      if (!card || !editBtn) return;
+
+      function placeCursorAtEnd(el) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+
+      editBtn.addEventListener('click', function () {
+        const isEditing = card.classList.toggle('is-editing');
+        const fields = card.querySelectorAll('[data-editable]');
+        fields.forEach(function (el) {
+          if (isEditing) {
+            el.setAttribute('contenteditable', 'true');
+            el.setAttribute('spellcheck', 'false');
+          } else {
+            el.removeAttribute('contenteditable');
+          }
+        });
+
+        if (isEditing) {
+          editBtn.setAttribute('aria-label', '編集を終了');
+          editBtn.setAttribute('title', '編集を終了');
+          const first = card.querySelector('[data-editable]');
+          if (first) {
+            first.focus();
+            placeCursorAtEnd(first);
+          }
+        } else {
+          editBtn.setAttribute('aria-label', 'プロフィールを編集');
+          editBtn.setAttribute('title', 'プロフィールを編集');
+        }
+      });
+
+      // Prevent Enter from inserting line breaks in single-line fields
+      // IME (日本語入力) の確定 Enter は無視 — そうしないと確定文字が二重に入る
+      card.querySelectorAll('.user-card__name, .user-card__handle, .user-card__info-text').forEach(function (el) {
+        el.addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter') return;
+          if (e.isComposing || e.keyCode === 229) return;
+          e.preventDefault();
+          el.blur();
+        });
+      });
+
+      // Chevron click → open the role select dropdown
+      card.querySelectorAll('.user-card__role-wrap').forEach(function (wrap) {
+        const chevron = wrap.querySelector('.user-card__role-chevron');
+        const select  = wrap.querySelector('.user-card__role-select');
+        if (!chevron || !select) return;
+        chevron.addEventListener('click', function (e) {
+          if (!card.classList.contains('is-editing')) return;
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof select.showPicker === 'function') {
+            try { select.showPicker(); return; } catch (_) {}
+          }
+          select.focus();
+        });
+      });
+    })();
+  </script>
+
+  <!-- ========== Banner & Avatar Image Picker ========== -->
+  <script>
+    (function () {
+      const card           = document.getElementById('userCard');
+      const bannerImg      = document.getElementById('userBannerImg');
+      const bannerBtn      = document.getElementById('bannerImageBtn');
+      const bannerMenu     = document.getElementById('bannerImageMenu');
+      const bannerFileIn   = document.getElementById('bannerFileInput');
+      const avatarImg      = document.getElementById('userAvatarImg');
+      const avatarBtn      = document.getElementById('avatarImageBtn');
+      const avatarFileIn   = document.getElementById('avatarFileInput');
+      const galleryModal   = document.getElementById('bannerGalleryModal');
+      const galleryOverlay = document.getElementById('bannerGalleryOverlay');
+      const galleryCancel  = document.getElementById('bannerGalleryCancel');
+
+      if (!card || !bannerImg || !bannerBtn) return;
+
+      function closeMenu() {
+        bannerMenu.classList.remove('is-open');
+        bannerMenu.setAttribute('aria-hidden', 'true');
+      }
+      function openMenu() {
+        bannerMenu.classList.add('is-open');
+        bannerMenu.setAttribute('aria-hidden', 'false');
+      }
+      function openGallery() {
+        galleryModal.classList.add('is-open');
+        galleryModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeGallery() {
+        galleryModal.classList.remove('is-open');
+        galleryModal.setAttribute('aria-hidden', 'true');
+      }
+
+      // Banner: toggle menu
+      bannerBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        bannerMenu.classList.contains('is-open') ? closeMenu() : openMenu();
+      });
+
+      // Click outside menu closes it
+      document.addEventListener('click', function (e) {
+        if (bannerMenu.classList.contains('is-open') &&
+            !bannerMenu.contains(e.target) &&
+            e.target !== bannerBtn) {
+          closeMenu();
+        }
+      });
+
+      // Menu actions
+      bannerMenu.querySelector('[data-action="upload"]').addEventListener('click', function () {
+        closeMenu();
+        bannerFileIn.click();
+      });
+      bannerMenu.querySelector('[data-action="gallery"]').addEventListener('click', function () {
+        closeMenu();
+        openGallery();
+      });
+
+      // Banner file upload
+      bannerFileIn.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+          bannerImg.src = URL.createObjectURL(this.files[0]);
+        }
+        this.value = '';
+      });
+
+      // Banner gallery selection
+      galleryModal.querySelectorAll('.banner-gallery-modal__item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          const src = item.dataset.src;
+          if (src) bannerImg.src = src;
+          closeGallery();
+        });
+      });
+
+      galleryOverlay.addEventListener('click', closeGallery);
+      galleryCancel.addEventListener('click', closeGallery);
+
+      // Avatar: direct to file picker
+      avatarBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        avatarFileIn.click();
+      });
+
+      avatarFileIn.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+          avatarImg.src = URL.createObjectURL(this.files[0]);
+        }
+        this.value = '';
+      });
+
+      // Esc closes menu/gallery
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        if (galleryModal.classList.contains('is-open')) closeGallery();
+        else if (bannerMenu.classList.contains('is-open')) closeMenu();
+      });
+    })();
+  </script>
+
+  <!-- ========== SNS Edit Modal ========== -->
+  <script>
+    (function () {
+      const SNS_TYPES = {
+        x:         { label: 'X',         path: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' },
+        instagram: { label: 'Instagram', path: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z' },
+        github:    { label: 'GitHub',    path: 'M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z' },
+        facebook:  { label: 'Facebook',  path: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
+        linkedin:  { label: 'LinkedIn',  path: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' },
+        youtube:   { label: 'YouTube',   path: 'M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' }
+      };
+
+      const card       = document.getElementById('userCard');
+      const socialBox  = document.getElementById('socialLinks');
+      const addBtn     = document.getElementById('snsAddBtn');
+      const modal      = document.getElementById('snsModal');
+      const overlay    = document.getElementById('snsModalOverlay');
+      const titleEl    = document.getElementById('snsModalTitle');
+      const iconGrid   = document.getElementById('snsModalIcons');
+      const urlInput   = document.getElementById('snsModalUrl');
+      const deleteBtn  = document.getElementById('snsModalDelete');
+      const cancelBtn  = document.getElementById('snsModalCancel');
+      const saveBtn    = document.getElementById('snsModalSave');
+
+      if (!card || !socialBox || !modal) return;
+
+      let editingEl = null;
+      let selectedType = null;
+
+      // Build icon picker grid
+      Object.keys(SNS_TYPES).forEach(function (type) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sns-modal__icon-btn';
+        btn.dataset.type = type;
+        btn.setAttribute('aria-label', SNS_TYPES[type].label);
+        btn.title = SNS_TYPES[type].label;
+        btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + SNS_TYPES[type].path + '"/></svg>';
+        btn.addEventListener('click', function () {
+          selectedType = type;
+          iconGrid.querySelectorAll('.sns-modal__icon-btn').forEach(function (b) {
+            b.classList.toggle('is-selected', b.dataset.type === type);
+          });
+          refreshSaveState();
+        });
+        iconGrid.appendChild(btn);
+      });
+
+      function refreshSaveState() {
+        saveBtn.disabled = !(selectedType && urlInput.value.trim().length > 0);
+      }
+
+      urlInput.addEventListener('input', refreshSaveState);
+
+      function openModal(el) {
+        editingEl = el;
+        selectedType = el ? el.dataset.sns : null;
+        urlInput.value = el && el.dataset.url ? el.dataset.url : '';
+        titleEl.textContent = el ? 'Edit social link' : 'Add social link';
+        deleteBtn.hidden = !el;
+        iconGrid.querySelectorAll('.sns-modal__icon-btn').forEach(function (b) {
+          b.classList.toggle('is-selected', b.dataset.type === selectedType);
+        });
+        refreshSaveState();
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        setTimeout(function () { urlInput.focus(); }, 0);
+      }
+
+      function closeModal() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        editingEl = null;
+        selectedType = null;
+      }
+
+      function onIconClick(e) {
+        if (!card.classList.contains('is-editing')) return;
+        e.preventDefault();
+        e.stopPropagation();
+        openModal(e.currentTarget);
+      }
+
+      function renderIcon(el, type, url) {
+        el.dataset.sns = type;
+        el.dataset.url = url;
+        el.setAttribute('aria-label', SNS_TYPES[type].label);
+        el.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + SNS_TYPES[type].path + '"/></svg>';
+      }
+
+      function save() {
+        if (!selectedType || !urlInput.value.trim()) return;
+        const url = urlInput.value.trim();
+        if (editingEl) {
+          renderIcon(editingEl, selectedType, url);
+        } else {
+          const newIcon = document.createElement('span');
+          newIcon.className = 'social-links__icon';
+          renderIcon(newIcon, selectedType, url);
+          newIcon.addEventListener('click', onIconClick);
+          socialBox.insertBefore(newIcon, addBtn);
+        }
+        closeModal();
+      }
+
+      function removeIcon() {
+        if (editingEl) editingEl.remove();
+        closeModal();
+      }
+
+      // Wire up existing icons
+      socialBox.querySelectorAll('.social-links__icon').forEach(function (icon) {
+        icon.addEventListener('click', onIconClick);
+      });
+
+      addBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        openModal(null);
+      });
+
+      overlay.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+      saveBtn.addEventListener('click', save);
+      deleteBtn.addEventListener('click', removeIcon);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+          closeModal();
+        }
+      });
+    })();
+  </script>
+
+  <!-- ========== Intro Toggle Script ========== -->
+  <script>
+    (function () {
+      const intro  = document.getElementById('userIntro');
+      const toggle = document.getElementById('introToggle');
+      if (!intro || !toggle) return;
+
+      toggle.addEventListener('click', function () {
+        intro.classList.toggle('is-expanded');
+        toggle.classList.toggle('is-expanded');
+      });
+    })();
+  </script>
+
+  <!-- ========== TechItem Click Navigation ========== -->
+  <script>
+    (function () {
+      document.querySelectorAll('.tech-item-wrapper').forEach(function (el) {
+        el.addEventListener('click', function () {
+          window.location.href = 'tech-stack-detail.html';
+        });
+      });
+    })();
+  </script>
+
+  <!-- ========== ConnectModal Toggle ========== -->
+  <script>
+    (function () {
+      const modal = document.getElementById('connectModal');
+      const openBtn = document.getElementById('connectionAddBtn');
+      const closeBtn = document.getElementById('connectModalClose');
+      const backdrop = document.getElementById('connectModalBackdrop');
+      const sendBtn = document.getElementById('connectModalSend');
+      if (!modal || !openBtn) return;
+
+      function open() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+
+      openBtn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      backdrop.addEventListener('click', close);
+      if (sendBtn) sendBtn.addEventListener('click', close);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) close();
+      });
+    })();
+  </script>
+
+  <script src="header.js"></script>
+
+  <!-- ========== Signup Flow: empty state + auto edit mode ========== -->
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('from') !== 'signup') return;
+
+      // 0) UserCard: GitHub から取得できる name と @username だけ残し、それ以外は空に
+      const nameEl   = document.querySelector('.user-card__name');
+      const handleEl = document.querySelector('.user-card__handle');
+      if (nameEl)   nameEl.textContent   = 'Tomo Komoda';   // GitHub の display name
+      if (handleEl) handleEl.textContent = '@kmdtomo';      // GitHub username
+
+      // Banner と Avatar の画像を空(透明1x1 GIF) にして破線枠のプレースホルダーに
+      // ※ 透明GIF を使うことで、後でユーザーが画像を upload した際に src を差し替えれば
+      //    そのまま表示される（display:none で隠すと反映されない）
+      const BLANK_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+
+      const bannerImg = document.getElementById('userBannerImg');
+      if (bannerImg) {
+        bannerImg.src = BLANK_PIXEL;
+        const bannerWrap = bannerImg.parentElement;
+        if (bannerWrap) {
+          bannerWrap.style.background = 'rgba(255,255,255,0.025)';
+          bannerWrap.style.border = '1px dashed rgba(255,255,255,0.22)';
+          bannerWrap.style.borderRadius = 'var(--radius-md) var(--radius-md) 0 0';
+        }
+        // アップロードされたら破線プレースホルダーを解除
+        bannerImg.addEventListener('load', () => {
+          if (bannerImg.src !== BLANK_PIXEL && !bannerImg.src.endsWith(BLANK_PIXEL)) {
+            const w = bannerImg.parentElement;
+            if (w) {
+              w.style.background = '';
+              w.style.border = '';
+              w.style.borderRadius = '';
+            }
+          }
+        });
+      }
+
+      const avatarImg = document.getElementById('userAvatarImg');
+      if (avatarImg) {
+        avatarImg.src = BLANK_PIXEL;
+        const avatarWrap = avatarImg.parentElement;
+        if (avatarWrap) {
+          avatarWrap.style.background = 'var(--color-surface)';
+          avatarWrap.style.border = '2px dashed rgba(255,255,255,0.28)';
+          avatarWrap.style.boxShadow = '0 0 0 4px var(--color-surface)';
+          avatarWrap.style.zIndex = '3';
+        }
+        avatarImg.addEventListener('load', () => {
+          if (avatarImg.src !== BLANK_PIXEL && !avatarImg.src.endsWith(BLANK_PIXEL)) {
+            const w = avatarImg.parentElement;
+            if (w) {
+              w.style.background = '';
+              w.style.border = '';
+              w.style.boxShadow = '';
+            }
+          }
+        });
+      }
+
+      // SNS リンクは GitHub だけ残し（GitHub OAuth から取得できるため）、それ以外は削除
+      document.querySelectorAll('.social-links__icon').forEach(el => {
+        if (el.dataset.sns !== 'github') el.remove();
+      });
+      // GitHub の URL を username (kmdtomo) に合わせて更新
+      const githubIcon = document.querySelector('.social-links__icon[data-sns="github"]');
+      if (githubIcon) githubIcon.dataset.url = 'https://github.com/kmdtomo';
+
+      // 自己紹介を空に（placeholder が見える状態に）
+      const intro = document.getElementById('userIntro');
+      if (intro) {
+        intro.textContent = '';
+        // 自己紹介を1行で展開状態にする (toggle ボタンを隠す)
+        const introToggle = document.getElementById('introToggle');
+        if (introToggle) introToggle.style.display = 'none';
+      }
+
+      // Company / 会社名を空に
+      const infoRows = document.querySelectorAll('.user-card__info-row .user-card__info-text');
+      infoRows.forEach(el => { el.textContent = ''; });
+
+      // Role select を未選択状態に (空のプレースホルダー option を先頭に追加)
+      const roleSelect = document.querySelector('.user-card__role-select');
+      if (roleSelect) {
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = '';
+        placeholderOpt.textContent = '役職を選択';
+        placeholderOpt.disabled = true;
+        placeholderOpt.selected = true;
+        placeholderOpt.hidden = true;
+        roleSelect.insertBefore(placeholderOpt, roleSelect.firstChild);
+        roleSelect.value = '';
+      }
+
+      // Summary chips の数字を 0 に
+      document.querySelectorAll('.user-card__chip strong').forEach(el => {
+        el.textContent = '0';
+      });
+
+      // 1) Products リストを空状態に置き換え
+      const productList = document.querySelector('.product-card__list');
+      if (productList) {
+        productList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <p class="empty-state__title">No products yet</p>
+            <a href="product-edit.html" class="empty-state__cta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Create
+            </a>
+          </div>
+        `;
+      }
+
+      // 2) Connections リストを空状態に置き換え + count を 0/0 に
+      const connectionItems = document.querySelector('.connection-list__items');
+      if (connectionItems) {
+        connectionItems.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+            <p class="empty-state__title">No connections yet</p>
+            <a href="users.html" class="empty-state__cta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add
+            </a>
+          </div>
+        `;
+      }
+      const countEl = document.querySelector('.connection-list__count');
+      if (countEl) countEl.innerHTML = '<strong>0</strong>/0';
+
+      // 3) プロフィール編集モードを自動起動
+      // 他の初期化スクリプトが終わったあとで click を発火させる
+      window.addEventListener('load', () => {
+        const editBtn = document.getElementById('userCardEditBtn');
+        if (editBtn) editBtn.click();
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Stack - Quine</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+  <!-- ========== Header ========== -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo">
+        <a href="user-profile.html">
+          <img src="assets/quine_logo.png" alt="Quine Logo">
+        </a>
+      </div>
+
+      <nav class="header__nav">
+        <ul class="header__nav-list">
+          <li>
+            <a href="user-profile.html" class="header__nav-item" aria-label="Home">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V10"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="products.html" class="header__nav-item" aria-label="Products">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="users.html" class="header__nav-item" aria-label="Search">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <button class="header__nav-item header__nav-item--active" aria-label="Create new">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span class="header__nav-dot"></span>
+            </button>
+          </li>
+          <li>
+            <button class="header__nav-item" aria-label="Copy profile link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ヘッダー右側アクション -->
+      <div class="header__actions">
+        <!-- 通知 -->
+        <button type="button" class="header__notify" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="header__notify-dot"></span>
+        </button>
+
+        <!-- 言語切替 -->
+        <div class="lang-toggle" role="tablist" aria-label="Language">
+          <button type="button" class="lang-toggle__btn is-active" data-lang="ja" role="tab" aria-selected="true">JP</button>
+          <button type="button" class="lang-toggle__btn" data-lang="en" role="tab" aria-selected="false">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== Main ========== -->
+  <main class="tech-edit">
+    <div class="tech-edit__container">
+
+      <!-- ========== TechEditHero (Title + Autosave indicator) ========== -->
+      <section class="tech-edit-hero">
+        <div class="tech-edit-hero__info">
+          <span class="tech-edit-hero__eyebrow">Tech Stack</span>
+          <h1 class="tech-edit-hero__title">Build your skillset</h1>
+          <p class="tech-edit-hero__subtitle">Select technologies, set your years of experience, and arrange how they appear on your profile.</p>
+        </div>
+        <div class="tech-edit-hero__aside">
+          <div class="tech-edit-hero__autosave" id="autosave" aria-live="polite">
+            <span class="tech-edit-hero__autosave-dot"></span>
+            <span class="tech-edit-hero__autosave-label" id="autosaveLabel">Auto-saved</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Workbench ========== -->
+      <div class="tech-workbench">
+
+        <!-- ========== BrowsePanel (探索) ========== -->
+        <section class="tech-browse">
+
+          <!-- ========== BrowseToolbar ========== -->
+          <div class="tech-browse__toolbar">
+            <div class="tech-browse__search">
+              <svg class="tech-browse__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" class="tech-browse__search-input" id="searchInput" placeholder="Search 140+ technologies…" autocomplete="off" spellcheck="false">
+              <span class="tech-browse__search-kbd" id="searchKbd">⌘ K</span>
+              <button class="tech-browse__search-clear" id="searchClear" aria-label="Clear search" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="tech-browse__filter" role="tablist" aria-label="Filter">
+              <button class="tech-browse__filter-btn is-active" data-filter="all" role="tab">All</button>
+              <button class="tech-browse__filter-btn" data-filter="selected" role="tab">
+                <svg class="tech-browse__filter-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h13M3 12h9M3 18h6"/><path d="M17 15l3 3 3-3M20 6v12"/></svg>
+                Selected &amp; Sort <span class="tech-browse__filter-count" id="filterSelectedCount">0</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ========== BrowseBody (Categories + Grid) ========== -->
+          <div class="tech-browse__body">
+
+            <!-- ========== CategoryList ========== -->
+            <nav class="tech-browse__cats" id="catList" aria-label="Categories">
+              <!-- dynamically generated -->
+            </nav>
+
+            <!-- ========== TechGrid ========== -->
+            <div class="tech-browse__grid-wrap">
+              <div class="tech-browse__grid-head" id="gridHead">
+                <!-- dynamically generated -->
+              </div>
+              <div class="tech-browse__grid" id="techGrid">
+                <!-- dynamically generated -->
+              </div>
+
+              <!-- ========== TechSort (Selected mode only) ========== -->
+              <div class="tech-sort" id="techSort" hidden>
+                <!-- Display order section -->
+                <div class="tech-sort__section-head">
+                  <svg class="tech-sort__section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V4m0 0L3 8m4-4l4 4M17 4v16m0 0l-4-4m4 4l4-4"/></svg>
+                  <span class="tech-sort__section-title">Display order</span>
+                  <span class="tech-sort__section-hint">Drag a card to rearrange</span>
+                </div>
+                <div class="tech-sort__scroll-wrapper">
+                  <button class="tech-sort__btn tech-sort__btn--left" id="sortScrollLeft" aria-label="Scroll left" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <div class="tech-sort__list" id="sortList">
+                    <!-- dynamically generated -->
+                  </div>
+                  <button class="tech-sort__btn tech-sort__btn--right" id="sortScrollRight" aria-label="Scroll right" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+
+                <div class="tech-sort__categories" id="sortCategories">
+                  <!-- dynamically generated -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ========== Toast ========== -->
+    <div class="tech-toast" id="toast" role="status" aria-live="polite">
+      <!-- Expanded years panel (shown when expanded) -->
+      <div class="tech-toast__panel" id="toastPanel" hidden>
+        <div class="tech-toast__panel-head">
+          <div class="tech-toast__panel-title">
+            <span>Set years of experience</span>
+            <span class="tech-toast__panel-count" id="toastPanelCount">0</span>
+          </div>
+          <button class="tech-toast__panel-close" id="toastPanelClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="tech-toast__panel-list" id="toastPanelList">
+          <!-- checkboxes generated -->
+        </div>
+        <div class="tech-toast__panel-footer">
+          <div class="tech-toast__years" id="toastYearChips" role="radiogroup" aria-label="Years of experience">
+            <button type="button" class="tech-toast__year-chip" data-year="1">1y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="2">2y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="3">3y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="4">4y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="5">5y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="6">6y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="7">7y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="8">8y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="9">9y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="10">10y</button>
+            <button type="button" class="tech-toast__year-chip" data-year="11">10+</button>
+          </div>
+          <button type="button" class="tech-toast__apply" id="toastApply" disabled>Apply</button>
+        </div>
+      </div>
+
+      <!-- Compact row (default) -->
+      <div class="tech-toast__row" id="toastRow">
+        <span class="tech-toast__icon" id="toastIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+        </span>
+        <span id="toastMsg" class="tech-toast__msg">Saved</span>
+        <button class="tech-toast__action" id="toastAction" hidden>Set years</button>
+        <button class="tech-toast__undo" id="toastUndo" hidden>Undo</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== SignupWelcomeModal (only shown when ?from=signup) ========== -->
+  <div class="signup-modal" id="signupWelcomeModal" role="dialog" aria-modal="true" aria-labelledby="signupWelcomeTitle" aria-hidden="true">
+    <div class="signup-modal__overlay" data-welcome-close></div>
+
+    <div class="signup-modal__panel" role="document">
+      <div class="signup-modal__brand">
+        <img src="assets/quine_logo.png" alt="Quine">
+      </div>
+
+      <h2 class="signup-modal__title" id="signupWelcomeTitle">We picked these from your repos</h2>
+      <p class="signup-modal__sub" id="signupWelcomeDesc">
+        Adjust your tech stack — and <strong>set years of experience for each.</strong> Quine doesn't guess years; only you know your real experience.
+      </p>
+
+      <button type="button" class="auth-btn auth-btn--github" data-welcome-close>
+        Got it
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== Data ========== -->
+  <script src="data/technologies.js"></script>
+
+  <!-- ========== Render & Interaction ========== -->
+  <script>
+  (function () {
+    /* ------------------------------------------------------------------
+       Constants
+       ------------------------------------------------------------------ */
+    const categories = window.TECHNOLOGIES;
+    const LOGO_BASE  = "../frontend/public/tech_stack_logo/";
+    const logoFor    = (key) => LOGO_BASE + key + ".png";
+
+    /* ------------------------------------------------------------------
+       Signup flow detection
+       ------------------------------------------------------------------ */
+    const urlParams   = new URLSearchParams(window.location.search);
+    const fromSignup  = urlParams.get('from') === 'signup';
+    const manualMode  = urlParams.get('manual') === '1';
+
+    /* ------------------------------------------------------------------
+       State
+       ------------------------------------------------------------------ */
+    // Default seed (通常のtech-stack-edit利用時)
+    const seedDefault = [
+      { key: "typescript",   years: 8 },
+      { key: "react",        years: 6 },
+      { key: "nextjs",       years: 4 },
+      { key: "nodejs",       years: 7 },
+      { key: "postgresql",   years: 5 },
+      { key: "docker",       years: 3 },
+      { key: "tailwind_css", years: 2 },
+    ];
+
+    // Signup flow: GitHub から自動検出された技術 (年数は AI 推測しない → null = 未設定、ユーザーが入力)
+    const seedFromGitHub = [
+      { key: "typescript",     years: null },
+      { key: "javascript",     years: null },
+      { key: "react",          years: null },
+      { key: "nextjs",         years: null },
+      { key: "tailwind_css",   years: null },
+      { key: "nodejs",         years: null },
+      { key: "python",         years: null },
+      { key: "postgresql",     years: null },
+      { key: "redis",          years: null },
+      { key: "docker",         years: null },
+      { key: "graphql",        years: null },
+      { key: "vercel",         years: null },
+      { key: "github_actions", years: null },
+      { key: "figma",          years: null },
+    ];
+
+    const seed = fromSignup
+      ? (manualMode ? [] : seedFromGitHub)
+      : seedDefault;
+
+    // サインアップフロー時: ヘッダーを Home 誘導モードに、autosave を隠してウェルカムモーダルを開く
+    if (fromSignup) {
+      // ヘッダー: Home 以外を無効化、Home だけ光らせる
+      const header = document.querySelector('.header');
+      if (header) {
+        header.classList.add('header--signup-guided');
+        const homeLink = header.querySelector('a[aria-label="Home"]');
+        if (homeLink) {
+          homeLink.classList.add('header__nav-item--guide');
+          // 遷移時に from=signup を引き継ぐ → user-profile も signup モードに
+          homeLink.href = 'user-profile.html?from=signup';
+          homeLink.style.pointerEvents = 'auto';
+          homeLink.style.filter = 'none';
+          homeLink.style.opacity = '1';
+          // 誘導ツールチップ
+          const tip = document.createElement('span');
+          tip.className = 'header__guide-tip';
+          tip.textContent = 'Next';
+          homeLink.appendChild(tip);
+        }
+      }
+
+      const autosaveEl = document.getElementById('autosave');
+      if (autosaveEl) autosaveEl.hidden = true;
+
+      // モーダルの文言を manual モードで切替
+      const modalTitle = document.getElementById('signupWelcomeTitle');
+      const modalDesc  = document.getElementById('signupWelcomeDesc');
+      if (manualMode) {
+        if (modalTitle) modalTitle.textContent = 'Build your tech stack';
+        if (modalDesc)  modalDesc.innerHTML    = 'Pick the technologies you ship with — and <strong>set years of experience for each.</strong>';
+      }
+
+      // ウェルカムモーダルを表示
+      const modal = document.getElementById('signupWelcomeModal');
+      if (modal) {
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        const close = () => {
+          modal.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        };
+        modal.querySelectorAll('[data-welcome-close]').forEach(el => el.addEventListener('click', close));
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') close();
+        });
+      }
+    }
+
+    const allTechs = categories.flatMap(c => c.technologies);
+    const initialSelected = seed
+      .map((s, i) => {
+        const t = allTechs.find(x => x.key === s.key);
+        return t ? { key: t.key, name: t.name, years: s.years, order: i + 1 } : null;
+      })
+      .filter(Boolean);
+
+    const state = {
+      selected:       JSON.parse(JSON.stringify(initialSelected)),
+      activeCategory: categories[0].name,
+      search:         "",
+      filter:         "all",   // "all" | "selected"
+      lastRemoved:    null,
+      lastYearsApplied: null,  // for undo
+      toastTimer:     null,
+      autosaveTimer:  null,
+      toastMode:      'hidden', // 'hidden' | 'prompt' | 'undo' | 'panel'
+      panelChecked:  new Set(),
+      panelYear:     null,
+    };
+
+    /* ------------------------------------------------------------------
+       DOM
+       ------------------------------------------------------------------ */
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      autosave:      $('autosave'),
+      autosaveLabel: $('autosaveLabel'),
+
+      searchInput:   $('searchInput'),
+      searchKbd:     $('searchKbd'),
+      searchClear:   $('searchClear'),
+
+      filterBtns:    document.querySelectorAll('.tech-browse__filter-btn'),
+      filterSelectedCount: $('filterSelectedCount'),
+
+      techBrowse:    document.querySelector('.tech-browse'),
+      catList:       $('catList'),
+      gridHead:      $('gridHead'),
+      techGrid:      $('techGrid'),
+
+      techSort:       $('techSort'),
+      sortList:       $('sortList'),
+      sortScrollLeft: $('sortScrollLeft'),
+      sortScrollRight:$('sortScrollRight'),
+      sortCategories: $('sortCategories'),
+
+      toast:          $('toast'),
+      toastRow:       $('toastRow'),
+      toastMsg:       $('toastMsg'),
+      toastUndo:      $('toastUndo'),
+      toastAction:    $('toastAction'),
+      toastIcon:      $('toastIcon'),
+      toastPanel:     $('toastPanel'),
+      toastPanelList: $('toastPanelList'),
+      toastPanelCount:$('toastPanelCount'),
+      toastPanelClose:$('toastPanelClose'),
+      toastYearChips: $('toastYearChips'),
+      toastApply:     $('toastApply'),
+    };
+
+    /* ------------------------------------------------------------------
+       Helpers
+       ------------------------------------------------------------------ */
+    const selectedKeys = () => state.selected.map(s => s.key);
+    const isSelected   = (key) => selectedKeys().includes(key);
+
+    function getSearchResults() {
+      if (!state.search) return null;
+      const q = state.search.toLowerCase();
+      return allTechs.filter(t =>
+        t.name.toLowerCase().includes(q) || t.key.toLowerCase().includes(q)
+      );
+    }
+
+    function countSelectedInCategory(cat) {
+      return cat.technologies.filter(t => isSelected(t.key)).length;
+    }
+
+    function getVisibleTechs() {
+      // search mode
+      if (state.search) return getSearchResults();
+      // selected filter
+      if (state.filter === 'selected') {
+        return state.selected.map(s => allTechs.find(t => t.key === s.key)).filter(Boolean);
+      }
+      // category
+      const cat = categories.find(c => c.name === state.activeCategory) || categories[0];
+      return cat.technologies;
+    }
+
+    /* ------------------------------------------------------------------
+       Autosave indicator
+       ------------------------------------------------------------------ */
+    function pingAutosave() {
+      clearTimeout(state.autosaveTimer);
+      els.autosave.classList.remove('is-idle');
+      els.autosave.classList.add('is-saving');
+      els.autosaveLabel.textContent = 'Saving…';
+      state.autosaveTimer = setTimeout(() => {
+        els.autosave.classList.remove('is-saving');
+        els.autosave.classList.add('is-idle');
+        els.autosaveLabel.textContent = 'Auto-saved';
+      }, 600);
+    }
+
+    function renderCategories() {
+      const total = state.selected.length;
+      els.filterSelectedCount.textContent = total;
+
+      const items = categories.map(cat => {
+        const count = countSelectedInCategory(cat);
+        const active = !state.search && state.filter === 'all' && cat.name === state.activeCategory;
+        return `
+          <button class="tech-browse__cat ${active ? 'is-active' : ''}" data-cat="${cat.name}">
+            <span class="tech-browse__cat-dot"></span>
+            <span class="tech-browse__cat-name">${cat.name}</span>
+            <span class="tech-browse__cat-count">
+              ${count > 0 ? `<strong>${count}</strong>` : ''}<span class="tech-browse__cat-count-total">${count > 0 ? '/' : ''}${cat.technologies.length}</span>
+            </span>
+          </button>
+        `;
+      }).join('');
+      els.catList.innerHTML = items;
+    }
+
+    function renderGridHead() {
+      let label, sub;
+      if (state.search) {
+        const n = (getSearchResults() || []).length;
+        label = `Search results`;
+        sub   = `${n} ${n === 1 ? 'match' : 'matches'} for "${state.search}"`;
+      } else if (state.filter === 'selected') {
+        label = 'Selected';
+        const n = state.selected.length;
+        sub   = n === 0
+          ? 'No technologies yet'
+          : `${n} ${n === 1 ? 'technology' : 'technologies'} · drag to reorder`;
+      } else {
+        const cat = categories.find(c => c.name === state.activeCategory);
+        label = cat ? cat.name : 'All';
+        sub   = cat ? `${cat.technologies.length} technologies` : '';
+      }
+      els.gridHead.innerHTML = `
+        <div class="tech-browse__grid-head-inline">
+          <span class="tech-browse__grid-title">${label}</span>
+          <span class="tech-browse__grid-sub">${sub}</span>
+        </div>
+      `;
+    }
+
+    function isSortMode() {
+      return state.filter === 'selected' && !state.search;
+    }
+
+    function renderBrowseGrid() {
+      const techs = getVisibleTechs();
+
+      if (!techs || techs.length === 0) {
+        let title, text;
+        if (state.search) {
+          title = 'No technologies found';
+          text  = `Nothing matched "${state.search}". Try a different keyword.`;
+        } else {
+          title = 'Empty category';
+          text  = 'This category has no registered technologies.';
+        }
+        els.techGrid.innerHTML = `
+          <div class="tech-browse__empty">
+            <svg class="tech-browse__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <div class="tech-browse__empty-title">${title}</div>
+            <div class="tech-browse__empty-text">${text}</div>
+          </div>`;
+        return;
+      }
+
+      els.techGrid.innerHTML = techs.map(tech => {
+        const selected = isSelected(tech.key);
+        return `
+          <button class="tech-card2 ${selected ? 'is-selected' : ''}" data-key="${tech.key}" type="button">
+            <span class="tech-card2__logo">
+              <img src="${logoFor(tech.key)}" alt="${tech.name}" onerror="this.style.visibility='hidden'">
+            </span>
+            <span class="tech-card2__info">
+              <span class="tech-card2__name">${tech.name}</span>
+            </span>
+            <span class="tech-card2__check" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderSort() {
+      if (state.selected.length === 0) {
+        els.sortList.innerHTML = `
+          <div class="tech-sort__empty">
+            <svg class="tech-browse__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <div class="tech-browse__empty-title">No selections yet</div>
+            <div class="tech-browse__empty-text">Switch to All and pick technologies to build your stack.</div>
+          </div>`;
+        els.sortCategories.innerHTML = '';
+        updateSortScrollBtns();
+        return;
+      }
+
+      els.sortList.innerHTML = state.selected.map((s, idx) => {
+        const yearsText = (s.years == null)
+          ? '— year'
+          : (s.years >= 11 ? '10+ year' : `${s.years} year`);
+        const isUnset = s.years == null;
+        return `
+          <div class="tech-item-wrapper tech-sort__item" draggable="true" data-key="${s.key}" data-idx="${idx}">
+            <div class="tech-sort__card">
+              <div class="tech-item">
+                <div class="tech-item__bg"></div>
+                <div class="tech-item__logo-wrapper">
+                  <img src="${logoFor(s.key)}" alt="${s.name}" class="tech-item__logo" onerror="this.style.visibility='hidden'">
+                </div>
+                <div class="tech-item__name-wrapper"><span class="tech-item__name">${s.name}</span></div>
+              </div>
+              <button class="tech-sort__remove" type="button" aria-label="Remove ${s.name}" data-action="remove">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="tech-sort__years">
+              <button class="tech-sort__year-btn tech-sort__year-btn--dec" type="button" aria-label="Decrease years" data-action="year-dec" ${(s.years == null || s.years <= 1) ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
+              </button>
+              <span class="tech-sort__year-text ${isUnset ? 'is-unset' : ''}">${yearsText}</span>
+              <button class="tech-sort__year-btn tech-sort__year-btn--inc" type="button" aria-label="Increase years" data-action="year-inc" ${s.years >= 11 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      renderSortCategories();
+      updateSortScrollBtns();
+    }
+
+    function renderSortCategories() {
+      const groups = categories
+        .map(cat => ({
+          name: cat.name,
+          items: cat.technologies.filter(t => isSelected(t.key)),
+        }))
+        .filter(g => g.items.length > 0);
+
+      if (groups.length === 0) {
+        els.sortCategories.innerHTML = '';
+        return;
+      }
+
+      els.sortCategories.innerHTML = groups.map(g => `
+        <div class="tech-stack-category__group">
+          <h4 class="tech-stack-category__name">${g.name} <span class="tech-sort__cat-count">${g.items.length}</span></h4>
+          <div class="tech-stack-category__items">
+            ${g.items.map(t => {
+              const sel = state.selected.find(s => s.key === t.key);
+              const years = (sel && sel.years != null)
+                ? (sel.years >= 11 ? '10+ year' : `${sel.years} year`)
+                : '— year';
+              return `
+                <div class="tech-item-wrapper">
+                  <div class="tech-item">
+                    <div class="tech-item__bg"></div>
+                    <div class="tech-item__logo-wrapper">
+                      <img src="${logoFor(t.key)}" alt="${t.name}" class="tech-item__logo" onerror="this.style.visibility='hidden'">
+                    </div>
+                    <div class="tech-item__name-wrapper"><span class="tech-item__name">${t.name}</span></div>
+                  </div>
+                  <div class="tech-item__years">${years}</div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateSortScrollBtns() {
+      const list = els.sortList;
+      const maxScroll = list.scrollWidth - list.clientWidth;
+      els.sortScrollLeft.hidden  = list.scrollLeft <= 2;
+      els.sortScrollRight.hidden = list.scrollLeft >= maxScroll - 2 || maxScroll <= 0;
+    }
+
+    function syncMode() {
+      els.techBrowse.classList.toggle('is-sort-mode', isSortMode());
+      els.techSort.hidden = !isSortMode();
+    }
+
+    function renderView() {
+      syncMode();
+      if (isSortMode()) {
+        renderSort();
+      } else {
+        renderBrowseGrid();
+      }
+    }
+
+    function renderAll() {
+      renderCategories();
+      renderGridHead();
+      renderView();
+      pingAutosave();
+    }
+
+    /* ------------------------------------------------------------------
+       Toast (multi-mode: prompt / undo / panel)
+       ------------------------------------------------------------------ */
+    function setToastMode(mode) {
+      state.toastMode = mode;
+      els.toast.classList.toggle('is-panel', mode === 'panel');
+      els.toastRow.hidden  = mode === 'panel' || mode === 'hidden';
+      els.toastPanel.hidden = mode !== 'panel';
+      if (mode === 'hidden') {
+        els.toast.classList.remove('is-visible');
+      } else {
+        els.toast.classList.add('is-visible');
+      }
+    }
+
+    function showPrompt(msg, unsetCount) {
+      clearTimeout(state.toastTimer);
+      els.toastMsg.textContent = msg;
+      els.toast.classList.remove('is-success');
+      els.toast.classList.add('is-info');
+      els.toastUndo.hidden = true;
+      els.toastAction.hidden = unsetCount === 0;
+      els.toastAction.textContent = unsetCount > 1 ? `Set years (${unsetCount})` : 'Set years';
+      setToastMode('prompt');
+      state.toastTimer = setTimeout(hideToast, 8000);
+    }
+
+    function showUndo(msg) {
+      clearTimeout(state.toastTimer);
+      els.toastMsg.textContent = msg;
+      els.toast.classList.remove('is-success');
+      els.toast.classList.add('is-info');
+      els.toastUndo.hidden = false;
+      els.toastAction.hidden = true;
+      setToastMode('prompt');
+      state.toastTimer = setTimeout(hideToast, 4000);
+    }
+
+    function showSuccess(msg) {
+      clearTimeout(state.toastTimer);
+      els.toastMsg.textContent = msg;
+      els.toast.classList.remove('is-info');
+      els.toast.classList.add('is-success');
+      els.toastUndo.hidden = true;
+      els.toastAction.hidden = true;
+      setToastMode('prompt');
+      state.toastTimer = setTimeout(hideToast, 2500);
+    }
+
+    function hideToast() {
+      setToastMode('hidden');
+    }
+
+    /* ------------------------------------------------------------------
+       Year panel
+       ------------------------------------------------------------------ */
+    function unsetYearItems() {
+      return state.selected.filter(s => s.years == null);
+    }
+
+    function openYearPanel() {
+      clearTimeout(state.toastTimer);
+      const items = unsetYearItems();
+      if (items.length === 0) {
+        hideToast();
+        return;
+      }
+      state.panelChecked = new Set(items.map(s => s.key));
+      state.panelYear = null;
+      renderPanel();
+      setToastMode('panel');
+    }
+
+    function renderPanel() {
+      const items = unsetYearItems();
+      els.toastPanelCount.textContent = state.panelChecked.size;
+
+      els.toastPanelList.innerHTML = items.map(s => {
+        const checked = state.panelChecked.has(s.key);
+        return `
+          <label class="tech-toast__item ${checked ? 'is-checked' : ''}" data-key="${s.key}">
+            <span class="tech-toast__item-check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            </span>
+            <span class="tech-toast__item-logo">
+              <img src="${logoFor(s.key)}" alt="${s.name}" onerror="this.style.visibility='hidden'">
+            </span>
+            <span class="tech-toast__item-name">${s.name}</span>
+          </label>
+        `;
+      }).join('');
+
+      els.toastYearChips.querySelectorAll('.tech-toast__year-chip').forEach(btn => {
+        btn.classList.toggle('is-active', Number(btn.dataset.year) === state.panelYear);
+      });
+
+      els.toastApply.disabled = state.panelChecked.size === 0 || state.panelYear == null;
+    }
+
+    function togglePanelCheck(key) {
+      if (state.panelChecked.has(key)) state.panelChecked.delete(key);
+      else state.panelChecked.add(key);
+      renderPanel();
+    }
+
+    function applyYears() {
+      if (state.panelYear == null || state.panelChecked.size === 0) return;
+      const year = state.panelYear;
+      const prev = {};
+      const keys = Array.from(state.panelChecked);
+      state.selected.forEach(s => {
+        if (state.panelChecked.has(s.key)) {
+          prev[s.key] = s.years;
+          s.years = year;
+        }
+      });
+      state.lastYearsApplied = { keys, prev };
+      state.panelChecked.clear();
+      state.panelYear = null;
+      renderAll();
+
+      const remaining = unsetYearItems();
+      const label = year >= 11 ? '10+ years' : `${year}y`;
+      if (remaining.length === 0) {
+        showSuccess(`Set ${label} for ${keys.length} ${keys.length === 1 ? 'tech' : 'techs'}`);
+      } else {
+        state.panelChecked = new Set(remaining.map(s => s.key));
+        renderPanel();
+      }
+    }
+
+    /* ------------------------------------------------------------------
+       Actions
+       ------------------------------------------------------------------ */
+    function addTech(key) {
+      if (isSelected(key)) return;
+      const tech = allTechs.find(t => t.key === key);
+      if (!tech) return;
+      state.selected.push({
+        key:   tech.key,
+        name:  tech.name,
+        years: null,
+        order: state.selected.length + 1,
+      });
+      renderAll();
+      if (state.toastMode === 'panel') {
+        state.panelChecked.add(tech.key);
+        renderPanel();
+      } else {
+        const unset = unsetYearItems();
+        showPrompt(`Added ${tech.name}`, unset.length);
+      }
+    }
+
+    function removeTech(key, { silent = false } = {}) {
+      const idx = state.selected.findIndex(s => s.key === key);
+      if (idx < 0) return;
+      const removed = state.selected[idx];
+      state.selected.splice(idx, 1);
+      state.selected.forEach((s, i) => s.order = i + 1);
+      if (!silent) {
+        state.lastRemoved = removed;
+        showUndo(`Removed ${removed.name}`);
+      }
+      renderAll();
+    }
+
+    function toggleTech(key) {
+      if (isSelected(key)) removeTech(key);
+      else addTech(key);
+    }
+
+    /* ------------------------------------------------------------------
+       Event handlers
+       ------------------------------------------------------------------ */
+    // Search
+    els.searchInput.addEventListener('input', (e) => {
+      state.search = e.target.value.trim();
+      els.searchClear.hidden = state.search.length === 0;
+      els.searchKbd.hidden = state.search.length > 0;
+      if (state.search) state.filter = 'all';
+      renderCategories();
+      renderGridHead();
+      renderView();
+    });
+    els.searchClear.addEventListener('click', () => {
+      state.search = '';
+      els.searchInput.value = '';
+      els.searchClear.hidden = true;
+      els.searchKbd.hidden = false;
+      renderCategories();
+      renderGridHead();
+      renderView();
+      els.searchInput.focus();
+    });
+
+    // Filter tabs
+    els.filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.filter = btn.dataset.filter;
+        state.search = '';
+        els.searchInput.value = '';
+        els.searchClear.hidden = true;
+        els.searchKbd.hidden = false;
+        els.filterBtns.forEach(b => b.classList.toggle('is-active', b === btn));
+        renderCategories();
+        renderGridHead();
+        renderView();
+      });
+    });
+
+    // Category click
+    els.catList.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tech-browse__cat');
+      if (!btn) return;
+      state.activeCategory = btn.dataset.cat;
+      state.filter = 'all';
+      state.search = '';
+      els.searchInput.value = '';
+      els.searchClear.hidden = true;
+      els.searchKbd.hidden = false;
+      els.filterBtns.forEach(b => b.classList.toggle('is-active', b.dataset.filter === 'all'));
+      renderCategories();
+      renderGridHead();
+      renderView();
+    });
+
+    // Tech card click
+    els.techGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.tech-card2');
+      if (!card) return;
+      toggleTech(card.dataset.key);
+    });
+
+    /* ------------------------------------------------------------------
+       Sort view: year +/-, remove, drag reorder, scroll buttons
+       ------------------------------------------------------------------ */
+    // Click delegation for year buttons and remove
+    els.sortList.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const item = btn.closest('.tech-sort__item');
+      if (!item) return;
+      const key = item.dataset.key;
+      const action = btn.dataset.action;
+      const target = state.selected.find(s => s.key === key);
+      if (!target) return;
+
+      if (action === 'remove') {
+        removeTech(key);
+        return;
+      }
+      if (action === 'year-inc') {
+        target.years = (target.years == null) ? 1 : Math.min(11, target.years + 1);
+      } else if (action === 'year-dec') {
+        if (target.years == null) return;
+        target.years = Math.max(1, target.years - 1);
+      }
+      renderAll();
+    });
+
+    // Scroll buttons
+    els.sortScrollLeft.addEventListener('click', () => {
+      els.sortList.scrollBy({ left: -240, behavior: 'smooth' });
+    });
+    els.sortScrollRight.addEventListener('click', () => {
+      els.sortList.scrollBy({ left: 240, behavior: 'smooth' });
+    });
+    els.sortList.addEventListener('scroll', updateSortScrollBtns);
+    window.addEventListener('resize', updateSortScrollBtns);
+
+    // Drag & drop reorder
+    let dragFromIdx = null;
+
+    function clearDropIndicators() {
+      els.sortList.querySelectorAll('.is-drop-before, .is-drop-after').forEach(el => {
+        el.classList.remove('is-drop-before', 'is-drop-after');
+      });
+    }
+
+    // Auto-scroll while dragging near edges
+    const autoScroll = { dir: 0, speed: 0, raf: null };
+    const EDGE_THRESHOLD = 200; // px from the list edge where scrolling kicks in
+    const MAX_SPEED      = 25;  // px per frame at top speed
+
+    function stopAutoScroll() {
+      autoScroll.dir = 0;
+      autoScroll.speed = 0;
+      if (autoScroll.raf) {
+        cancelAnimationFrame(autoScroll.raf);
+        autoScroll.raf = null;
+      }
+    }
+
+    function runAutoScroll() {
+      if (autoScroll.raf) return;
+      const step = () => {
+        if (!autoScroll.dir) { autoScroll.raf = null; return; }
+        els.sortList.scrollLeft += autoScroll.dir * autoScroll.speed;
+        autoScroll.raf = requestAnimationFrame(step);
+      };
+      autoScroll.raf = requestAnimationFrame(step);
+    }
+
+    // Speed ramps from 0 (at the zone boundary) to MAX_SPEED (at the list edge).
+    // Beyond the edge, speed stays pinned at MAX_SPEED — no further boost.
+    function speedForDist(dist) {
+      if (dist >= EDGE_THRESHOLD) return 0;
+      if (dist <= 0) return MAX_SPEED;
+      const t = (EDGE_THRESHOLD - dist) / EDGE_THRESHOLD; // 0 … 1 within the zone
+      return t * MAX_SPEED;
+    }
+
+    function maybeAutoScroll(clientX) {
+      const rect = els.sortList.getBoundingClientRect();
+      const leftDist  = clientX - rect.left;
+      const rightDist = rect.right - clientX;
+      if (leftDist < rightDist && leftDist < EDGE_THRESHOLD) {
+        autoScroll.dir   = -1;
+        autoScroll.speed = speedForDist(leftDist);
+        runAutoScroll();
+      } else if (rightDist < EDGE_THRESHOLD) {
+        autoScroll.dir   = 1;
+        autoScroll.speed = speedForDist(rightDist);
+        runAutoScroll();
+      } else {
+        stopAutoScroll();
+      }
+    }
+
+    // Find drop target even when no item is directly under pointer (edges)
+    function findDropTarget(clientX) {
+      const items = Array.from(els.sortList.querySelectorAll('.tech-sort__item'));
+      if (items.length === 0) return null;
+
+      for (const it of items) {
+        if (it.classList.contains('is-dragging')) continue;
+        const r = it.getBoundingClientRect();
+        if (clientX >= r.left && clientX <= r.right) {
+          return { item: it, before: (clientX - r.left) < r.width / 2 };
+        }
+      }
+      // Not directly over an item — fall back to closest edge item
+      const firstRect = items[0].getBoundingClientRect();
+      const lastRect  = items[items.length - 1].getBoundingClientRect();
+      if (clientX < firstRect.left)  return { item: items[0], before: true };
+      if (clientX > lastRect.right)  return { item: items[items.length - 1], before: false };
+      return null;
+    }
+
+    els.sortList.addEventListener('dragstart', (e) => {
+      const item = e.target.closest('.tech-sort__item');
+      if (!item) return;
+      dragFromIdx = Number(item.dataset.idx);
+      item.classList.add('is-dragging');
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', item.dataset.key);
+      }
+    });
+
+    els.sortList.addEventListener('dragover', (e) => {
+      if (dragFromIdx == null) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      maybeAutoScroll(e.clientX);
+
+      clearDropIndicators();
+      const target = findDropTarget(e.clientX);
+      if (!target) return;
+      target.item.classList.add(target.before ? 'is-drop-before' : 'is-drop-after');
+    });
+
+    els.sortList.addEventListener('dragleave', (e) => {
+      if (!els.sortList.contains(e.relatedTarget)) {
+        clearDropIndicators();
+        // Do NOT stop auto-scroll here: the user may drag further outside
+        // to scroll faster. Stopping is handled on dragend/drop.
+      }
+    });
+
+    // Global dragover: keep auto-scroll running (and accelerating)
+    // even when the pointer leaves the list area entirely.
+    document.addEventListener('dragover', (e) => {
+      if (dragFromIdx == null) return;
+      maybeAutoScroll(e.clientX);
+    });
+
+    els.sortList.addEventListener('drop', (e) => {
+      e.preventDefault();
+      stopAutoScroll();
+      if (dragFromIdx == null) return;
+
+      const target = findDropTarget(e.clientX);
+      clearDropIndicators();
+      if (!target) { dragFromIdx = null; return; }
+
+      const toIdx = Number(target.item.dataset.idx);
+      let insertIdx = toIdx + (target.before ? 0 : 1);
+      if (insertIdx > dragFromIdx) insertIdx -= 1;
+      if (insertIdx === dragFromIdx) { dragFromIdx = null; return; }
+
+      const [moved] = state.selected.splice(dragFromIdx, 1);
+      state.selected.splice(insertIdx, 0, moved);
+      state.selected.forEach((s, i) => s.order = i + 1);
+      dragFromIdx = null;
+      renderAll();
+    });
+
+    els.sortList.addEventListener('dragend', () => {
+      dragFromIdx = null;
+      stopAutoScroll();
+      clearDropIndicators();
+      els.sortList.querySelectorAll('.is-dragging').forEach(el => el.classList.remove('is-dragging'));
+    });
+
+    // Toast undo
+    els.toastUndo.addEventListener('click', () => {
+      if (state.lastRemoved) {
+        const r = state.lastRemoved;
+        state.selected.push({ ...r, order: state.selected.length + 1 });
+        state.lastRemoved = null;
+        hideToast();
+        renderAll();
+      }
+    });
+
+    // Toast action (Set years button in prompt)
+    els.toastAction.addEventListener('click', openYearPanel);
+
+    // Panel close
+    els.toastPanelClose.addEventListener('click', hideToast);
+
+    // Panel checkbox toggle
+    els.toastPanelList.addEventListener('click', (e) => {
+      const item = e.target.closest('.tech-toast__item');
+      if (!item) return;
+      e.preventDefault();
+      togglePanelCheck(item.dataset.key);
+    });
+
+    // Year chip selection
+    els.toastYearChips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.tech-toast__year-chip');
+      if (!chip) return;
+      state.panelYear = Number(chip.dataset.year);
+      renderPanel();
+    });
+
+    // Apply years
+    els.toastApply.addEventListener('click', applyYears);
+
+    // Keyboard: ⌘K / Ctrl+K to focus search
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        els.searchInput.focus();
+        els.searchInput.select();
+      }
+      if (e.key === 'Escape' && document.activeElement === els.searchInput) {
+        els.searchInput.blur();
+      }
+    });
+
+    /* ------------------------------------------------------------------
+       Init
+       ------------------------------------------------------------------ */
+    // Detect OS for ⌘ vs Ctrl
+    const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    els.searchKbd.textContent = isMac ? '⌘ K' : 'Ctrl K';
+    renderAll();
+  })();
+  </script>
+
+  <!-- ========== Lang Toggle Script ========== -->
+  <script>
+    (function () {
+      document.querySelectorAll('.lang-toggle').forEach(function (toggle) {
+        toggle.addEventListener('click', function (e) {
+          var btn = e.target.closest('.lang-toggle__btn');
+          if (!btn) return;
+          toggle.querySelectorAll('.lang-toggle__btn').forEach(function (b) {
+            var active = b === btn;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+        });
+      });
+    })();
+  </script>
+
+  <script src="header.js"></script>
+</body>
+</html>

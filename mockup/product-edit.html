@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create New Product - Quine</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body>
+
+  <!-- ========== Header ========== -->
+  <header class="header">
+    <div class="header__inner">
+      <div class="header__logo">
+        <a href="user-profile.html">
+          <img src="assets/quine_logo.png" alt="Quine Logo">
+        </a>
+      </div>
+
+      <nav class="header__nav">
+        <ul class="header__nav-list">
+          <li>
+            <a href="user-profile.html" class="header__nav-item" aria-label="Home">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V10"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="products.html" class="header__nav-item" aria-label="Products">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <a href="users.html" class="header__nav-item" aria-label="Search">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
+            </a>
+          </li>
+          <li>
+            <button class="header__nav-item header__nav-item--active" aria-label="Create new">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span class="header__nav-dot"></span>
+            </button>
+          </li>
+          <li>
+            <button class="header__nav-item" aria-label="Copy profile link">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- ヘッダー右側アクション -->
+      <div class="header__actions">
+        <!-- 通知 -->
+        <button type="button" class="header__notify" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="header__notify-dot"></span>
+        </button>
+
+        <!-- 言語切替 -->
+        <div class="lang-toggle" role="tablist" aria-label="Language">
+          <button type="button" class="lang-toggle__btn is-active" data-lang="ja" role="tab" aria-selected="true">JP</button>
+          <button type="button" class="lang-toggle__btn" data-lang="en" role="tab" aria-selected="false">EN</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== Main ========== -->
+  <main class="product-edit">
+    <div class="product-edit__container">
+
+      <!-- ========== ProductEditHero ========== -->
+      <section class="product-edit-hero">
+        <div class="product-edit-hero__info">
+          <span class="product-edit-hero__eyebrow">Product</span>
+          <h1 class="product-edit-hero__title">Create New Product</h1>
+          <p class="product-edit-hero__subtitle">Share your project with the community. Fill in the details below to showcase your work.</p>
+        </div>
+        <div class="product-edit-hero__aside">
+          <button type="button" class="btn btn--gradient" id="openRepoModalBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.65 5.58.65 11.85c0 5.01 3.25 9.26 7.76 10.76.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.1-3.16.69-3.83-1.34-3.83-1.34-.52-1.31-1.26-1.66-1.26-1.66-1.03-.71.08-.69.08-.69 1.14.08 1.74 1.17 1.74 1.17 1.01 1.74 2.66 1.24 3.31.95.1-.74.4-1.24.72-1.53-2.52-.29-5.18-1.26-5.18-5.62 0-1.24.44-2.26 1.17-3.06-.12-.29-.51-1.45.11-3.02 0 0 .95-.31 3.12 1.17.91-.25 1.88-.38 2.84-.39.96.01 1.93.13 2.84.39 2.17-1.47 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.17 1.82 1.17 3.06 0 4.37-2.67 5.33-5.2 5.61.41.35.77 1.04.77 2.1 0 1.51-.01 2.73-.01 3.1 0 .3.21.66.79.55 4.5-1.5 7.75-5.75 7.75-10.76C23.35 5.58 18.27.5 12 .5z"/></svg>
+            Import from GitHub
+          </button>
+        </div>
+      </section>
+
+      <!-- ========== Workbench (2-column) ========== -->
+      <div class="product-edit-workbench">
+
+        <!-- ========== ProductEditForm (左カラム) ========== -->
+        <form class="product-edit-form" id="productEditForm" autocomplete="off">
+
+          <!-- ========== ProjectHeader (Logo + Title) ========== -->
+          <section class="product-edit-form__section product-edit-form__project-header">
+            <div class="product-edit-form__logo-row">
+              <!-- ========== LogoUpload ========== -->
+              <label class="logo-upload" id="logoUpload">
+                <input type="file" accept="image/*" id="logoInput" hidden>
+                <div class="logo-upload__placeholder" id="logoPlaceholder">
+                  <svg class="logo-upload__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span class="logo-upload__label">Upload Logo</span>
+                </div>
+                <img class="logo-upload__preview" id="logoPreview" alt="" hidden>
+              </label>
+
+              <!-- Title & Tagline -->
+              <div class="product-edit-form__title-stack">
+                <input
+                  type="text"
+                  id="productTitle"
+                  class="form-field form-field--hero"
+                  placeholder="Project Title"
+                  maxlength="50"
+                  required
+                >
+                <span class="ai-pending-host" id="taglineHost">
+                  <input
+                    type="text"
+                    id="productTagline"
+                    class="form-field"
+                    placeholder="A short catchphrase that describes your product"
+                    maxlength="100"
+                    required
+                  >
+                </span>
+              </div>
+            </div>
+
+            <!-- ========== DetailsGroup (Metadata + Links) ========== -->
+            <h2 class="product-edit-form__label product-edit-form__label--group">Project info</h2>
+
+            <!-- ========== MetadataRow ========== -->
+            <div class="product-edit-form__meta">
+              <!-- ProjectType (custom dropdown / flat hover) -->
+              <div class="field-group">
+                <label class="field-group__label" for="projectTypeTrigger">Project Type</label>
+                <div class="meta-chip meta-chip--popover" id="projectTypeChip">
+                  <svg class="meta-chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7.5" cy="7.5" r="1.25" fill="currentColor" stroke="none"/></svg>
+                  <button type="button" class="meta-chip__trigger meta-chip__trigger--sm" id="projectTypeTrigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="meta-chip__trigger-label meta-chip__trigger-label--placeholder" id="projectTypeLabel">Select</span>
+                    <svg class="meta-chip__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <div class="select-popover" id="projectTypePopover" hidden role="listbox">
+                    <button type="button" class="select-option" data-value="Personal" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      Personal
+                    </button>
+                    <button type="button" class="select-option" data-value="Work" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                      Work
+                    </button>
+                    <button type="button" class="select-option" data-value="Open Source" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3"/><path d="M6 9v3a3 3 0 003 3h6a3 3 0 003-3V9"/><path d="M12 15v0"/></svg>
+                      Open Source
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TeamSize (custom dropdown / gradient hover) -->
+              <div class="field-group">
+                <label class="field-group__label" for="teamSizeTrigger">Team Size</label>
+                <div class="meta-chip meta-chip--popover" id="teamSizeChip">
+                  <svg class="meta-chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                  <button type="button" class="meta-chip__trigger meta-chip__trigger--wide" id="teamSizeTrigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="meta-chip__trigger-label meta-chip__trigger-label--placeholder" id="teamSizeLabel">Select</span>
+                    <svg class="meta-chip__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  <div class="select-popover" id="teamSizePopover" hidden role="listbox">
+                    <button type="button" class="select-option" data-value="1 person" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      1 person (Solo)
+                    </button>
+                    <button type="button" class="select-option" data-value="2-5 people" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                      2-5 people (Small team)
+                    </button>
+                    <button type="button" class="select-option" data-value="6-10 people" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="9" r="2.5"/><circle cx="18" cy="9" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M2 20v-1a3 3 0 013-3h2a3 3 0 013 3v1"/><path d="M14 20v-1a3 3 0 013-3h2a3 3 0 013 3v1"/></svg>
+                      6-10 people (Medium team)
+                    </button>
+                    <button type="button" class="select-option" data-value="11-30 people" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="10" r="2"/><circle cx="12" cy="7" r="2"/><circle cx="18" cy="10" r="2"/><circle cx="9" cy="15" r="2"/><circle cx="15" cy="15" r="2"/><path d="M2 21v-1a2 2 0 012-2h16a2 2 0 012 2v1"/></svg>
+                      11-30 people (Large team)
+                    </button>
+                    <button type="button" class="select-option" data-value="31+ people" role="option">
+                      <svg class="select-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+                      31+ people (Enterprise)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Role (multi-select popover / gradient checkbox) -->
+              <div class="field-group">
+                <label class="field-group__label" for="roleTrigger">Role</label>
+                <div class="meta-chip meta-chip--popover" id="roleChip">
+                  <svg class="meta-chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="2" y1="13" x2="22" y2="13"/></svg>
+                  <button type="button" class="meta-chip__trigger meta-chip__trigger--role" id="roleTrigger" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="meta-chip__trigger-label meta-chip__trigger-label--placeholder" id="roleTriggerLabel">Select roles</span>
+                    <svg class="meta-chip__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+
+                  <div class="role-popover" id="rolePopover" hidden>
+                    <div class="role-popover__list" id="roleList" role="listbox" aria-multiselectable="true">
+                      <!-- dynamically generated -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== LinksRow ========== -->
+            <div class="product-edit-form__links">
+              <div class="field-group">
+                <label class="field-group__label" for="productUrl">Product URL</label>
+                <div class="input-with-icon">
+                  <svg class="input-with-icon__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                  <input type="url" class="form-field form-field--sm" placeholder="https://..." id="productUrl">
+                </div>
+              </div>
+              <div class="field-group">
+                <label class="field-group__label" for="githubUrl">GitHub URL</label>
+                <div class="input-with-icon">
+                  <svg class="input-with-icon__icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.65 5.58.65 11.85c0 5.01 3.25 9.26 7.76 10.76.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.1-3.16.69-3.83-1.34-3.83-1.34-.52-1.31-1.26-1.66-1.26-1.66-1.03-.71.08-.69.08-.69 1.14.08 1.74 1.17 1.74 1.17 1.01 1.74 2.66 1.24 3.31.95.1-.74.4-1.24.72-1.53-2.52-.29-5.18-1.26-5.18-5.62 0-1.24.44-2.26 1.17-3.06-.12-.29-.51-1.45.11-3.02 0 0 .95-.31 3.12 1.17.91-.25 1.88-.38 2.84-.39.96.01 1.93.13 2.84.39 2.17-1.47 3.12-1.17 3.12-1.17.62 1.57.23 2.73.11 3.02.73.8 1.17 1.82 1.17 3.06 0 4.37-2.67 5.33-5.2 5.61.41.35.77 1.04.77 2.1 0 1.51-.01 2.73-.01 3.1 0 .3.21.66.79.55 4.5-1.5 7.75-5.75 7.75-10.76C23.35 5.58 18.27.5 12 .5z"/></svg>
+                  <input type="url" class="form-field form-field--sm" placeholder="https://github.com/..." id="githubUrl">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ========== ContentEditor ========== -->
+          <section class="product-edit-form__section product-edit-form__section--editor">
+            <h2 class="product-edit-form__label">Content</h2>
+            <div class="ai-pending-host" id="descriptionHost">
+              <div class="n-editor" id="contentEditor"></div>
+            </div>
+          </section>
+
+          <!-- ========== ProductActions ========== -->
+          <section class="product-edit-form__actions">
+            <button type="button" class="btn btn--ghost" id="cancelBtn">Cancel</button>
+            <button type="submit" class="btn btn--gradient" id="submitBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+              Create Product
+            </button>
+          </section>
+        </form>
+
+        <!-- ========== ProductTechPanel (右カラム: プレビュー) ========== -->
+        <aside class="product-tech-panel">
+          <header class="product-tech-panel__head">
+            <h3 class="product-tech-panel__title">Product Tech Stack</h3>
+            <button type="button" class="btn btn--gradient btn--sm" id="techEditBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/><path d="M14.06 6.19l3.75 3.75"/></svg>
+              Edit
+            </button>
+          </header>
+
+          <div class="product-tech-panel__body" id="techPreview">
+            <!-- dynamically generated -->
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <!-- ========== AIChat (floating, bottom-right) ========== -->
+    <div class="ai-chat" id="aiChat">
+      <button type="button" class="ai-chat__fab is-hidden" id="aiChatFab" aria-label="Open AI assistant">
+        <svg class="ai-chat__fab-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2c.35 0 .66.22.78.56l1.6 4.49c.3.84.96 1.5 1.8 1.8l4.49 1.6c.75.27.75 1.33 0 1.6l-4.49 1.6c-.84.3-1.5.96-1.8 1.8l-1.6 4.49c-.27.75-1.33.75-1.6 0l-1.6-4.49c-.3-.84-.96-1.5-1.8-1.8l-4.49-1.6c-.75-.27-.75-1.33 0-1.6l4.49-1.6c.84-.3 1.5-.96 1.8-1.8l1.6-4.49c.12-.34.43-.56.78-.56z"/>
+          <path d="M19.5 3c.18 0 .34.11.4.28l.55 1.52c.15.41.47.73.88.88l1.52.55c.34.13.34.62 0 .75l-1.52.55c-.41.15-.73.47-.88.88l-.55 1.52c-.13.34-.62.34-.75 0l-.55-1.52c-.15-.41-.47-.73-.88-.88l-1.52-.55c-.34-.13-.34-.62 0-.75l1.52-.55c.41-.15.73-.47.88-.88l.55-1.52c.06-.17.22-.28.4-.28z" opacity="0.85"/>
+        </svg>
+      </button>
+
+      <div class="ai-chat__panel" id="aiChatPanel">
+        <header class="ai-chat__head">
+          <div class="ai-chat__head-left">
+            <span class="ai-chat__logo" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z"/>
+              </svg>
+            </span>
+            <div class="ai-chat__head-text">
+              <h3 class="ai-chat__title">Quine AI</h3>
+            </div>
+          </div>
+          <div class="ai-chat__head-actions">
+            <button type="button" class="ai-chat__head-btn" id="aiChatExpand" aria-label="Expand">
+              <svg class="ai-chat__head-btn-icon ai-chat__head-btn-icon--expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/>
+                <polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+              <svg class="ai-chat__head-btn-icon ai-chat__head-btn-icon--contract" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 14 10 14 10 20"/>
+                <polyline points="20 10 14 10 14 4"/>
+                <line x1="14" y1="10" x2="21" y2="3"/>
+                <line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+            <button type="button" class="ai-chat__close" id="aiChatClose" aria-label="Minimize">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class="ai-chat__messages" id="aiChatMessages" aria-live="polite"></div>
+
+        <div class="ai-chat__actions" id="aiChatActions" hidden>
+          <span class="ai-chat__actions-hint">Review the draft</span>
+          <div class="ai-chat__actions-buttons">
+            <button type="button" class="ai-chat__actions-btn" data-proposal-action="discard">
+              <kbd>Esc</kbd>
+              Discard
+            </button>
+            <button type="button" class="ai-chat__actions-btn ai-chat__actions-btn--primary" data-proposal-action="accept">
+              <kbd>↵</kbd>
+              Approve
+            </button>
+          </div>
+        </div>
+
+        <form class="ai-chat__input-row" id="aiChatForm">
+          <div class="ai-chat__input-wrap">
+            <textarea
+              class="ai-chat__input"
+              id="aiChatInput"
+              placeholder="Send a message..."
+              rows="1"
+              autocomplete="off"
+            ></textarea>
+            <div class="ai-chat__input-tools">
+              <div class="ai-chat__input-tools-left">
+                <button type="button" class="ai-chat__tool-btn" aria-label="Attach file">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+                <button type="button" class="ai-chat__tool-btn" aria-label="Voice input">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0014 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+              </div>
+              <button type="submit" class="ai-chat__send" aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========== RepoSelectionModal (Step 1: choose a repository) ========== -->
+    <div class="repo-select-modal" id="repoModal" aria-hidden="false">
+      <div class="repo-select-modal__backdrop" id="repoModalBackdrop"></div>
+
+      <div class="repo-select-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="repoModalTitle">
+        <header class="repo-select-modal__head">
+          <div class="repo-select-modal__head-text">
+            <h2 class="repo-select-modal__title" id="repoModalTitle">Import Git Repository</h2>
+            <p class="repo-select-modal__subtitle">Pick a repository and AI will draft the rest for you.</p>
+          </div>
+          <button type="button" class="repo-select-modal__close" id="repoModalClose" aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </header>
+
+        <div class="repo-select-modal__body">
+
+          <!-- Account dropdown + Search -->
+          <div class="repo-controls">
+            <div class="repo-account-picker">
+              <button type="button" class="repo-account-picker__trigger" id="repoAccountTrigger" aria-haspopup="listbox" aria-expanded="false">
+                <span class="repo-account-picker__avatar" id="repoAccountAvatar">K</span>
+                <span class="repo-account-picker__login" id="repoAccountLogin">kmdtomo</span>
+                <svg class="repo-account-picker__caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="repo-account-menu" id="repoAccountMenu" hidden>
+                <!-- dynamically rendered -->
+              </div>
+            </div>
+
+            <div class="repo-search">
+              <svg class="repo-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="search" placeholder="Search..." id="repoSearchInput">
+            </div>
+          </div>
+
+          <!-- Repo list or install notice -->
+          <div class="repo-list" id="repoList">
+            <!-- dynamically rendered -->
+          </div>
+
+          <!-- URL import (secondary, below list) -->
+          <div class="repo-url-row">
+            <input type="url" placeholder="Or paste a GitHub URL" id="repoUrlInput">
+            <button type="button" class="repo-url-row__btn" id="repoUrlFetch">Import</button>
+          </div>
+
+        </div>
+
+        <footer class="repo-select-modal__foot">
+          <span class="repo-select-modal__foot-hint">Reads README and dependency files only — never your source code.</span>
+          <button type="button" class="repo-select-modal__skip" id="skipRepoBtn">Skip</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ========== TechStackSelectionModal ========== -->
+    <div class="tech-select-modal" id="techModal" hidden aria-hidden="true">
+      <div class="tech-select-modal__backdrop" id="techModalBackdrop"></div>
+
+      <div class="tech-select-modal__dialog" role="dialog" aria-modal="true">
+        <div class="tech-select-modal__body" id="techModalBody">
+          <section class="tech-browse tech-browse--modal">
+            <div class="tech-browse__toolbar">
+              <div class="tech-browse__search">
+                <svg class="tech-browse__search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" class="tech-browse__search-input" id="techModalSearch" placeholder="Search technologies..." autocomplete="off" spellcheck="false">
+                <button class="tech-browse__search-clear" id="techModalSearchClear" aria-label="Clear search" hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="tech-browse__body">
+              <nav class="tech-browse__cats" id="techModalCats" aria-label="Categories"></nav>
+              <div class="tech-browse__grid-wrap">
+                <div class="tech-browse__grid-head" id="techModalGridHead"></div>
+                <div class="tech-browse__grid" id="techModalGrid"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="tech-select-modal__foot">
+          <span class="tech-select-modal__count" id="techModalCount">0 tech stacks selected</span>
+          <div class="tech-select-modal__actions">
+            <button type="button" class="btn btn--ghost" id="techModalCancel">Cancel</button>
+            <button type="button" class="btn btn--gradient" id="techModalDone">Done</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== Lang Toggle Script ========== -->
+  <script>
+    (function () {
+      document.querySelectorAll('.lang-toggle').forEach(function (toggle) {
+        toggle.addEventListener('click', function (e) {
+          var btn = e.target.closest('.lang-toggle__btn');
+          if (!btn) return;
+          toggle.querySelectorAll('.lang-toggle__btn').forEach(function (b) {
+            var active = b === btn;
+            b.classList.toggle('is-active', active);
+            b.setAttribute('aria-selected', active ? 'true' : 'false');
+          });
+        });
+      });
+    })();
+  </script>
+
+  <!-- ========== Data ========== -->
+  <script src="data/technologies.js"></script>
+
+  <!-- ========== NotionEditor (block editor) ========== -->
+  <script src="notion-editor.js"></script>
+
+  <!-- ========== Render & Interaction ========== -->
+  <script>
+  (function () {
+    const ENGINEER_ROLES = [
+      "Frontend Engineer", "Backend Engineer", "Full Stack Engineer",
+      "Mobile Engineer", "DevOps Engineer", "Site Reliability Engineer (SRE)",
+      "Data Engineer", "ML Engineer", "Software Engineer",
+      "Platform Engineer", "Cloud Engineer", "Security Engineer",
+      "QA Engineer", "Test Engineer", "Embedded Engineer",
+      "Game Engineer", "Infrastructure Engineer", "Solutions Engineer",
+      "Technical Lead", "Engineering Manager", "Staff Engineer",
+      "Principal Engineer", "Architect", "CTO",
+      "Designer", "Product Manager",
+    ];
+
+    const LOGO_BASE = "../frontend/public/tech_stack_logo/";
+    const logoFor = (key) => LOGO_BASE + key + ".png";
+
+    // User's registered tech stacks (mocked). In the real app this comes from the API.
+    const USER_TECH_STACKS = [
+      "typescript", "javascript", "python", "go",
+      "react", "nextjs", "svelte", "tailwind_css",
+      "nodejs", "express", "django",
+      "postgresql", "mongodb", "redis",
+      "docker", "kubernetes", "terraform", "github_actions",
+      "vercel", "supabase", "gcp_firebase",
+      "graphql", "jest", "figma",
+    ];
+
+    const allTechs = window.TECHNOLOGIES.flatMap(c =>
+      c.technologies.map(t => ({ ...t, category: c.name }))
+    );
+
+    const state = {
+      projectType: null,
+      teamSize: null,
+      roles: [],
+      selectedTechKeys: [],
+      logoPreview: null,
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    /* ------------------------------------------------------------------
+       Logo upload
+       ------------------------------------------------------------------ */
+    $('logoInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        state.logoPreview = reader.result;
+        const img = $('logoPreview');
+        img.src = reader.result;
+        img.hidden = false;
+        $('logoPlaceholder').hidden = true;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    /* ------------------------------------------------------------------
+       Dropdown helpers (shared between selects and role popover)
+       ------------------------------------------------------------------ */
+    const dropdowns = [];  // { trigger, popover }
+
+    function registerDropdown(trigger, popover) {
+      dropdowns.push({ trigger, popover });
+      trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const willOpen = popover.hidden;
+        // Close all other dropdowns
+        dropdowns.forEach(d => {
+          if (d.popover !== popover) {
+            d.popover.hidden = true;
+            d.trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+        popover.hidden = !willOpen;
+        trigger.setAttribute('aria-expanded', String(willOpen));
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      dropdowns.forEach(({ trigger, popover }) => {
+        if (!popover.contains(e.target) && !trigger.contains(e.target)) {
+          popover.hidden = true;
+          trigger.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    /* ------------------------------------------------------------------
+       Project Type dropdown (single-select, flat hover)
+       ------------------------------------------------------------------ */
+    const projectTypeTrigger = $('projectTypeTrigger');
+    const projectTypePopover = $('projectTypePopover');
+    const projectTypeLabel = $('projectTypeLabel');
+    registerDropdown(projectTypeTrigger, projectTypePopover);
+
+    projectTypePopover.addEventListener('click', (e) => {
+      const opt = e.target.closest('.select-option');
+      if (!opt) return;
+      state.projectType = opt.dataset.value;
+      projectTypeLabel.textContent = opt.textContent.trim();
+      projectTypeLabel.classList.remove('meta-chip__trigger-label--placeholder');
+      projectTypePopover.querySelectorAll('.select-option').forEach(b => {
+        b.classList.toggle('is-active', b === opt);
+      });
+      projectTypePopover.hidden = true;
+      projectTypeTrigger.setAttribute('aria-expanded', 'false');
+    });
+
+    /* ------------------------------------------------------------------
+       Team Size dropdown (single-select, gradient hover)
+       ------------------------------------------------------------------ */
+    const teamSizeTrigger = $('teamSizeTrigger');
+    const teamSizePopover = $('teamSizePopover');
+    const teamSizeLabel = $('teamSizeLabel');
+    registerDropdown(teamSizeTrigger, teamSizePopover);
+
+    teamSizePopover.addEventListener('click', (e) => {
+      const opt = e.target.closest('.select-option');
+      if (!opt) return;
+      state.teamSize = opt.dataset.value;
+      teamSizeLabel.textContent = opt.textContent.trim();
+      teamSizeLabel.classList.remove('meta-chip__trigger-label--placeholder');
+      teamSizePopover.querySelectorAll('.select-option').forEach(b => {
+        b.classList.toggle('is-active', b === opt);
+      });
+      teamSizePopover.hidden = true;
+      teamSizeTrigger.setAttribute('aria-expanded', 'false');
+    });
+
+    /* ------------------------------------------------------------------
+       Role popover (multi-select)
+       ------------------------------------------------------------------ */
+    const roleList = $('roleList');
+    const rolePopover = $('rolePopover');
+    const roleTrigger = $('roleTrigger');
+    const roleTriggerLabel = $('roleTriggerLabel');
+    registerDropdown(roleTrigger, rolePopover);
+
+    function renderRoleList() {
+      roleList.innerHTML = ENGINEER_ROLES.map(role => {
+        const checked = state.roles.includes(role);
+        return `
+          <label class="role-option ${checked ? 'is-checked' : ''}" data-role="${role}">
+            <span class="role-option__check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            </span>
+            <span class="role-option__name">${role}</span>
+          </label>
+        `;
+      }).join('');
+    }
+
+    function updateRoleLabel() {
+      if (state.roles.length === 0) {
+        roleTriggerLabel.textContent = 'Select roles';
+        roleTriggerLabel.classList.add('meta-chip__trigger-label--placeholder');
+      } else {
+        roleTriggerLabel.textContent = state.roles.join(', ');
+        roleTriggerLabel.classList.remove('meta-chip__trigger-label--placeholder');
+      }
+    }
+
+    roleList.addEventListener('click', (e) => {
+      const opt = e.target.closest('.role-option');
+      if (!opt) return;
+      e.preventDefault();
+      e.stopPropagation();  // renderRoleList()でDOM差替するので、bubbleで外側クリック判定に入らせない
+      const role = opt.dataset.role;
+      if (state.roles.includes(role)) {
+        state.roles = state.roles.filter(r => r !== role);
+      } else {
+        state.roles.push(role);
+      }
+      renderRoleList();
+      updateRoleLabel();
+    });
+
+    renderRoleList();
+    updateRoleLabel();
+
+    /* ------------------------------------------------------------------
+       Tech stack preview (right panel, read-only)
+       ------------------------------------------------------------------ */
+    const techPreview = $('techPreview');
+    const techEditBtn = $('techEditBtn');
+
+    function renderTechPreview() {
+      if (state.selectedTechKeys.length === 0) {
+        techPreview.innerHTML = `
+          <div class="product-tech-panel__empty">
+            <p>No tech stacks selected</p>
+          </div>
+        `;
+        return;
+      }
+
+      const grouped = window.TECHNOLOGIES
+        .map(cat => ({
+          name: cat.name,
+          items: cat.technologies.filter(t => state.selectedTechKeys.includes(t.key)),
+        }))
+        .filter(g => g.items.length > 0);
+
+      techPreview.innerHTML = grouped.map(g => `
+        <section class="product-tech-panel__group">
+          <h4 class="product-tech-panel__group-name">${g.name}</h4>
+          <div class="product-tech-panel__grid">
+            ${g.items.map(t => `
+              <div class="product-tech-panel__tech">
+                <div class="product-tech-panel__tech-logo">
+                  <img src="${logoFor(t.key)}" alt="${t.name}" onerror="this.style.visibility='hidden'">
+                </div>
+                <span class="product-tech-panel__tech-name">${t.name}</span>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      `).join('');
+    }
+
+    /* ------------------------------------------------------------------
+       Tech selection modal (tech-browse style, All mode only)
+       ------------------------------------------------------------------ */
+    const modal = $('techModal');
+    const modalCount = $('techModalCount');
+    const modalCats = $('techModalCats');
+    const modalGrid = $('techModalGrid');
+    const modalGridHead = $('techModalGridHead');
+    const modalSearch = $('techModalSearch');
+    const modalSearchClear = $('techModalSearchClear');
+
+    // All technology categories (no user-filter — all stacks selectable)
+    const ALL_CATEGORIES = window.TECHNOLOGIES;
+    const MODAL_ALL_TECHS = ALL_CATEGORIES.flatMap(c => c.technologies);
+
+    const modalState = {
+      activeCategory: ALL_CATEGORIES[0] ? ALL_CATEGORIES[0].name : null,
+      search: '',
+    };
+
+    function openTechModal() {
+      // Reset view state each time
+      modalState.search = '';
+      modalSearch.value = '';
+      modalSearchClear.hidden = true;
+      modalState.activeCategory = ALL_CATEGORIES[0] ? ALL_CATEGORIES[0].name : null;
+      renderModalAll();
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeTechModal() {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    function updateModalCount() {
+      const n = state.selectedTechKeys.length;
+      modalCount.textContent = `${n} tech stack${n === 1 ? '' : 's'} selected`;
+    }
+
+    function modalIsSelected(key) {
+      return state.selectedTechKeys.includes(key);
+    }
+
+    function modalCountSelectedInCategory(cat) {
+      return cat.technologies.filter(t => modalIsSelected(t.key)).length;
+    }
+
+    function modalGetSearchResults() {
+      if (!modalState.search) return null;
+      const q = modalState.search.toLowerCase();
+      return MODAL_ALL_TECHS.filter(t =>
+        t.name.toLowerCase().includes(q) || t.key.toLowerCase().includes(q)
+      );
+    }
+
+    function modalGetVisibleTechs() {
+      if (modalState.search) return modalGetSearchResults();
+      const cat = ALL_CATEGORIES.find(c => c.name === modalState.activeCategory) || ALL_CATEGORIES[0];
+      return cat ? cat.technologies : [];
+    }
+
+    function renderModalCategories() {
+      if (ALL_CATEGORIES.length === 0) {
+        modalCats.innerHTML = '';
+        return;
+      }
+      modalCats.innerHTML = ALL_CATEGORIES.map(cat => {
+        const count = modalCountSelectedInCategory(cat);
+        const active = !modalState.search && cat.name === modalState.activeCategory;
+        return `
+          <button class="tech-browse__cat ${active ? 'is-active' : ''}" data-cat="${cat.name}" type="button">
+            <span class="tech-browse__cat-dot"></span>
+            <span class="tech-browse__cat-name">${cat.name}</span>
+            <span class="tech-browse__cat-count">
+              ${count > 0 ? `<strong>${count}</strong>` : ''}<span class="tech-browse__cat-count-total">${count > 0 ? '/' : ''}${cat.technologies.length}</span>
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderModalGridHead() {
+      let label, sub;
+      if (modalState.search) {
+        const n = (modalGetSearchResults() || []).length;
+        label = 'Search results';
+        sub = `${n} ${n === 1 ? 'match' : 'matches'} for "${modalState.search}"`;
+      } else {
+        const cat = ALL_CATEGORIES.find(c => c.name === modalState.activeCategory);
+        label = cat ? cat.name : 'All';
+        sub = cat ? `${cat.technologies.length} technologies` : '';
+      }
+      modalGridHead.innerHTML = `
+        <div class="tech-browse__grid-head-inline">
+          <span class="tech-browse__grid-title">${label}</span>
+          <span class="tech-browse__grid-sub">${sub}</span>
+        </div>
+      `;
+    }
+
+    function renderModalGrid() {
+      const techs = modalGetVisibleTechs();
+
+      if (!techs || techs.length === 0) {
+        const empty = modalState.search
+          ? { title: 'No technologies found', text: `Nothing matched "${modalState.search}".` }
+          : { title: 'Empty category', text: 'This category has no registered technologies.' };
+        modalGrid.innerHTML = `
+          <div class="tech-browse__empty">
+            <svg class="tech-browse__empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <div class="tech-browse__empty-title">${empty.title}</div>
+            <div class="tech-browse__empty-text">${empty.text}</div>
+          </div>`;
+        return;
+      }
+
+      modalGrid.innerHTML = techs.map(tech => {
+        const selected = modalIsSelected(tech.key);
+        return `
+          <button class="tech-card2 ${selected ? 'is-selected' : ''}" data-key="${tech.key}" type="button">
+            <span class="tech-card2__logo">
+              <img src="${logoFor(tech.key)}" alt="${tech.name}" onerror="this.style.visibility='hidden'">
+            </span>
+            <span class="tech-card2__info">
+              <span class="tech-card2__name">${tech.name}</span>
+            </span>
+            <span class="tech-card2__check" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderModalAll() {
+      renderModalCategories();
+      renderModalGridHead();
+      renderModalGrid();
+      updateModalCount();
+    }
+
+    // Category click
+    modalCats.addEventListener('click', (e) => {
+      const btn = e.target.closest('.tech-browse__cat');
+      if (!btn) return;
+      modalState.activeCategory = btn.dataset.cat;
+      modalState.search = '';
+      modalSearch.value = '';
+      modalSearchClear.hidden = true;
+      renderModalAll();
+    });
+
+    // Tech card click (toggle selection)
+    modalGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.tech-card2');
+      if (!card) return;
+      const key = card.dataset.key;
+      if (modalIsSelected(key)) {
+        state.selectedTechKeys = state.selectedTechKeys.filter(k => k !== key);
+      } else {
+        state.selectedTechKeys.push(key);
+      }
+      card.classList.toggle('is-selected');
+      renderModalCategories();
+      updateModalCount();
+    });
+
+    // Search
+    modalSearch.addEventListener('input', (e) => {
+      modalState.search = e.target.value.trim();
+      modalSearchClear.hidden = modalState.search.length === 0;
+      renderModalCategories();
+      renderModalGridHead();
+      renderModalGrid();
+    });
+    modalSearchClear.addEventListener('click', () => {
+      modalState.search = '';
+      modalSearch.value = '';
+      modalSearchClear.hidden = true;
+      renderModalAll();
+      modalSearch.focus();
+    });
+
+    techEditBtn.addEventListener('click', openTechModal);
+    $('techModalCancel').addEventListener('click', closeTechModal);
+    $('techModalBackdrop').addEventListener('click', closeTechModal);
+    $('techModalDone').addEventListener('click', () => {
+      renderTechPreview();
+      closeTechModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hidden) closeTechModal();
+    });
+
+    /* ------------------------------------------------------------------
+       Form submit (mock)
+       ------------------------------------------------------------------ */
+    $('productEditForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Mock: in the real app this calls the server action.
+      alert('Product created (mock)');
+    });
+
+    $('cancelBtn').addEventListener('click', () => {
+      history.back();
+    });
+
+    /* ------------------------------------------------------------------
+       Repo Selection Modal (Step 1)
+       ------------------------------------------------------------------ */
+    const REPO_ACCOUNTS = [
+      {
+        key: 'personal',
+        login: 'kmdtomo',
+        label: 'Personal',
+        avatarText: 'K',
+        status: 'installed',
+        repos: [
+          {
+            name: 'my-portfolio',
+            desc: 'Personal portfolio site built with Next.js and Framer Motion',
+            lang: 'TypeScript',
+            langColor: '#3178C6',
+            updated: '2 days ago',
+            private: false,
+            prefill: {
+              title: 'My Portfolio',
+              tagline: 'Next.js と Framer Motion で作ったポートフォリオ',
+              description: 'Next.js 14 App Router + Tailwind CSS + Framer Motion で構築したパーソナルポートフォリオ。ISR でブログ記事を配信、Vercel Analytics でPV計測。画面遷移はすべて Framer Motion の shared-layout で統一。',
+              url: 'https://kmdtomo.dev',
+              githubUrl: 'https://github.com/kmdtomo/my-portfolio',
+              projectType: 'Personal',
+              teamSize: '1 person',
+              roles: ['Frontend Engineer'],
+              techKeys: ['nextjs', 'react', 'typescript', 'tailwind_css', 'vercel'],
+            },
+          },
+          {
+            name: 'quine',
+            desc: 'Engineer-first platform connecting people, products, and companies',
+            lang: 'TypeScript',
+            langColor: '#3178C6',
+            updated: '1 hour ago',
+            private: true,
+            prefill: {
+              title: 'Quine',
+              tagline: '技術スタックで人とプロダクトと企業をつなぐプラットフォーム',
+              description: 'Next.js + Supabase + GitHub App 連携で構築したエンジニア向けSNS。GitHub OAuth でログイン、GitHub App で読み取り専用のリポ解析、軽量AIで技術スタック自動正規化。',
+              url: 'https://quine.dev',
+              githubUrl: 'https://github.com/kmdtomo/quine',
+              projectType: 'Personal',
+              teamSize: '1 person',
+              roles: ['Full Stack Engineer'],
+              techKeys: ['nextjs', 'typescript', 'supabase', 'tailwind_css', 'vercel', 'postgresql'],
+            },
+          },
+          {
+            name: 'side-hack',
+            desc: 'Weekend automation for daily standups',
+            lang: 'Python',
+            langColor: '#3572A5',
+            updated: '5 days ago',
+            private: true,
+            prefill: {
+              title: 'Side Hack',
+              tagline: 'デイリースタンドアップを自動化する週末プロジェクト',
+              description: 'Python + Slack SDK + GPT-4 API で構築。Slack のスレッドを要約し、毎朝 9:00 に投稿する bot。Cloud Functions + Cloud Scheduler で運用。',
+              url: '',
+              githubUrl: 'https://github.com/kmdtomo/side-hack',
+              projectType: 'Personal',
+              teamSize: '1 person',
+              roles: ['Backend Engineer'],
+              techKeys: ['python', 'gcp_firebase', 'openai'],
+            },
+          },
+          {
+            name: 'dotfiles',
+            desc: 'My development environment setup',
+            lang: 'Shell',
+            langColor: '#89E051',
+            updated: '2 weeks ago',
+            private: false,
+            prefill: {
+              title: 'dotfiles',
+              tagline: '開発環境の設定ファイル集',
+              description: 'zsh + starship + neovim + tmux の dotfiles。macOS 初期セットアップスクリプト付き。',
+              url: '',
+              githubUrl: 'https://github.com/kmdtomo/dotfiles',
+              projectType: 'Personal',
+              teamSize: '1 person',
+              roles: ['Software Engineer'],
+              techKeys: [],
+            },
+          },
+        ],
+      },
+      {
+        key: 'acme-corp',
+        login: 'acme-corp',
+        label: 'Organization',
+        avatarText: 'A',
+        status: 'installed',
+        repos: [
+          {
+            name: 'web-dashboard',
+            desc: 'Main product dashboard for internal operations',
+            lang: 'TypeScript',
+            langColor: '#3178C6',
+            updated: '3 hours ago',
+            private: true,
+            prefill: {
+              title: 'Acme Web Dashboard',
+              tagline: '社内オペレーション向けの統合ダッシュボード',
+              description: 'React + TypeScript + GraphQL + PostgreSQL のモノレポ構成。Turborepo でビルド高速化。認証は Auth0、決済は Stripe 連携。',
+              url: 'https://dashboard.acme-corp.com',
+              githubUrl: 'https://github.com/acme-corp/web-dashboard',
+              projectType: 'Work',
+              teamSize: '6-10 people',
+              roles: ['Full Stack Engineer', 'Frontend Engineer'],
+              techKeys: ['react', 'typescript', 'graphql', 'postgresql', 'docker'],
+            },
+          },
+          {
+            name: 'api-gateway',
+            desc: 'Microservices gateway with rate limiting and auth',
+            lang: 'Go',
+            langColor: '#00ADD8',
+            updated: '1 day ago',
+            private: true,
+            prefill: {
+              title: 'API Gateway',
+              tagline: 'Go製のマイクロサービスゲートウェイ',
+              description: 'Go + gRPC + Redis でレート制限と認証を担う API Gateway。Kubernetes 上で動作、ArgoCD で GitOps デプロイ。',
+              url: '',
+              githubUrl: 'https://github.com/acme-corp/api-gateway',
+              projectType: 'Work',
+              teamSize: '2-5 people',
+              roles: ['Backend Engineer', 'DevOps Engineer'],
+              techKeys: ['go', 'redis', 'kubernetes', 'docker', 'github_actions'],
+            },
+          },
+          {
+            name: 'docs-site',
+            desc: 'Public product documentation built with Docusaurus',
+            lang: 'MDX',
+            langColor: '#FCB32C',
+            updated: '6 days ago',
+            private: false,
+            prefill: {
+              title: 'Acme Docs',
+              tagline: 'プロダクトドキュメントサイト',
+              description: 'Docusaurus 3 + Algolia DocSearch で構築したドキュメントサイト。',
+              url: 'https://docs.acme-corp.com',
+              githubUrl: 'https://github.com/acme-corp/docs-site',
+              projectType: 'Work',
+              teamSize: '2-5 people',
+              roles: ['Frontend Engineer'],
+              techKeys: ['react', 'typescript'],
+            },
+          },
+        ],
+      },
+      {
+        key: 'beta-labs',
+        login: 'beta-labs',
+        label: 'Organization',
+        avatarText: 'B',
+        status: 'not-installed-admin',
+        repos: [],
+      },
+      {
+        key: 'closed-co',
+        login: 'closed-co',
+        label: 'Organization',
+        avatarText: 'C',
+        status: 'not-installed-member',
+        admins: ['alice', 'bob'],
+        repos: [],
+      },
+    ];
+
+    let currentAccountKey = 'personal';
+    let repoSearchQuery = '';
+
+    const repoModal = $('repoModal');
+    const repoAccountTrigger = $('repoAccountTrigger');
+    const repoAccountMenu = $('repoAccountMenu');
+    const repoAccountAvatar = $('repoAccountAvatar');
+    const repoAccountLogin = $('repoAccountLogin');
+    const repoList = $('repoList');
+    const repoSearchInput = $('repoSearchInput');
+
+    function renderRepoAccountTrigger() {
+      const acc = REPO_ACCOUNTS.find(a => a.key === currentAccountKey);
+      if (!acc) return;
+      repoAccountAvatar.textContent = acc.avatarText;
+      repoAccountLogin.textContent = acc.login;
+    }
+
+    function renderRepoAccountMenu() {
+      repoAccountMenu.innerHTML = REPO_ACCOUNTS.map(acc => {
+        const isActive = acc.key === currentAccountKey;
+        const statusBadge = acc.status === 'installed'
+          ? ''
+          : `<span class="repo-account-menu__item-status repo-account-menu__item-status--warn">Not installed</span>`;
+        return `
+          <button type="button" class="repo-account-menu__item ${isActive ? 'is-active' : ''}" data-account-key="${acc.key}">
+            <span class="repo-account-menu__item-avatar">${acc.avatarText}</span>
+            <span class="repo-account-menu__item-main">
+              <span class="repo-account-menu__item-name">${acc.login}</span>
+              <span class="repo-account-menu__item-sub">${acc.label}</span>
+            </span>
+            ${statusBadge}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderRepoList() {
+      const acc = REPO_ACCOUNTS.find(a => a.key === currentAccountKey);
+      if (!acc) { repoList.innerHTML = ''; return; }
+
+      // Not installed states
+      if (acc.status === 'not-installed-admin') {
+        repoList.innerHTML = `
+          <div class="repo-list__notice">
+            <h3 class="repo-list__notice-title">Install Quine on ${acc.login}</h3>
+            <p class="repo-list__notice-desc">You're an admin of this org. Install to let Quine read your repositories (read-only).</p>
+            <button type="button" class="repo-list__notice-action" data-install-action="install">Install on ${acc.login}</button>
+          </div>
+        `;
+        return;
+      }
+
+      if (acc.status === 'not-installed-member') {
+        repoList.innerHTML = `
+          <div class="repo-list__notice">
+            <h3 class="repo-list__notice-title">Admin approval required</h3>
+            <p class="repo-list__notice-desc">An admin of ${acc.login} needs to install Quine first.</p>
+            <button type="button" class="repo-list__notice-action repo-list__notice-action--secondary" data-install-action="request">Request from admin</button>
+            <span class="repo-list__notice-meta">admins: ${(acc.admins || []).map(a => '@' + a).join(', ')}</span>
+          </div>
+        `;
+        return;
+      }
+
+      // Installed: filter + render list
+      const q = repoSearchQuery.trim().toLowerCase();
+      const repos = q
+        ? acc.repos.filter(r => r.name.toLowerCase().includes(q) || (r.desc || '').toLowerCase().includes(q))
+        : acc.repos;
+
+      if (repos.length === 0) {
+        repoList.innerHTML = `<div class="repo-list__empty">No repositories match your search.</div>`;
+        return;
+      }
+
+      repoList.innerHTML = repos.map((r) => `
+        <button type="button" class="repo-item" data-repo-index="${acc.repos.indexOf(r)}">
+          <div class="repo-item__body">
+            <span class="repo-item__name">${r.name}</span>
+            ${r.private ? '<span class="repo-item__privacy">Private</span>' : ''}
+            <span class="repo-item__time">${r.updated}</span>
+          </div>
+          <span class="repo-item__btn">Import</span>
+        </button>
+      `).join('');
+    }
+
+    function openRepoModal() {
+      repoModal.hidden = false;
+      repoModal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeRepoModal() {
+      repoModal.hidden = true;
+      repoModal.setAttribute('aria-hidden', 'true');
+      repoAccountMenu.hidden = true;
+      repoAccountTrigger.setAttribute('aria-expanded', 'false');
+      // Kick off AI greeting once the user has decided on a repo (or skipped)
+      if (typeof aiMaybeGreet === 'function') aiMaybeGreet();
+    }
+
+    // Account dropdown toggle
+    repoAccountTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = repoAccountMenu.hidden;
+      if (willOpen) renderRepoAccountMenu();
+      repoAccountMenu.hidden = !willOpen;
+      repoAccountTrigger.setAttribute('aria-expanded', String(willOpen));
+    });
+
+    // Account menu item click → switch account
+    repoAccountMenu.addEventListener('click', (e) => {
+      const btn = e.target.closest('.repo-account-menu__item');
+      if (!btn) return;
+      currentAccountKey = btn.dataset.accountKey;
+      repoSearchInput.value = '';
+      repoSearchQuery = '';
+      repoAccountMenu.hidden = true;
+      repoAccountTrigger.setAttribute('aria-expanded', 'false');
+      renderRepoAccountTrigger();
+      renderRepoList();
+    });
+
+    // Close dropdown on outside click (scoped to modal to avoid conflicting with tech modal)
+    document.addEventListener('click', (e) => {
+      if (!repoAccountMenu.hidden
+          && !repoAccountMenu.contains(e.target)
+          && !repoAccountTrigger.contains(e.target)) {
+        repoAccountMenu.hidden = true;
+        repoAccountTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Repo item click → prefill form and close
+    repoList.addEventListener('click', (e) => {
+      const installBtn = e.target.closest('[data-install-action]');
+      if (installBtn) {
+        const action = installBtn.dataset.installAction;
+        if (action === 'install') {
+          alert('(Mock) Redirecting to GitHub install page:\nhttps://github.com/apps/quine/installations/new');
+        } else if (action === 'request') {
+          alert('(Mock) Install request sent to admin');
+        }
+        return;
+      }
+
+      const item = e.target.closest('.repo-item');
+      if (!item) return;
+      const acc = REPO_ACCOUNTS.find(a => a.key === currentAccountKey);
+      const repo = acc.repos[Number(item.dataset.repoIndex)];
+      if (!repo || !repo.prefill) return;
+      prefillForm(repo.prefill);
+      closeRepoModal();
+    });
+
+    // Search
+    repoSearchInput.addEventListener('input', (e) => {
+      repoSearchQuery = e.target.value;
+      renderRepoList();
+    });
+
+    // URL import → mock prefill using first personal repo
+    $('repoUrlFetch').addEventListener('click', () => {
+      const url = $('repoUrlInput').value.trim();
+      if (!url) { $('repoUrlInput').focus(); return; }
+      const fallback = REPO_ACCOUNTS[0].repos[0].prefill;
+      prefillForm({ ...fallback, githubUrl: url });
+      closeRepoModal();
+    });
+
+    // Skip → just close
+    $('skipRepoBtn').addEventListener('click', closeRepoModal);
+    $('repoModalClose').addEventListener('click', closeRepoModal);
+    $('repoModalBackdrop').addEventListener('click', closeRepoModal);
+
+    // Reopen from hero
+    $('openRepoModalBtn').addEventListener('click', () => {
+      renderRepoAccountTrigger();
+      renderRepoList();
+      openRepoModal();
+    });
+
+    // Fields the AI will propose after greeting (not yet applied to the form).
+    let pendingAiProposal = null;
+
+    // Prefill Title + GitHub URL + Tech Stack immediately (auto-detectable from repo).
+    // The rest is staged for the AI to propose in the chat.
+    function prefillForm(data) {
+      $('productTitle').value = data.title || '';
+      $('githubUrl').value = data.githubUrl || '';
+      if (Array.isArray(data.techKeys)) {
+        state.selectedTechKeys = [...data.techKeys];
+        renderTechPreview();
+      }
+      pendingAiProposal = {
+        tagline: data.tagline || '',
+        description: data.description || '',
+        projectType: data.projectType || '',
+        teamSize: data.teamSize || '',
+        roles: Array.isArray(data.roles) ? data.roles : [],
+      };
+    }
+
+    // Initial render
+    renderRepoAccountTrigger();
+    renderRepoList();
+
+    /* ------------------------------------------------------------------
+       AI Chat (mock)
+       ------------------------------------------------------------------ */
+    const aiChatFab = $('aiChatFab');
+    const aiChatPanel = $('aiChatPanel');
+    const aiChatClose = $('aiChatClose');
+    const aiChatMessages = $('aiChatMessages');
+    const aiChatForm = $('aiChatForm');
+    const aiChatInput = $('aiChatInput');
+
+    let aiChatInitialized = false;
+    let proposalShown = false;
+    let genericReplyIndex = 0;
+
+    const GENERIC_AI_REPLIES = [
+      '承知しました。左のフォームを直接編集してもOKです。もう少し具体的に教えてもらえますか？',
+      'ありがとう。反映しておきました。他に追加したい情報はありますか？',
+      'わかりました。必要に応じてフォームに反映します。',
+    ];
+
+    function aiAddMessage(role, text) {
+      const el = document.createElement('div');
+      el.className = 'ai-chat__msg ai-chat__msg--' + role;
+      el.textContent = text;
+      aiChatMessages.appendChild(el);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    }
+
+    function aiAddTyping() {
+      aiChatPanel.classList.add('is-thinking');
+      const el = document.createElement('div');
+      el.className = 'ai-chat__typing';
+      el.id = 'aiChatTyping';
+      el.innerHTML = '<span></span><span></span><span></span>';
+      aiChatMessages.appendChild(el);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+    }
+
+    function aiRemoveTyping() {
+      aiChatPanel.classList.remove('is-thinking');
+      const t = $('aiChatTyping');
+      if (t) t.remove();
+    }
+
+    function aiGreeting() {
+      const title = $('productTitle').value.trim();
+      if (title) {
+        return `${title} のリポジトリを読み込みました。\n技術スタックも自動で検出済みです。\n\n残りの項目について、下書きを考えています…`;
+      }
+      return 'こんにちは、Quine AI です。\nプロダクト情報を一緒に作りましょう。\n\nまず、このプロダクトは何をするものですか?';
+    }
+
+    function aiEscape(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+    }
+
+    function aiTruncate(s, n) {
+      s = String(s);
+      return s.length > n ? s.slice(0, n) + '…' : s;
+    }
+
+    function aiProposalField(label, value) {
+      return `
+        <div class="ai-chat__proposal-field">
+          <span class="ai-chat__proposal-label">${label}</span>
+          <span class="ai-chat__proposal-value">${aiEscape(value)}</span>
+        </div>
+      `;
+    }
+
+    function applyProposalToForm(data) {
+      if (data.tagline) $('productTagline').value = data.tagline;
+      if (data.description && window.NotionEditor) {
+        window.NotionEditor.setContentFromText(data.description);
+      }
+      if (data.projectType) {
+        state.projectType = data.projectType;
+        projectTypeLabel.textContent = data.projectType;
+        projectTypeLabel.classList.remove('meta-chip__trigger-label--placeholder');
+      }
+      if (data.teamSize) {
+        state.teamSize = data.teamSize;
+        const sizeLabel = {
+          '1 person': '1 person (Solo)',
+          '2-5 people': '2-5 people (Small team)',
+          '6-10 people': '6-10 people (Medium team)',
+          '11-30 people': '11-30 people (Large team)',
+          '31+ people': '31+ people (Enterprise)',
+        }[data.teamSize] || data.teamSize;
+        teamSizeLabel.textContent = sizeLabel;
+        teamSizeLabel.classList.remove('meta-chip__trigger-label--placeholder');
+      }
+      if (data.roles && data.roles.length) {
+        state.roles = [...data.roles];
+        renderRoleList();
+        updateRoleLabel();
+      }
+    }
+
+    function clearAllPending() {
+      document.querySelectorAll('.ai-pending-host.is-pending, .meta-chip__trigger.is-pending')
+        .forEach(el => el.classList.remove('is-pending'));
+    }
+
+    function discardProposal() {
+      // Clear text fields proposed by AI
+      $('productTagline').value = '';
+      if (window.NotionEditor) window.NotionEditor.clear();
+
+      // Reset Project Type
+      state.projectType = null;
+      projectTypeLabel.textContent = 'Select';
+      projectTypeLabel.classList.add('meta-chip__trigger-label--placeholder');
+      projectTypePopover.querySelectorAll('.select-option').forEach(b => b.classList.remove('is-active'));
+
+      // Reset Team Size
+      state.teamSize = null;
+      teamSizeLabel.textContent = 'Select';
+      teamSizeLabel.classList.add('meta-chip__trigger-label--placeholder');
+      teamSizePopover.querySelectorAll('.select-option').forEach(b => b.classList.remove('is-active'));
+
+      // Reset Roles
+      state.roles = [];
+      renderRoleList();
+      updateRoleLabel();
+
+      // Remove pending gradient rings
+      clearAllPending();
+    }
+
+    function markPendingFields(data) {
+      if (data.tagline)     $('taglineHost').classList.add('is-pending');
+      if (data.description) $('descriptionHost').classList.add('is-pending');
+      if (data.projectType) projectTypeTrigger.classList.add('is-pending');
+      if (data.teamSize)    teamSizeTrigger.classList.add('is-pending');
+      if (data.roles && data.roles.length) roleTrigger.classList.add('is-pending');
+    }
+
+    function aiPostProposal(data) {
+      // Apply values to the form first so users see them updated.
+      applyProposalToForm(data);
+      // Mark proposed fields with the animated AI ring until user approves.
+      markPendingFields(data);
+
+      const parts = [];
+      if (data.tagline)     parts.push(aiProposalField('Catchphrase', data.tagline));
+      if (data.description) parts.push(aiProposalField('Description', data.description));
+      if (data.projectType) parts.push(aiProposalField('Project Type', data.projectType));
+      if (data.teamSize)    parts.push(aiProposalField('Team Size', data.teamSize));
+      if (data.roles && data.roles.length) parts.push(aiProposalField('Role', data.roles.join(', ')));
+
+      const msg = document.createElement('div');
+      msg.className = 'ai-chat__msg ai-chat__msg--ai ai-chat__proposal';
+      msg.innerHTML =
+        '<p class="ai-chat__proposal-intro">README と依存関係ファイルから、以下の内容で下書きを作成しました。左のフォームに反映しています。</p>' +
+        '<div class="ai-chat__proposal-fields">' + parts.join('') + '</div>';
+      aiChatMessages.appendChild(msg);
+      aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+      showActionBar();
+    }
+
+    const aiChatActions = $('aiChatActions');
+
+    function showActionBar() {
+      aiChatActions.hidden = false;
+    }
+
+    function hideActionBar() {
+      aiChatActions.hidden = true;
+    }
+
+    function aiOpen() {
+      aiChatFab.classList.add('is-hidden');
+      aiChatPanel.classList.remove('is-minimized');
+      setTimeout(() => aiChatInput.focus(), 200);
+    }
+
+    function aiClose() {
+      aiChatPanel.classList.add('is-minimized');
+      aiChatFab.classList.remove('is-hidden');
+    }
+
+    function aiMaybeGreet() {
+      if (aiChatInitialized) return;
+      aiAddMessage('ai', aiGreeting());
+      aiChatInitialized = true;
+
+      // If a repo was selected, automatically propose the remaining fields.
+      if (pendingAiProposal && !proposalShown) {
+        proposalShown = true;
+        const proposal = pendingAiProposal;
+        pendingAiProposal = null;
+        aiAddTyping();
+        setTimeout(() => {
+          aiRemoveTyping();
+          aiPostProposal(proposal);
+        }, 1800);
+      }
+    }
+
+    aiChatFab.addEventListener('click', aiOpen);
+    aiChatClose.addEventListener('click', aiClose);
+
+    const aiChatExpand = $('aiChatExpand');
+    aiChatExpand.addEventListener('click', () => {
+      const expanded = aiChatPanel.classList.toggle('is-expanded');
+      aiChatExpand.setAttribute('aria-label', expanded ? 'Collapse' : 'Expand');
+    });
+
+    // Auto-resize textarea
+    aiChatInput.addEventListener('input', () => {
+      aiChatInput.style.height = 'auto';
+      aiChatInput.style.height = Math.min(aiChatInput.scrollHeight, 120) + 'px';
+    });
+
+    // Cmd/Ctrl + Enter to send. Plain Enter inserts a newline.
+    // `isComposing` guard prevents submission while IME is converting (e.g. Japanese).
+    aiChatInput.addEventListener('keydown', (e) => {
+      if (e.isComposing || e.keyCode === 229) return;
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        aiChatForm.requestSubmit();
+      }
+    });
+
+    aiChatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = aiChatInput.value.trim();
+      if (!text) return;
+      aiAddMessage('user', text);
+      aiChatInput.value = '';
+      aiChatInput.style.height = 'auto';
+      aiAddTyping();
+      setTimeout(() => {
+        aiRemoveTyping();
+        const reply = GENERIC_AI_REPLIES[genericReplyIndex % GENERIC_AI_REPLIES.length];
+        genericReplyIndex++;
+        aiAddMessage('ai', reply);
+      }, 900);
+    });
+
+    // Proposal accept / revise (action bar above input)
+    function handleProposalAction(action) {
+      hideActionBar();
+      if (action === 'accept') {
+        clearAllPending();
+      } else {
+        discardProposal();
+        aiAddMessage('ai', '了解、提案をクリアしました。\nどんな内容にしたいか、具体的に教えてください。');
+      }
+    }
+
+    aiChatActions.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-proposal-action]');
+      if (!btn) return;
+      handleProposalAction(btn.dataset.proposalAction);
+    });
+
+    // Keyboard shortcuts while action bar visible: Enter = Approve, Esc = Discard
+    document.addEventListener('keydown', (e) => {
+      if (aiChatActions.hidden) return;
+      // Ignore while user is typing in the textarea
+      if (e.target === aiChatInput && aiChatInput.value.trim() !== '') return;
+      // Ignore during IME composition (Japanese/CJK input)
+      if (e.isComposing || e.keyCode === 229) return;
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleProposalAction('accept');
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleProposalAction('discard');
+      }
+    });
+
+    /* ------------------------------------------------------------------
+       Init
+       ------------------------------------------------------------------ */
+    renderTechPreview();
+  })();
+  </script>
+
+  <script src="header.js"></script>
+</body>
+</html>

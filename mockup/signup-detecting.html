@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reading your repositories - Quine</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="components.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-bg" aria-hidden="true"></div>
+
+  <div class="auth-shell">
+
+    <!-- ========== AuthMain ========== -->
+    <main class="auth-main">
+
+      <!-- ========== DetectingCard ========== -->
+      <section class="auth-card">
+        <div class="auth-card__brand">
+          <img src="assets/quine_logo.png" alt="Quine">
+        </div>
+
+        <h1 class="auth-card__title">Reading your repositories</h1>
+        <p class="auth-card__subtitle">This usually takes a few seconds…</p>
+
+        <!-- ========== ProgressList ========== -->
+        <ul class="auth-detect__list">
+          <li class="auth-detect__row auth-detect__row--done">
+            <span class="auth-detect__row-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span class="auth-detect__row-label">Fetching repositories</span>
+            <span class="auth-detect__row-meta">20</span>
+          </li>
+          <li class="auth-detect__row auth-detect__row--done">
+            <span class="auth-detect__row-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <span class="auth-detect__row-label">Analyzing dependencies</span>
+            <span class="auth-detect__row-meta">62</span>
+          </li>
+          <li class="auth-detect__row auth-detect__row--running">
+            <span class="auth-detect__row-icon"></span>
+            <span class="auth-detect__row-label">Normalizing with AI</span>
+            <span class="auth-detect__row-meta">…</span>
+          </li>
+          <li class="auth-detect__row">
+            <span class="auth-detect__row-icon"></span>
+            <span class="auth-detect__row-label">Preparing your stack</span>
+            <span class="auth-detect__row-meta"></span>
+          </li>
+        </ul>
+
+        <p class="auth-card__note">
+          Source code is never touched.
+        </p>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    // モック演出: 数秒後に tech-stack-edit.html?from=signup へ自動遷移
+    // 実装時は API レスポンスを待って遷移する
+    window.addEventListener('DOMContentLoaded', () => {
+      const rows = document.querySelectorAll('.auth-detect__row');
+      // 3番目を done に、4番目を running に → 全 done にしたあと遷移
+      setTimeout(() => {
+        rows[2].classList.remove('auth-detect__row--running');
+        rows[2].classList.add('auth-detect__row--done');
+        rows[2].querySelector('.auth-detect__row-icon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        rows[2].querySelector('.auth-detect__row-meta').textContent = '14 techs';
+        rows[3].classList.add('auth-detect__row--running');
+      }, 1800);
+      setTimeout(() => {
+        rows[3].classList.remove('auth-detect__row--running');
+        rows[3].classList.add('auth-detect__row--done');
+        rows[3].querySelector('.auth-detect__row-icon').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        rows[3].querySelector('.auth-detect__row-meta').textContent = 'Done';
+      }, 3200);
+      setTimeout(() => {
+        window.location.href = 'tech-stack-edit.html?from=signup';
+      }, 4000);
+    });
+  </script>
+
+</body>
+</html>
