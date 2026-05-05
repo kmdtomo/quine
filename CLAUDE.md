@@ -75,9 +75,10 @@ import alias: `@/*` = `apps/frontend/*`、`@convex/*` = `convex/*`。
 | ファイル | 内容 |
 |---|---|
 | `.docs/05_directory-structure.md` | 配置ルール / 依存方向 / View・Content パターン |
-| `.docs/06_convex.md` | Convex スキーマ / 認証 / 権限分岐 |
+| `.docs/06_convex.md` | Convex スキーマ / 認証 / 権限分岐 / 接続セットアップ |
 | `.docs/07_coding-guidelines.md` | 型安全 / 命名 / import 順 / Server-Client |
 | `.docs/08_mockup.md` | mockup の構成と移植方針 |
+| `.docs/09_gotchas.md` | 過去にハマった罠と対処（実装前にざっと眺める） |
 
 プロダクト仕様（`00_manifesto.md` 〜 `04_login.md`）は要件確認が必要な時のみ参照。
 

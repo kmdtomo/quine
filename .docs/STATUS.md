@@ -37,8 +37,10 @@
 - [x] [05_directory-structure.md](05_directory-structure.md) `data/` 追加 + 依存方向更新
 - [x] [06_convex.md](06_convex.md) §3 schema 単一ファイル必須を明記、§3.5 接続セットアップ新設
 - [x] [INDEX.md](INDEX.md) キーワード索引更新
-- [x] [quine-init/SKILL.md](../.claude/skills/quine-init/SKILL.md) Cloud 前提 + Deploy Key + MCP 設定に更新
-- [x] [quine-implement/SKILL.md](../.claude/skills/quine-implement/SKILL.md) schema 分割禁止を明記
+- [x] [09_gotchas.md](09_gotchas.md) 新設（Next 16 / Convex / Convex Auth / shadcn / Routing の罠）
+- [x] [quine-init/SKILL.md](../.claude/skills/quine-init/SKILL.md) Cloud 前提 + Deploy Key + MCP 設定にスリム化
+- [x] [quine-implement/SKILL.md](../.claude/skills/quine-implement/SKILL.md) MCP 利用 + STATUS 更新 step 追加にリライト
+- [x] [migrate-page-from-mockup/SKILL.md](../.claude/skills/migrate-page-from-mockup/SKILL.md) what 中心にスリム化、DB 連携必須を明文化
 
 ---
 

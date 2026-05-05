@@ -21,6 +21,8 @@ $ARGUMENTS が空、またはページ名が不明確な場合は、対象ペー
 実装に入る前に必ず:
 
 - [`.docs/INDEX.md`](../../../.docs/INDEX.md) — タスク種別から関連 docs を絞る
+- [`.docs/STATUS.md`](../../../.docs/STATUS.md) — **セッション開始時に最初に読む**（進捗・既知課題）
+- [`.docs/09_gotchas.md`](../../../.docs/09_gotchas.md) — 過去の罠（実装前にざっと眺める）
 - [`.docs/08_mockup.md`](../../../.docs/08_mockup.md) — mockup の構造と移植方針
 - [`.docs/05_directory-structure.md`](../../../.docs/05_directory-structure.md) — 配置、依存方向、View/Content
 - [`.docs/06_convex.md`](../../../.docs/06_convex.md) — schema、query/mutation、権限分岐
@@ -90,12 +92,21 @@ pnpm typecheck   # エラー 0 になるまで
 pnpm dev         # ブラウザで mockup と並べて見比べる
 ```
 
+MCP が利用可能なら追加で:
+- `mcp__convex__functionSpec` で追加した query / mutation が公開されてるか確認
+- `mcp__convex__runOneoffQuery` で query を実機で叩く
+- `mcp__convex__data` で mutation の書き込み結果を確認
+
 ブラウザ確認項目:
 - レイアウト / 色 / 余白 / ホバー状態が mockup と一致
 - mutation 実行で dashboard.convex.dev のデータが実際に変わる
 - 公開 / 認証必須 / 所有者限定の出し分けが効く
 
-### 8. レポート
+### 8. STATUS.md を更新
+- 完了タスクは `[ ]` → `[x]`
+- 新しい罠を踏んだら `.docs/09_gotchas.md` に追記
+
+### 9. レポート
 - 追加・変更したファイル
 - 追加した schema / query / mutation
 - shadcn で追加した primitive
@@ -112,3 +123,4 @@ pnpm dev         # ブラウザで mockup と並べて見比べる
 - 公開ページの query で auth 必須にする
 - 型チェック未実施 / ブラウザ確認未実施で完了報告する
 - 「データ繋ぎは別タスク」として分離する（このスキルの範囲）
+- STATUS.md 未更新で完了報告する
