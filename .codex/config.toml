@@ -1,0 +1,10 @@
+[mcp_servers.convex]
+args = [
+    "-y",
+    "convex@latest",
+    "mcp",
+    "start",
+    "--project-dir",
+    "/Users/komodatomo/Desktop/Lazarus",
+]
+command = "npx"

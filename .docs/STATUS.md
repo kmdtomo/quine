@@ -3,7 +3,7 @@
 > セッションを跨いでの進捗追跡。**新しいセッション開始時はこのファイルを最初に読む**。  
 > 区切りごとに更新。形式: ✅ 完了 / 🚧 進行中 / 📋 次やる / 🔮 未着手（将来）
 
-最終更新: 2026-05-01
+最終更新: 2026-05-05
 
 ---
 
@@ -63,8 +63,14 @@
 
 - [x] `/signin` ページ実装（GitHub ログインボタン、`@/features/auth/components/SigninContent`）
 - [x] Tailwind theme を mockup から `app/globals.css` へ移植（dark palette、accent gradient、radius、surface variants）
+- [x] mockup `lp.html` を `app/(public)/page.tsx` に移植（`migrate-page-from-mockup` skill）
+- [x] mockup `signup-github-app.html` を `/signup/github-app` に移植（`features/auth/auth.module.css` に auth-* 系 CSS 移植、stub: `/signup/{detecting,tech-stack,profile}`、callback receiver `/signup/github-app/callback`）
+- [x] **GitHub App 登録**（`quine-app`、callback: `http://localhost:3000/signup/github-app/callback`、Permissions: Contents Read-only + Metadata Read-only、Webhook OFF）→ Convex env に `GITHUB_APP_ID=3701030` / `GITHUB_APP_CLIENT_ID=Iv23lidP6p9FmGzLnm5x` / `GITHUB_APP_CLIENT_SECRET` / `GITHUB_APP_PRIVATE_KEY`（**base64 エンコード済み**、デコードは Action 側で `Buffer.from(..., "base64").toString("utf8")`）、frontend `.env.local` に `NEXT_PUBLIC_GITHUB_APP_SLUG=quine-app` 投入済み
 - [ ] `afterUserCreatedOrUpdated` callback で GitHub プロフィール → users カラム反映（githubId, username, name, image）
-- [ ] mockup `lp.html` を `app/(public)/page.tsx` に移植（`migrate-page-from-mockup` skill）
+- [ ] users.signupCompletedAt 追加 + middleware で未完了は `/signup/github-app` へ強制
+- [ ] mockup `signup-detecting.html` 移植（Convex action: `analyzeRepos(installationId)` で DB 書き込まず結果 return）
+- [ ] mockup `tech-stack-edit.html` 移植（signup 動線では `/signup/tech-stack`、通常編集は別ルート想定）
+- [ ] mockup `signup-profile.html` 移植
 
 ---
 
