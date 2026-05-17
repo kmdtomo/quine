@@ -28,6 +28,7 @@ $ARGUMENTS が空、または対象・スコープが不明確な場合は、実
 - **mutation の最初で `requireUser(ctx)`**。所有者限定なら `authorId === user._id` チェック
 - **公開 query は auth 必須にしない**（未ログインでも動く）
 - **schema は `convex/schema.ts` 1 ファイル**（分割不可、単一エントリポイント）。**機能（query/mutation/action）はテーブル単位で分割**
+- **技術スタック key は `data/tech-stack.ts` を唯一の正規カタログにする**。GitHub 解析・ロゴ・DB・UI は同じ canonical key を参照し、alias / 依存名は key へ変換する
 - **mockup は read-only**（直接編集しない）
 - **データを繋がず TODO で残さない**（モックデータ禁止）
 
@@ -46,10 +47,13 @@ $ARGUMENTS が空、または対象・スコープが不明確な場合は、実
 - 変更・追加ファイル一覧と各ファイルの責務
 - View / Content / Section の境界
 - Convex schema 変更の要否（破壊的変更ならユーザー確認）
+- 技術スタックを扱う場合は、`data/tech-stack.ts` の canonical key 追加 / 変更 / alias 追加の要否
 - 設計を提示して **承認を得てから実装**
 
 ### 4. 実装する
 - docs のルールと既存コードの命名・パターンに揃える
+- 技術スタック検出辞書・ロゴ辞書・DB 保存値を追加する場合は、値を `TechnologyKey` 型で縛り、存在しない key を typecheck で落とす
+- 技術スタックロゴはSVGのみを基本とする。simple-icons にあるものは `simple-icons` package から直接 import し、`public/` に複製しない。SVGで正しく取得できないものは無理に表示せず、PNG/WebPは新規の技術スタックアイコンとして使わない
 - schema 追加 / 変更時は `pnpm dlx convex dev --once --until-success` で push + codegen 更新
 
 ### 5. 確認
@@ -84,6 +88,7 @@ MCP があるなら追加で:
 - 公開 query で auth 必須
 - 型チェック未実施で完了報告
 - schema をテーブルごとに分割
+- 技術スタック key を feature / Convex / logo helper に生 string で散らす
 - モックデータを残す（必ず Convex query 経由）
 - mockup を直接編集
 - STATUS.md 未更新で完了報告

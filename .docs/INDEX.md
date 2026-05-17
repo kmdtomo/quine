@@ -25,6 +25,7 @@
 | Convex の query / mutation / action 追加 | `06_convex.md`, `07_coding-guidelines.md` | — |
 | 認証 / 権限の追加・変更 | `06_convex.md` §4-5, `07_coding-guidelines.md` | `04_login.md` |
 | GitHub App / リポ解析 | `06_convex.md` §7, `05_directory-structure.md` | `03_github.md` |
+| 技術スタック catalog / key / alias 設計 | `05_directory-structure.md` §4, `07_coding-guidelines.md` §2, `06_convex.md` §7 | `03_github.md` |
 | 公開ページの実装（プロフィール / プロダクト詳細） | `05_directory-structure.md`, `06_convex.md` §5, `08_mockup.md` | `01_product.md`, `02_account.md` |
 | mockup から 1 ページ移植 | **`migrate-page-from-mockup` スキルを使う** | — |
 | UI コンポーネント実装 | `05_directory-structure.md`, `07_coding-guidelines.md`, `08_mockup.md` | — |
@@ -63,6 +64,7 @@
 - 命名規則（ファイル / コンポーネント / hook / Convex） → `07_coding-guidelines.md` §2
 - import 順 → `07_coding-guidelines.md` §3
 - Tailwind の書き方 / `cn()` → `07_coding-guidelines.md` §5
+- 技術スタック key / canonical catalog（`data/tech-stack.ts`） → `05_directory-structure.md` §4, `07_coding-guidelines.md` §2
 - フォーム（react-hook-form + Zod） → `07_coding-guidelines.md` §6
 - エラーハンドリング → `07_coding-guidelines.md` §7
 - 共通の禁止事項 → `07_coding-guidelines.md` §10
@@ -70,7 +72,7 @@
 ### mockup（移植元）
 
 - mockup の構成と役割 → `08_mockup.md` §1-2
-- **既に整備済みの実装側リソース（技術カタログ / ロゴ 628 個 / helper）** → `08_mockup.md` §1.1
+- **既に整備済みの実装側リソース（技術カタログ / simple-icons import + 公式SVGロゴ / helper）** → `08_mockup.md` §1.1
 - ページ一覧と公開度 → `08_mockup.md` §3
 - HTML のセクション区切り → `08_mockup.md` §5
 - セクション → コンポーネントのマッピング → `08_mockup.md` §5

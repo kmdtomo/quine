@@ -128,8 +128,9 @@ pnpm dlx convex env set AUTH_GITHUB_SECRET <secret>
 
 ### 8. assets / theme
 - 既存資産を確認（再生成しない）:
-  - `apps/frontend/public/tech_stack_logo/*.png` 628 ファイル
-  - `data/technologies.ts` 580 件
+  - `simple-icons` package で解決する技術ロゴ
+  - `apps/frontend/public/tech_stack_logo/*.svg` 公式 / 手動 SVG
+  - `data/tech-stack.ts` 技術スタック canonical catalog
   - `apps/frontend/lib/technology-logo.ts`
 - mockup の他 assets を `apps/frontend/public/` にコピー
 - mockup の `:root` 変数を `app/globals.css` の `@theme inline` に移植（dark palette、accent gradient、surface variants）

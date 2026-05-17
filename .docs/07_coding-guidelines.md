@@ -26,6 +26,26 @@
 | 型 / interface | PascalCase | `Product`, `ProfileFormValues` |
 | 定数 | SCREAMING_SNAKE_CASE | `MAX_PRODUCTS`, `TECH_DOMAINS` |
 
+### 技術スタック key
+
+`data/tech-stack.ts` の `technology.key` は Quine 全体の canonical ID。DB、URL、UI、GitHub 解析、編集フォームで同じ key を使う。
+
+- 形式は lowercase ASCII の安定 slug
+- 基本は `snake_case`。ただし固有名として定着しているものは詰めてよい（例: `nextjs`, `nodejs`, `vuejs`, `postgresql`）
+- 言語系は URL / DB で扱いやすい slug にする（例: `csharp`, `cpp`, `objective_c`）
+- 表示名（例: `Next.js`）や依存名（例: `next`）に引っ張られない
+- 解析用 alias は canonical key へ寄せる。alias 側も `TechnologyKey` 型で存在チェックする
+- 生の string key を feature / Convex / logo helper に散らさない
+
+例:
+
+```typescript
+{
+  key: "nextjs",
+  name: "Next.js",
+}
+```
+
 ### 特殊な接尾辞
 
 - `*View.tsx` … server component の入口

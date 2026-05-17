@@ -22,6 +22,12 @@ const developerStatus = v.union(
   v.literal("declined"),
 );
 
+const githubAnalysisLogLevel = v.union(
+  v.literal("info"),
+  v.literal("warn"),
+  v.literal("error"),
+);
+
 export default defineSchema({
   ...authTables,
 
@@ -49,7 +55,7 @@ export default defineSchema({
       ),
     ),
     githubInstallationId: v.optional(v.number()),
-    isPublic: v.boolean(),
+    isPublic: v.optional(v.boolean()),
   })
     .index("email", ["email"])
     .index("by_github_id", ["githubId"])
@@ -113,4 +119,15 @@ export default defineSchema({
     .index("by_product_order", ["productId", "order"])
     .index("by_product_technology", ["productId", "technologyKey"])
     .index("by_technology", ["technologyKey"]),
+
+  githubAnalysisLogs: defineTable({
+    runId: v.string(),
+    userId: v.id("users"),
+    createdAt: v.number(),
+    level: githubAnalysisLogLevel,
+    message: v.string(),
+    repository: v.optional(v.string()),
+  })
+    .index("by_user_run", ["userId", "runId"])
+    .index("by_run", ["runId"]),
 });

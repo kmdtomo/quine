@@ -25,10 +25,10 @@ GitHub API（データ取得: 高速・無料）
   └ README.md
   ↓
 軽量AI（正規化 & 文章生成: 高速・低コスト）
-  ├ 検出結果 → technologies.type.ts のキーに正規化
+  ├ 検出結果 → data/tech-stack.ts の canonical key に正規化
   └ README → エンジニア向け説明文を生成
   ↓
-technologies.type.ts のキーとして保存（600+技術、18カテゴリ）
+data/tech-stack.ts の canonical key として保存
 ```
 
 ## 1. OAuth認証フロー
@@ -84,7 +84,7 @@ GitHub API: ユーザーのリポジトリ一覧取得（上位20件、スター
   ├ GET /repos/{owner}/{repo}/contents/go.mod → Go依存関係
   └ 設定ファイルの存在チェック（next.config.*, tailwind.config.*, docker-compose.* 等）
   ↓
-軽量AI: 収集データ → technologies.type.ts のキーに正規化
+軽量AI: 収集データ → data/tech-stack.ts の canonical key に正規化
   ↓
 tech_stacks テーブルに自動INSERT
   ↓
@@ -182,7 +182,7 @@ AIがREADMEと技術スタックから下書きを生成し、ユーザーが肉
 
 ↓ 軽量AI（Haiku級）に以下を渡す:
   - 上記の生データ
-  - technologies.type.ts の全キー一覧
+  - data/tech-stack.ts の全キー一覧
 
 ↓ AIの出力:
   ["typescript", "javascript", "nextjs", "react", "tailwind_css", "docker"]
@@ -201,7 +201,7 @@ AIがREADMEと技術スタックから下書きを生成し、ユーザーが肉
 
 ### 正規化の制約
 
-- `technologies.type.ts` に定義されている600+のキーのみを対象
+- `data/tech-stack.ts` に定義されている canonical key のみを対象
 - 未定義の技術は無視する（AIに明示的に指示）
 - 既存のデータ構造との完全な整合性を保つ
 
@@ -252,7 +252,7 @@ AIがREADMEと技術スタックから下書きを生成し、ユーザーが肉
 
 ```
 ユーザーの技術スタック
-  → technologies.type.ts のキーで保存
+  → data/tech-stack.ts の canonical key で保存
   → ソース（自動検出 / 手動追加）は区別しない
   → ユーザーが最終的に確認・編集したものが正
 ```
@@ -261,7 +261,7 @@ AIがREADMEと技術スタックから下書きを生成し、ユーザーが肉
 
 ```
 プロダクト情報
-  → 技術スタック: technologies.type.ts のキー配列
+  → 技術スタック: data/tech-stack.ts の key 配列
   → 説明文: ユーザーが編集した最終版
   → GitHub URL: 任意（なくても作成可能）
 ```

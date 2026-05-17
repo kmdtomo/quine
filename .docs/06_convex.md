@@ -315,6 +315,18 @@ export function ProductContent({ preloaded }) {
 
 GitHub App でリポ解析、OpenAI で要約など。
 
+### GitHub App 解析と技術 key
+
+GitHub App 解析の出力は必ず `data/tech-stack.ts` の canonical `technology.key` に正規化する。`data/tech-stack.ts` に存在しない key は Quine の技術スタックとして扱わない。
+
+- `data/tech-stack.ts` は技術スタックの正規カタログ。DB / UI / 解析結果 / 編集フォームで同じ key を使う
+- 依存ファイル上の名前（例: `next`, `@tanstack/react-query`, `torch`）は alias として扱い、canonical key（例: `nextjs`, `tanstack_query`, `pytorch`）へ変換する
+- GitHub Languages API の言語名も canonical key へ変換する
+- 検出辞書を追加する場合は、辞書側の値を `TechnologyKey` 型で縛り、存在しない key を書けないようにする
+- 解析辞書・ロゴ辞書・UI 用リストで別々の string key を増やさない。key の所有者は `data/tech-stack.ts` だけ
+
+リリース前なら key の命名変更は許容するが、リリース後は migration が必要になるため安易に変更しない。
+
 ```typescript
 "use node";  // node ランタイム必須
 

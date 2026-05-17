@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 
+import { SignupDetectingView } from "@/features/auth/components/SignupDetectingView";
+
 export const metadata: Metadata = {
   title: "Reading your repositories — Quine",
 };
 
-export default function SignupDetectingPage() {
-  return (
-    <main className="min-h-svh flex items-center justify-center px-6 text-center">
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Reading your repositories
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          このページは次のステップで実装されます。
-        </p>
-      </div>
-    </main>
-  );
+type SearchParams = Promise<{
+  installation_id?: string;
+}>;
+
+export default async function SignupDetectingPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  const installationId =
+    params.installation_id && /^\d+$/.test(params.installation_id)
+      ? Number(params.installation_id)
+      : null;
+
+  return <SignupDetectingView installationId={installationId} />;
 }

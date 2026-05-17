@@ -67,7 +67,8 @@ quine/
 │   ├── _generated/                 # Convex codegen（gitignore しない）
 │   └── <table>.ts                  # 各テーブルの query / mutation / action
 ├── data/                           # frontend / convex 共有の静的データ
-│   └── technologies.ts             # 技術カタログ（580 件 / 18 カテゴリ）
+│   ├── tech-stack.ts               # 技術スタックの正規カタログ + 型 + 検出 alias
+│   └── technologies.ts             # 互換 re-export（新規実装では tech-stack.ts を使う）
 ├── mockup/                         # デザインの真理値（read-only）
 ├── .docs/
 ├── .claude/
@@ -88,7 +89,7 @@ quine/
 
 例:
 - `import { api } from "@convex/_generated/api"`
-- `import { technologies } from "@data/technologies"`
+- `import { techStackCategories } from "@data/tech-stack"`
 
 ## 3. 依存方向
 
@@ -125,6 +126,21 @@ data/                     → 外を import しない（純データのみ）
 | 認証ロジック | `convex/auth.ts` + `apps/frontend/lib/auth.ts` | Convex 側と Next.js 側のヘルパを分離 |
 | フォーム validation | `apps/frontend/features/<feature>/schema.ts` | Zod。Convex の `v.*` とは別物 |
 | 横断 helper | `apps/frontend/lib/` | UI / feature 業務に依存しない |
+
+### 技術スタックカタログ
+
+`data/tech-stack.ts` は Quine 内で扱う技術スタックの **canonical catalog**。`technology.key` は DB / UI / URL / GitHub 解析 / 編集フォームで共通利用する唯一の正規 ID とする。`data/technologies.ts` は既存 import 互換の re-export であり、新規実装では使わない。
+
+- key は lowercase ASCII の安定 slug。表示名や依存パッケージ名をそのまま key にしない
+- key はリリース後に変更しない前提で扱う。リリース前に命名を整える
+- 表示名、説明、カテゴリ、検出 alias は `data/tech-stack.ts` に集約する
+- npm / pip / gem / crate / GitHub Languages などの検出 alias は key に寄せるための別レイヤーとして扱う
+- 検出 alias / ロゴ / DB 保存値など、key を参照するデータは `TechnologyKey` 型で縛り、存在しない key を typecheck で落とす
+- ロゴはSVGのみを基本とする。simple-icons にあるものは `simple-icons` package から直接 import し、`public/` に複製しない
+- AWS / Google Cloud / Azure など公式SVGを取得できるものは、公式アイコンパックから必要な `<key>.svg` だけを `apps/frontend/public/tech_stack_logo/` に置く。元パック丸ごとはコミットしない
+- SVGで正しく取得できないものは無理に表示しない。PNG/WebPは新規の技術スタックアイコンとして使わない
+
+例: `Next.js` は表示名、`next` は npm package 名、`nextjs` が Quine の canonical key。
 
 ## 5. View / Content / Section
 

@@ -18,9 +18,9 @@ mockup と一緒に使える、既に `apps/frontend/` `convex/` 側に揃って
 
 | リソース | 場所 | 内容 |
 |---|---|---|
-| 技術カタログ | `convex/seeds/technologies.ts` | 2955 行。カテゴリ（Language / Framework 等）→ technologies[] に key / name / description。Convex の seed として `techStacks` テーブルに流し込む |
-| 技術スタックロゴ画像 | `apps/frontend/public/tech_stack_logo/*.png` | 628 ファイル。`<key>.png` の命名 |
-| 技術名 → ロゴパス helper | `apps/frontend/lib/technology-logo.ts` | `getTechnologyLogo(techName)` で正規化された path を返す。`convex/seeds/technologies.ts` を参照 |
+| 技術カタログ | `data/tech-stack.ts` | 技術スタックの canonical catalog。カテゴリ → technologies[] に key / name / description / tier / detection alias。`TechnologyKey` 型もここから派生 |
+| 技術スタックロゴ画像 | `apps/frontend/public/tech_stack_logo/*.svg` | simple-icons にない公式 / 手動 SVG のみ。simple-icons は package import で解決し、`public/` に複製しない |
+| 技術名 → ロゴ helper | `apps/frontend/lib/technology-logo.ts` | `getTechnologyLogo(techName)` で simple-icons の SVG data URL、または公式 / 手動 SVG path を返す。PNG/WebP は返さない |
 
 ## 2. 構成
 

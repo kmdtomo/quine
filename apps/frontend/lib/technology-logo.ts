@@ -1,251 +1,160 @@
-import { technologies } from "@data/technologies";
+import {
+  allTechnologies,
+  techStackCategories,
+  type CanonicalTechnology,
+} from "@data/tech-stack";
+import * as simpleIcons from "simple-icons";
 
-/**
- * 文字列を正規化する（大文字小文字、スペース、記号を統一）
- */
-const normalizeString = (str: string): string => {
-  return str
+const normalizeString = (value: string): string =>
+  value
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '') // 文字と数字以外を削除
+    .replace(/[^a-z0-9]/g, "")
     .trim();
+
+const escapeSvgText = (value: string): string =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+const buildSimpleIconSvg = (slug: string): string | null => {
+  const icon = Object.values(simpleIcons).find(
+    (candidate) => candidate.slug === slug,
+  );
+  if (!icon) {
+    return null;
+  }
+
+  return [
+    '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">',
+    `<title>${escapeSvgText(icon.title)}</title>`,
+    `<path fill="#${icon.hex}" d="${icon.path}"/>`,
+    "</svg>",
+  ].join("");
 };
 
-/**
- * 技術名からロゴ画像のパスを取得する関数（改善版）
- * @param techName 技術名またはキー
- * @returns ロゴ画像のパス（見つからない場合はnull）
- */
+const toSvgDataUrl = (svg: string): string =>
+  `data:image/svg+xml,${encodeURIComponent(svg)}`;
+
 export const getTechnologyLogo = (techName: string): string | null => {
-  // 全カテゴリの技術を平坦化
-  const allTechnologies = technologies.flatMap(category => category.technologies);
-  
-  const normalizedInput = normalizeString(techName);
-  
-  // 優先順位付きで検索
-  
-  // 1. 完全一致（key）
-  let technology = allTechnologies.find(tech => 
-    tech.key.toLowerCase() === techName.toLowerCase()
-  );
-  
-  if (technology) {
-    return `/tech_stack_logo/${technology.key}.png`;
+  const technology = getTechnologyInfo(techName);
+  if (!technology) {
+    return null;
   }
-  
-  // 2. 完全一致（name）
-  technology = allTechnologies.find(tech => 
-    tech.name.toLowerCase() === techName.toLowerCase()
-  );
-  
-  if (technology) {
-    return `/tech_stack_logo/${technology.key}.png`;
+
+  if (technology.logo?.source === "simple-icons") {
+    const svg = buildSimpleIconSvg(technology.logo.slug);
+    return svg ? toSvgDataUrl(svg) : null;
   }
-  
-  // 3. 正規化した文字列での完全一致
-  technology = allTechnologies.find(tech => 
-    normalizeString(tech.key) === normalizedInput ||
-    normalizeString(tech.name) === normalizedInput
-  );
-  
-  if (technology) {
-    return `/tech_stack_logo/${technology.key}.png`;
+
+  if (
+    technology.logo?.source === "manual" &&
+    technology.logo.path.endsWith(".svg")
+  ) {
+    return technology.logo.path;
   }
-  
-  // 4. 部分一致（より柔軟）
-  technology = allTechnologies.find(tech => {
-    const normalizedKey = normalizeString(tech.key);
-    const normalizedName = normalizeString(tech.name);
-    
-    return (
-      normalizedKey.includes(normalizedInput) ||
-      normalizedInput.includes(normalizedKey) ||
-      normalizedName.includes(normalizedInput) ||
-      normalizedInput.includes(normalizedName)
-    );
-  });
-  
-  if (technology) {
-    return `/tech_stack_logo/${technology.key}.png`;
+
+  if (
+    technology.logo?.source === "aws-icons" ||
+    technology.logo?.source === "google-cloud-icons" ||
+    technology.logo?.source === "azure-icons"
+  ) {
+    return `/tech_stack_logo/${technology.logoKey ?? technology.key}.svg`;
   }
-  
-  // 5. 特殊ケース処理
-  const specialCases: Record<string, string> = {
-    // よくある略称・別名
-    'js': 'javascript',
-    'ts': 'typescript',
-    'react.js': 'react',
-    'next.js': 'nextjs',
-    'vue.js': 'vuejs',
-    'node.js': 'nodejs',
-    'express.js': 'express',
-    'nest.js': 'nestjs',
-    'svelte.js': 'svelte',
-    'angular.js': 'angular',
-    'postgres': 'postgresql',
-    'mongo': 'mongodb',
-    'elastic': 'elasticsearch',
-    'k8s': 'kubernetes',
-    'tf': 'terraform',
-    'gcp': 'gcp_compute_engine',
-    'aws': 'aws_ec2',
-    'azure': 'azure_app_service',
-    'fb': 'facebook',
-    'gh': 'github',
-    'gl': 'gitlab',
-    'bb': 'bitbucket',
-  };
-  
-  const normalizedInputLower = techName.toLowerCase();
-  if (specialCases[normalizedInputLower]) {
-    const specialKey = specialCases[normalizedInputLower];
-    technology = allTechnologies.find(tech => tech.key === specialKey);
-    if (technology) {
-      return `/tech_stack_logo/${technology.key}.png`;
-    }
-  }
-  
+
   return null;
 };
 
-/**
- * 技術名から技術情報を取得する関数（改善版）
- * @param techName 技術名またはキー
- * @returns 技術情報（見つからない場合はnull）
- */
-export const getTechnologyInfo = (techName: string) => {
-  const allTechnologies = technologies.flatMap(category => category.technologies);
+export const getTechnologyInfo = (
+  techName: string,
+): CanonicalTechnology | null => {
   const normalizedInput = normalizeString(techName);
-  
-  // 同じ検索ロジックを使用
-  
-  // 1. 完全一致（key）
-  let technology = allTechnologies.find(tech => 
-    tech.key.toLowerCase() === techName.toLowerCase()
+  const lowerInput = techName.toLowerCase();
+
+  const exact = allTechnologies.find(
+    (technology) =>
+      technology.key.toLowerCase() === lowerInput ||
+      technology.name.toLowerCase() === lowerInput ||
+      technology.aliases?.some((alias) => alias.toLowerCase() === lowerInput),
   );
-  
-  if (technology) return technology;
-  
-  // 2. 完全一致（name）
-  technology = allTechnologies.find(tech => 
-    tech.name.toLowerCase() === techName.toLowerCase()
-  );
-  
-  if (technology) return technology;
-  
-  // 3. 正規化した文字列での完全一致
-  technology = allTechnologies.find(tech => 
-    normalizeString(tech.key) === normalizedInput ||
-    normalizeString(tech.name) === normalizedInput
-  );
-  
-  if (technology) return technology;
-  
-  // 4. 部分一致
-  technology = allTechnologies.find(tech => {
-    const normalizedKey = normalizeString(tech.key);
-    const normalizedName = normalizeString(tech.name);
-    
-    return (
-      normalizedKey.includes(normalizedInput) ||
-      normalizedInput.includes(normalizedKey) ||
-      normalizedName.includes(normalizedInput) ||
-      normalizedInput.includes(normalizedName)
-    );
+  if (exact) {
+    return exact;
+  }
+
+  const normalized = allTechnologies.find((technology) => {
+    const values = [
+      technology.key,
+      technology.name,
+      ...(technology.aliases ?? []),
+    ];
+    return values.some((value) => normalizeString(value) === normalizedInput);
   });
-  
-  return technology || null;
+  if (normalized) {
+    return normalized;
+  }
+
+  return (
+    allTechnologies.find((technology) => {
+      const values = [
+        technology.key,
+        technology.name,
+        ...(technology.aliases ?? []),
+      ].map(normalizeString);
+
+      return values.some(
+        (value) => value.includes(normalizedInput) || normalizedInput.includes(value),
+      );
+    }) ?? null
+  );
 };
 
-/**
- * 複数の技術名からロゴ情報を取得する関数
- * @param techNames 技術名の配列
- * @returns ロゴ情報の配列
- */
-export const getTechnologyLogos = (techNames: string[]) => {
-  return techNames.map(techName => ({
+export const getTechnologyLogos = (techNames: string[]) =>
+  techNames.map((techName) => ({
     name: techName,
     logoPath: getTechnologyLogo(techName),
-    info: getTechnologyInfo(techName)
+    info: getTechnologyInfo(techName),
   }));
-};
 
-// カテゴリー名の英語変換マッピング
-export const categoryEnglishMap: Record<string, string> = {
-  "プログラミング言語": "Language",
-  "フロントエンド技術": "Frontend", 
-  "バックエンド技術": "Backend",
-  "モバイル開発": "Mobile",
-  "データベース": "Database",
-  "UIライブラリ": "UI",
-  "機械学習": "ML",
-  "データ分析・BI": "Analytics",
-  "デザイン": "Design",
-  "Amazon Web Services (AWS)": "AWS",
-  "Microsoft Azure": "Azure",
-  "Google Cloud Platform (GCP)": "GCP",
-  "その他のクラウドサービス": "Cloud",
-  "DevOpsとCI/CDツール": "DevOps",
-  "テストフレームワーク": "Testing",
-  "セキュリティと認証": "Security",
-  "ブロックチェーンとスマートコントラクト": "Blockchain",
-  "その他のツールとテクノロジー": "Other",
-};
+export const categoryEnglishMap: Record<string, string> = Object.fromEntries(
+  techStackCategories.map((category) => [category.name, category.name]),
+);
 
-/**
- * 技術スタック名からカテゴリーを取得
- */
 export const getTechnologyCategory = (stackName: string): string => {
-  for (const category of technologies) {
-    const found = category.technologies.find(tech => 
-      tech.name.toLowerCase() === stackName.toLowerCase() || 
-      tech.key.toLowerCase() === stackName.toLowerCase()
-    );
-    if (found) {
-      return category.name;
-    }
-  }
-  return "その他のツールとテクノロジー"; // デフォルトカテゴリー
+  const technology = getTechnologyInfo(stackName);
+  return technology?.categoryName ?? "Other";
 };
 
-/**
- * 技術スタック配列をカテゴリー別に集計
- */
-export const aggregateTechStacksByCategory = (techStacks: any[]) => {
+type TechnologyStackLike = {
+  stack_name: string;
+};
+
+export const aggregateTechStacksByCategory = (
+  techStacks: TechnologyStackLike[],
+) => {
   const categoryCount: Record<string, number> = {};
 
-  techStacks.forEach(stack => {
+  techStacks.forEach((stack) => {
     const category = getTechnologyCategory(stack.stack_name);
-    categoryCount[category] = (categoryCount[category] || 0) + 1;
+    categoryCount[category] = (categoryCount[category] ?? 0) + 1;
   });
 
-  // カテゴリー数でソートして上位5つを取得
-  const sortedCategories = Object.entries(categoryCount)
+  const result = Object.entries(categoryCount)
     .sort(([, a], [, b]) => b - a)
-    .slice(0, 5);
+    .slice(0, 5)
+    .map(([categoryName, count]) => ({
+      category: categoryEnglishMap[categoryName] ?? categoryName,
+      count,
+    }));
 
-  // 英語名に変換
-  const result = sortedCategories.map(([categoryName, count]) => ({
-    category: categoryEnglishMap[categoryName] || "Other",
-    count
-  }));
-
-  // Languageカテゴリーを必ず最初に表示
-  const languageIndex = result.findIndex(item => item.category === "Language");
+  const languageIndex = result.findIndex(
+    (item) => item.category === "Languages",
+  );
   if (languageIndex > 0) {
-    // Languageが存在し、最初でない場合は最初に移動
     const languageItem = result.splice(languageIndex, 1)[0];
-    result.unshift(languageItem);
-  } else if (languageIndex === -1 && categoryCount["プログラミング言語"]) {
-    // Languageカテゴリーが結果に含まれていないが存在する場合は追加
-    result.unshift({
-      category: "Language",
-      count: categoryCount["プログラミング言語"]
-    });
-    // 配列が6つになった場合は最後を削除
-    if (result.length > 5) {
-      result.pop();
+    if (languageItem) {
+      result.unshift(languageItem);
     }
   }
 
   return result;
-}; 
+};

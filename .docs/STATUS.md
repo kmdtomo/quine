@@ -3,7 +3,7 @@
 > セッションを跨いでの進捗追跡。**新しいセッション開始時はこのファイルを最初に読む**。  
 > 区切りごとに更新。形式: ✅ 完了 / 🚧 進行中 / 📋 次やる / 🔮 未着手（将来）
 
-最終更新: 2026-05-05
+最終更新: 2026-05-17
 
 ---
 
@@ -24,13 +24,13 @@
 - [x] Convex Cloud dev deployment（`colorful-meerkat-738`）作成
 - [x] root `.env.local`: `CONVEX_DEPLOYMENT` / `CONVEX_URL` / `CONVEX_SITE_URL` / `CONVEX_DEPLOY_KEY`
 - [x] frontend `.env.local`: `NEXT_PUBLIC_CONVEX_URL`
-- [x] `convex/schema.ts`（auth 6 + Quine 6 = 12 テーブル）Cloud に push 済み（28 indexes）
+- [x] `convex/schema.ts`（auth 6 + Quine 7 = 13 テーブル）Cloud に push 済み（`githubAnalysisLogs` 含む）
 - [x] `convex/auth.ts`, `convex/auth.config.ts`
 - [x] `apps/frontend/middleware.ts`（`/signin` redirect, `/(app)` `/settings` 保護）
 - [x] `apps/frontend/app/providers.tsx`（`ConvexAuthNextjsProvider`）
 - [x] `apps/frontend/app/layout.tsx` で provider wrap
 - [x] Convex MCP server を `.mcp.json` に登録（**次回セッションから利用可**）
-- [x] `data/technologies.ts`（580 件 / 18 カテゴリ）frontend / convex 共有
+- [x] `data/tech-stack.ts`（457 件 / 26 カテゴリ）frontend / convex 共有。`data/technologies.ts` は互換 re-export
 
 ### docs / skill
 
@@ -41,6 +41,11 @@
 - [x] [quine-init/SKILL.md](../.claude/skills/quine-init/SKILL.md) Cloud 前提 + Deploy Key + MCP 設定にスリム化
 - [x] [quine-implement/SKILL.md](../.claude/skills/quine-implement/SKILL.md) MCP 利用 + STATUS 更新 step 追加にリライト
 - [x] [migrate-page-from-mockup/SKILL.md](../.claude/skills/migrate-page-from-mockup/SKILL.md) what 中心にスリム化、DB 連携必須を明文化
+- [x] 技術スタック key 方針を docs / skill に反映（`data/tech-stack.ts` を canonical catalog、alias / ロゴ / DB / 解析は同じ key に正規化）
+- [x] 技術スタック catalog を再設計（Languages → Runtimes → Frontend/Mobile/Backend → DB/Data → Cloud/AWS/GCP/Azure → AI → Product APIs → DevOps/Observability/Testing/Design の順）
+- [x] AWS / Google Cloud / Azure の主要リソースを追加（AWS 42件 / Google Cloud 31件 / Azure 29件）
+- [x] 公式クラウドロゴをSVG優先に整理（AWS / Google Cloud / Azure の公式SVG 111件を `apps/frontend/public/tech_stack_logo/*.svg` としてアプリ表示用に追加。元アイコンパック丸ごとは保持しない）
+- [x] simple-icons に存在する技術ロゴは `simple-icons` package import で解決し、`public/` には複製しない方針へ整理
 
 ---
 
@@ -66,9 +71,12 @@
 - [x] mockup `lp.html` を `app/(public)/page.tsx` に移植（`migrate-page-from-mockup` skill）
 - [x] mockup `signup-github-app.html` を `/signup/github-app` に移植（`features/auth/auth.module.css` に auth-* 系 CSS 移植、stub: `/signup/{detecting,tech-stack,profile}`、callback receiver `/signup/github-app/callback`）
 - [x] **GitHub App 登録**（`quine-app`、callback: `http://localhost:3000/signup/github-app/callback`、Permissions: Contents Read-only + Metadata Read-only、Webhook OFF）→ Convex env に `GITHUB_APP_ID=3701030` / `GITHUB_APP_CLIENT_ID=Iv23lidP6p9FmGzLnm5x` / `GITHUB_APP_CLIENT_SECRET` / `GITHUB_APP_PRIVATE_KEY`（**base64 エンコード済み**、デコードは Action 側で `Buffer.from(..., "base64").toString("utf8")`）、frontend `.env.local` に `NEXT_PUBLIC_GITHUB_APP_SLUG=quine-app` 投入済み
+- [x] GitHub App 解析 MVP（DB保存なし / AIなし）: 既存 installation 検出 → `Analyze` → `convex/githubAction.ts` の `analyzeRepos` で fork 除外 repo を budget 内で解析 → `/signup/detecting` に結果表示。`git tree` 起点で実在ファイルを確認し、allowlist manifest（package.json, requirements.txt, pyproject.toml, Gemfile, go.mod, Cargo.toml, composer.json, pubspec.yaml, Package.swift, pom.xml, build.gradle, Dockerfile, docker-compose, GitHub Actions workflows）と Terraform / CloudFormation / Pulumi の IaC resource type を `data/tech-stack.ts` の key にルールベースで紐付ける。**AI API は使わない方針**。
+- [x] GitHub App 解析の rate limit 対策: 1解析あたり GitHub API request budget を 95 に制限。最大30 repo、1 repo あたり manifest 最大2ファイル。repo metadata の primary language は補助として使い、GitHub Languages API は初回解析から外した。実測: 25 repo / 67 requests / 約15秒 / 43 technologies detected。
+- [x] `/signup/detecting` に Analysis log UI を追加。`githubAnalysisLogs` テーブル + `convex/githubAnalysisLogs.ts` query/internal mutation で、Action の実進捗（token作成、repo一覧、repo tree、matching files、detected keys、warning/error）を realtime 表示。
 - [ ] `afterUserCreatedOrUpdated` callback で GitHub プロフィール → users カラム反映（githubId, username, name, image）
 - [ ] users.signupCompletedAt 追加 + middleware で未完了は `/signup/github-app` へ強制
-- [ ] mockup `signup-detecting.html` 移植（Convex action: `analyzeRepos(installationId)` で DB 書き込まず結果 return）
+- [ ] mockup `signup-detecting.html` の見た目仕上げ（機能は MVP 済み。DB保存なし・AIなしの解析結果表示 + Analysis log は動作確認済み。UI は仮実装）
 - [ ] mockup `tech-stack-edit.html` 移植（signup 動線では `/signup/tech-stack`、通常編集は別ルート想定）
 - [ ] mockup `signup-profile.html` 移植
 
@@ -84,8 +92,9 @@
 - [ ] `convex/connections.ts`（フォロー / フォロー解除）
 - [ ] `convex/developerTechnologies.ts`（技術スタック編集 - years / order）
 - [ ] `convex/productTechnologies.ts`
-- [ ] `convex/githubAction.ts`（"use node"）— GitHub App 経由でリポ解析
-- [ ] `convex/aiAction.ts`（"use node"）— 軽量 AI で技術キー正規化 + 説明文生成
+- [x] `convex/githubAction.ts`（"use node"）— GitHub App 経由でリポ解析（DB保存なし / AIなし）
+- [x] `convex/githubAnalysisLogs.ts` — GitHub App 解析 action の realtime log 表示用 query / internal mutation
+- [ ] `convex/aiAction.ts`（"use node"）— **当面使わない**。技術スタック検出は deterministic rule + ユーザー編集を主経路にする。AI は将来、未対応 dependency の分類・README 要約・説明文生成を任意補助として検討。
 
 ### features 実装
 
@@ -117,6 +126,8 @@
 - **`form.tsx`**: shadcn の `base-nova` style に form primitive がなく、標準テンプレートを手動配置
 - **`.cursor/mcp.json`**: 古い Supabase MCP 設定が残っている（Cursor IDE 用、Claude Code には無関係）。secret も hardcoded されてるので revoke 推奨
 - **Convex MCP**: セッション再起動まで `mcp__convex__*` ツールは現セッションで使えない
+- **GitHub App 解析方針**: 現時点では AI を使わない。package / language / manifest / config / workflow / IaC resource type 由来の確定情報を `data/tech-stack.ts` の key にマッピングし、残りはユーザー編集で補う。AI による長いローディングや推測混入は避ける。
+- **GitHub App rate limit 方針**: 初回解析は精度60〜70%でよく、後でユーザー編集する前提。全 repo 完全解析ではなく、95 requests 上限で tree 起点の軽量 breadth-first scan を行う。production 前には installation 単位のキュー制御（同時解析1本）を追加する。
 
 ---
 

@@ -42,13 +42,17 @@ $ARGUMENTS が空、またはページ名が不明確な場合は、対象ペー
 
 ## 既に揃っているリソース（再生成しない）
 
-- `data/technologies.ts` — 技術カタログ（580 件、`@data/technologies` で import）
-- `apps/frontend/public/tech_stack_logo/<key>.png` — ロゴ画像 628 ファイル
-- `apps/frontend/lib/technology-logo.ts` — 技術名 → ロゴパス helper
+- `data/tech-stack.ts` — 技術カタログ、canonical key、検出 alias、`TechnologyKey` 型（`@data/tech-stack` で import）
+- `data/technologies.ts` — 互換 re-export（新規実装では使わない）
+- `simple-icons` package — simple-icons にある技術ロゴは package import で解決し、`public/` に複製しない
+- `apps/frontend/public/tech_stack_logo/<key>.svg` — simple-icons にない公式 / 手動 SVG のみ
+- `apps/frontend/lib/technology-logo.ts` — 技術名 → SVG ロゴ helper
 - shadcn primitive 13 種（`apps/frontend/components/ui/`）
 - Tailwind theme（`apps/frontend/app/globals.css` に Quine dark palette 反映済み）
 
 mockup 側の `mockup/data/technologies.js` と `mockup/assets/tech_stack_logo/` は同じ内容のサブセット。**実装側ではこれらを使わない**。
+
+`data/tech-stack.ts` の `technology.key` は Quine 全体の canonical ID。ページ移植時に技術スタックを扱う場合、mockup 側の表示名やロゴファイル名を新しい key として増やさず、必ず `data/tech-stack.ts` の key に寄せる。足りない技術は `data/tech-stack.ts` に追加し、ロゴ・検出 alias・DB 保存値も同じ key を参照する。ロゴは SVG で取れるものだけを扱い、PNG/WebP は新規の技術スタックアイコンとして使わない。
 
 ## 手順
 
@@ -64,6 +68,7 @@ mockup 側の `mockup/data/technologies.js` と `mockup/assets/tech_stack_logo/`
 ### 3. データ層を整える
 - 必要なテーブルが [`convex/schema.ts`](../../../convex/schema.ts) にあるか確認。なければ追加（schema は **1 ファイル集約**、テーブルごとに分割しない）
 - query / mutation / action が `convex/<table>.ts` にあるか確認。なければ追加
+- 技術スタックを表示・編集するページでは、DB と UI の値を `data/tech-stack.ts` の canonical key に揃える。表示名や依存名を別 key として保存しない
 - 公開度に応じた権限分岐（`06_convex.md` §5）
   - 公開: auth チェックなし
   - 認証必須: `requireUser(ctx)`

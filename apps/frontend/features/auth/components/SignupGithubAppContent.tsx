@@ -1,16 +1,67 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { api } from "@convex/_generated/api";
+import { useAction } from "convex/react";
+
 import styles from "../auth.module.css";
 
-const APP_SLUG = process.env.NEXT_PUBLIC_GITHUB_APP_SLUG;
-const INSTALL_URL = APP_SLUG
-  ? `https://github.com/apps/${APP_SLUG}/installations/new?state=signup`
-  : "/signup/detecting?demo=1";
+type SignupGithubAppContentProps = {
+  appConfigured: boolean;
+  error: string | null;
+};
 
-export function SignupGithubAppContent() {
+type InstallationSummary = {
+  id: number;
+  accountLogin: string;
+  accountType: string;
+  repositorySelection: string;
+  targetType: string;
+};
+
+export function SignupGithubAppContent({
+  appConfigured,
+  error,
+}: SignupGithubAppContentProps) {
+  const listInstallations = useAction(api.githubAction.listInstallations);
+  const [installations, setInstallations] = useState<InstallationSummary[]>([]);
+  const [loadingInstallations, setLoadingInstallations] = useState(appConfigured);
+  const [installationError, setInstallationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!appConfigured) {
+      return;
+    }
+
+    let canceled = false;
+    listInstallations({})
+      .then((items) => {
+        if (canceled) {
+          return;
+        }
+        setInstallations(items);
+        setLoadingInstallations(false);
+      })
+      .catch((unknownError: unknown) => {
+        if (canceled) {
+          return;
+        }
+        setInstallationError(
+          unknownError instanceof Error
+            ? unknownError.message
+            : "Could not load existing GitHub App installations.",
+        );
+        setLoadingInstallations(false);
+      });
+
+    return () => {
+      canceled = true;
+    };
+  }, [appConfigured, listInstallations]);
+
   return (
     <div className={styles.shell}>
       <div className={styles.bg} aria-hidden />
@@ -38,6 +89,7 @@ export function SignupGithubAppContent() {
             Quine reads your README and dependency files to auto-build your
             tech stack. Your source code is never touched.
           </p>
+          {error ? <p className={styles.errorText}>{error}</p> : null}
 
           <p className={styles.permsLabel}>What Quine accesses</p>
           <div className={styles.perms}>
@@ -60,12 +112,13 @@ export function SignupGithubAppContent() {
           </div>
 
           <div className={styles.action}>
-            <a
-              href={INSTALL_URL}
-              className={`${styles.btn} ${styles.btnGithub}`}
-            >
+            <a href="/api/signup/github-app/install" className={`${styles.btn} ${styles.btnGithub}`} aria-disabled={!appConfigured}>
               <GithubIcon />
-              <span>Install Quine on GitHub</span>
+              <span>
+                {appConfigured
+                  ? "Install Quine on GitHub"
+                  : "GitHub App is not configured"}
+              </span>
             </a>
             <Link
               href="/signup/tech-stack?manual=1"
@@ -74,6 +127,12 @@ export function SignupGithubAppContent() {
               Skip — add manually
             </Link>
           </div>
+
+          <ExistingInstallations
+            error={installationError}
+            installations={installations}
+            loading={loadingInstallations}
+          />
 
           <p className={styles.note}>
             Read-only by GitHub App permissions — writing back is physically
@@ -84,6 +143,56 @@ export function SignupGithubAppContent() {
           </p>
         </section>
       </main>
+    </div>
+  );
+}
+
+function ExistingInstallations({
+  error,
+  installations,
+  loading,
+}: {
+  error: string | null;
+  installations: InstallationSummary[];
+  loading: boolean;
+}) {
+  if (loading) {
+    return (
+      <div className={styles.installations}>
+        <p className={styles.installationsTitle}>Checking existing installs...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.installations}>
+        <p className={styles.errorText}>{error}</p>
+      </div>
+    );
+  }
+
+  if (installations.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.installations}>
+      <p className={styles.installationsTitle}>Already installed</p>
+      <div className={styles.installationList}>
+        {installations.map((installation) => (
+          <Link
+            key={installation.id}
+            href={`/signup/detecting?installation_id=${installation.id}`}
+            className={styles.installationItem}
+          >
+            <span>
+              {installation.accountLogin} · {installation.repositorySelection}
+            </span>
+            <span>Analyze</span>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

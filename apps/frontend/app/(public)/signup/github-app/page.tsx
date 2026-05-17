@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Connect your GitHub — Quine",
 };
 
-export default function SignupGithubAppPage() {
-  return <SignupGithubAppView />;
+type SearchParams = Promise<{
+  error?: string;
+}>;
+
+export default async function SignupGithubAppPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const params = await searchParams;
+  return <SignupGithubAppView error={params.error} />;
 }
