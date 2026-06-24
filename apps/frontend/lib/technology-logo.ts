@@ -2,8 +2,44 @@ import {
   allTechnologies,
   techStackCategories,
   type CanonicalTechnology,
+  type TechnologyKey,
 } from "@data/tech-stack";
 import * as simpleIcons from "simple-icons";
+
+export type TechnologyLogoBackdrop = "circle" | "square";
+export type TechnologyLogoForeground = "brand" | "white";
+
+const logoBackdropByKey: Partial<Record<TechnologyKey, TechnologyLogoBackdrop>> = {
+  bun: "circle",
+  deno: "circle",
+  expo: "circle",
+  nextjs: "circle",
+  typescript: "square",
+};
+
+const logoForegroundByKey: Partial<Record<TechnologyKey, TechnologyLogoForeground>> = {
+  anthropic: "white",
+  astro: "white",
+  better_stack: "white",
+  devcontainers: "white",
+  express: "white",
+  fastify: "white",
+  github_api: "white",
+  github_projects: "white",
+  mapbox: "white",
+  notion: "white",
+  notion_api: "white",
+  opentelemetry: "white",
+  planetscale: "white",
+  prisma: "white",
+  radix_ui: "white",
+  remix: "white",
+  resend: "white",
+  rust: "white",
+  shadcn_ui: "white",
+  vercel: "white",
+  vercel_ai_sdk: "white",
+};
 
 const normalizeString = (value: string): string =>
   value
@@ -17,7 +53,10 @@ const escapeSvgText = (value: string): string =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-const buildSimpleIconSvg = (slug: string): string | null => {
+const buildSimpleIconSvg = (
+  slug: string,
+  foreground: TechnologyLogoForeground,
+): string | null => {
   const icon = Object.values(simpleIcons).find(
     (candidate) => candidate.slug === slug,
   );
@@ -28,7 +67,7 @@ const buildSimpleIconSvg = (slug: string): string | null => {
   return [
     '<svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">',
     `<title>${escapeSvgText(icon.title)}</title>`,
-    `<path fill="#${icon.hex}" d="${icon.path}"/>`,
+    `<path fill="${foreground === "white" ? "#FFFFFF" : `#${icon.hex}`}" d="${icon.path}"/>`,
     "</svg>",
   ].join("");
 };
@@ -36,14 +75,17 @@ const buildSimpleIconSvg = (slug: string): string | null => {
 const toSvgDataUrl = (svg: string): string =>
   `data:image/svg+xml,${encodeURIComponent(svg)}`;
 
-export const getTechnologyLogo = (techName: string): string | null => {
+export const getTechnologyLogo = (
+  techName: string,
+  foreground: TechnologyLogoForeground = "brand",
+): string | null => {
   const technology = getTechnologyInfo(techName);
   if (!technology) {
     return null;
   }
 
   if (technology.logo?.source === "simple-icons") {
-    const svg = buildSimpleIconSvg(technology.logo.slug);
+    const svg = buildSimpleIconSvg(technology.logo.slug, foreground);
     return svg ? toSvgDataUrl(svg) : null;
   }
 
@@ -63,6 +105,28 @@ export const getTechnologyLogo = (techName: string): string | null => {
   }
 
   return null;
+};
+
+export const getTechnologyLogoBackdrop = (
+  techName: string,
+): TechnologyLogoBackdrop | null => {
+  const technology = getTechnologyInfo(techName);
+  if (!technology) {
+    return null;
+  }
+
+  return logoBackdropByKey[technology.key] ?? null;
+};
+
+export const getTechnologyLogoForeground = (
+  techName: string,
+): TechnologyLogoForeground => {
+  const technology = getTechnologyInfo(techName);
+  if (!technology) {
+    return "brand";
+  }
+
+  return logoForegroundByKey[technology.key] ?? "brand";
 };
 
 export const getTechnologyInfo = (

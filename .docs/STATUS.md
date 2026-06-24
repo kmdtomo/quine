@@ -3,7 +3,7 @@
 > セッションを跨いでの進捗追跡。**新しいセッション開始時はこのファイルを最初に読む**。  
 > 区切りごとに更新。形式: ✅ 完了 / 🚧 進行中 / 📋 次やる / 🔮 未着手（将来）
 
-最終更新: 2026-05-17
+最終更新: 2026-06-22
 
 ---
 
@@ -74,10 +74,18 @@
 - [x] GitHub App 解析 MVP（DB保存なし / AIなし）: 既存 installation 検出 → `Analyze` → `convex/githubAction.ts` の `analyzeRepos` で fork 除外 repo を budget 内で解析 → `/signup/detecting` に結果表示。`git tree` 起点で実在ファイルを確認し、allowlist manifest（package.json, requirements.txt, pyproject.toml, Gemfile, go.mod, Cargo.toml, composer.json, pubspec.yaml, Package.swift, pom.xml, build.gradle, Dockerfile, docker-compose, GitHub Actions workflows）と Terraform / CloudFormation / Pulumi の IaC resource type を `data/tech-stack.ts` の key にルールベースで紐付ける。**AI API は使わない方針**。
 - [x] GitHub App 解析の rate limit 対策: 1解析あたり GitHub API request budget を 95 に制限。最大30 repo、1 repo あたり manifest 最大2ファイル。repo metadata の primary language は補助として使い、GitHub Languages API は初回解析から外した。実測: 25 repo / 67 requests / 約15秒 / 43 technologies detected。
 - [x] `/signup/detecting` に Analysis log UI を追加。`githubAnalysisLogs` テーブル + `convex/githubAnalysisLogs.ts` query/internal mutation で、Action の実進捗（token作成、repo一覧、repo tree、matching files、detected keys、warning/error）を realtime 表示。
-- [ ] `afterUserCreatedOrUpdated` callback で GitHub プロフィール → users カラム反映（githubId, username, name, image）
-- [ ] users.signupCompletedAt 追加 + middleware で未完了は `/signup/github-app` へ強制
-- [ ] mockup `signup-detecting.html` の見た目仕上げ（機能は MVP 済み。DB保存なし・AIなしの解析結果表示 + Analysis log は動作確認済み。UI は仮実装）
-- [ ] mockup `tech-stack-edit.html` 移植（signup 動線では `/signup/tech-stack`、通常編集は別ルート想定）
+- [x] ログイン → `tech-stack/edit` → GitHub App install / 既存 installation 検出 → 自動解析 → `developerTechnologies` 保存 → 編集画面に反映、の主動線を実装。LP の signup modal / 解析 modal / tech-stack edit は mockup の glass UI を基準に寄せた。
+- [x] `afterUserCreatedOrUpdated` callback で GitHub プロフィール → users カラム反映（githubId, username, name, image）
+- [x] `users.username` の `@` prefix 互換対応（保存時は `@` なしへ正規化、既存 `@username` 行も `/@username` で公開 profile query が拾える）
+- [x] Next.js 16 の dynamic route param が `%40username` になるケースを decode し、`/@username` profile route が 404 にならないよう修正
+- [x] users に `techStackOnboardingCompletedAt` / `profileOnboardingCompletedAt` を追加し、初回フロー完了を明示イベントで永続化
+- [x] 初回 tech-stack 後のプロフィール誘導を mockup 準拠の guided header に戻し、Home に `Next` 表示・他ヘッダー操作 disabled に統一
+- [x] mockup `user-profile.html` を `/@username` に再移植（左 UserCard / 中央 TechStack + Product / 右 Connections、`?onboarding=1` は初回編集状態として表示、route layout で viewport 固定 + カラム内スクロール、SNS link modal / banner image menu / banner gallery modal）
+- [x] user-profile の画像選択で async 後に file input を reset して落ちる runtime error を修正
+- [x] ログイン / 再ログイン後の `/onboarding` resolver を追加し、永続フラグに応じて tech-stack / profile onboarding / 通常プロフィールへ復帰
+- [x] LP の signup CTA はログイン済みなら modal を開かず `/onboarding` へ即遷移
+- [x] mockup `signup-detecting.html` の主動線を `/tech-stack/edit` 上の解析 modal に統合（精度検証ページではなく、高速 repo ticker + 保存完了 modal として実装）
+- [x] mockup `tech-stack-edit.html` の再移植（Workbench / category rail / search / Selected & Sort / drag reorder / years toast panel を Tailwind + 共通 components 化。技術選択 / 追加削除 / years 更新 / GitHub 解析結果の DB 反映）
 - [ ] mockup `signup-profile.html` 移植
 
 ---
@@ -86,12 +94,12 @@
 
 ### Convex 関数
 
-- [ ] `convex/users.ts`（query: `getProfile`, `getMe`、mutation: `updateProfile`）
-- [ ] `convex/products.ts`（query: `getBySlug`, `listByAuthor`、mutation: `create`, `update`, `delete`）
+- [x] `convex/users.ts`（query: `getProfile`, `getMe`、mutation: tech-stack/profile onboarding 完了）
+- [x] `convex/products.ts`（query: `getBySlug`, `listByAuthor`, `listPublic`, `getForEdit`、mutation: `create`, `update`, `delete`, `saveForm`）
 - [ ] `convex/productDevelopers.ts`（招待 / 承認 / 個人レイヤー編集）
 - [ ] `convex/connections.ts`（フォロー / フォロー解除）
-- [ ] `convex/developerTechnologies.ts`（技術スタック編集 - years / order）
-- [ ] `convex/productTechnologies.ts`
+- [x] `convex/developerTechnologies.ts`（技術スタック編集 - listMine / saveDetected / add / remove / setYears）
+- [x] `convex/productTechnologies.ts`
 - [x] `convex/githubAction.ts`（"use node"）— GitHub App 経由でリポ解析（DB保存なし / AIなし）
 - [x] `convex/githubAnalysisLogs.ts` — GitHub App 解析 action の realtime log 表示用 query / internal mutation
 - [ ] `convex/aiAction.ts`（"use node"）— **当面使わない**。技術スタック検出は deterministic rule + ユーザー編集を主経路にする。AI は将来、未対応 dependency の分類・README 要約・説明文生成を任意補助として検討。
@@ -99,17 +107,17 @@
 ### features 実装
 
 - [ ] `features/auth/`（signin フロー）
-- [ ] `features/profile/`（プロフィール表示・編集、`@username` ルート）
-- [ ] `features/products/`（products ページ、product-detail、product-edit）
+- [x] `features/profile/`（プロフィール表示・初回編集、`@username` ルート）
+- [x] `features/products/`（products ページ、product-detail、product-edit。Header create modal は mockup の UploadModal 準拠。product-edit UI は mockup の ProductEditHero / ProductEditForm / ProductTechPanel 構造へ再移植し、hero title / subtitle の横並び調整、Project Type / Team Size は共通 `DropdownSelect`、Role は同じ見た目の複数選択用 `DropdownMultiSelect` に統一し dropdown 選択状態は neutral tone に調整、`ProductEdit*Section` / modal / shell コンポーネントへ分離。新規 product 作成時は GitHub App の repo 選択 modal を自動表示し、選択 repo から name / URL / project type / tech stack をフォームへ反映（tagline / role / content は自動入力しない）。repo 選択 modal は共通 `GlassModal` 土台へ統一し、右上 close は非表示。repo list は主要技術スタックロゴ表示、未検出時は黒背景の Quine mark fallback、loading stuck 対策済み。AI shell は minimize / FAB reopen 対応 / profile Product link 接続まで）
 - [ ] `features/users/`（users 一覧、検索、フィルタ）
-- [ ] `features/tech-stack/`（tech-stack-detail、tech-stack-edit）
+- [x] `features/tech-stack/`（tech-stack-edit: onboarding 解析 modal + mockup 準拠の編集 UI）
 - [ ] `features/onboarding/`（signup-profile、signup-github-app、signup-detecting）
 - [ ] `features/connections/`（フォロー UI）
 
 ### 認証 / ユーザー
 
 - [ ] `username` 同期ロジック（GitHub 側で username 変更時の追従、旧 URL の 301）
-- [ ] GitHub App インストールフロー（`installation_id` 保存）
+- [x] GitHub App インストールフロー（`installation_id` 保存）
 - [ ] private リポへのスコープ追加フロー
 
 ### 周辺
@@ -128,6 +136,7 @@
 - **Convex MCP**: セッション再起動まで `mcp__convex__*` ツールは現セッションで使えない
 - **GitHub App 解析方針**: 現時点では AI を使わない。package / language / manifest / config / workflow / IaC resource type 由来の確定情報を `data/tech-stack.ts` の key にマッピングし、残りはユーザー編集で補う。AI による長いローディングや推測混入は避ける。
 - **GitHub App rate limit 方針**: 初回解析は精度60〜70%でよく、後でユーザー編集する前提。全 repo 完全解析ではなく、95 requests 上限で tree 起点の軽量 breadth-first scan を行う。production 前には installation 単位のキュー制御（同時解析1本）を追加する。
+- **Product AI chat**: `product-edit` の手動作成・編集・tech stack 保存、GitHub App repo 選択からの基本情報 import は実装済み。AI chat は UI shell のみで、README 要約や会話型補完は既存 GitHub 解析 action / 将来の AI action との責務整理をしてから別タスクでつなぐ。
 
 ---
 

@@ -121,7 +121,7 @@ export function SignupGithubAppContent({
               </span>
             </a>
             <Link
-              href="/signup/tech-stack?manual=1"
+              href="/tech-stack/edit?onboarding=1&manual=1"
               className={`${styles.btn} ${styles.btnGhost}`}
             >
               Skip — add manually
@@ -183,7 +183,7 @@ function ExistingInstallations({
         {installations.map((installation) => (
           <Link
             key={installation.id}
-            href={`/signup/detecting?installation_id=${installation.id}`}
+            href={`/tech-stack/edit?onboarding=1&installation_id=${installation.id}`}
             className={styles.installationItem}
           >
             <span>

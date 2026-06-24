@@ -139,7 +139,7 @@ export function SignupDetectingContent({
               </p>
             </div>
             <Link
-              href="/signup/github-app"
+              href="/tech-stack/edit?onboarding=1"
               className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-muted-foreground transition hover:text-foreground"
             >
               Install again
@@ -255,7 +255,7 @@ function ResultView({ result }: { result: AnalysisResult }) {
             </p>
           </div>
           <Link
-            href="/signup/tech-stack"
+            href="/tech-stack/edit?onboarding=1"
             className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
           >
             Review stack

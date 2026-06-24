@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import styles from "../lp.module.css";
@@ -8,7 +7,7 @@ import { LanguageMarquee } from "./LanguageMarquee";
 import { PrismBackground } from "./PrismBackground";
 import { RevealOnView } from "./RevealOnView";
 
-export function HeroSection() {
+export function HeroSection({ onSignupOpen }: { onSignupOpen: () => void }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,12 +69,13 @@ export function HeroSection() {
           </RevealOnView>
           <RevealOnView delay={520}>
             <div className={styles.heroActions}>
-              <Link
-                href="/signin"
+              <button
+                type="button"
                 className={`${styles.heroBtn} ${styles.heroBtnPrimary}`}
+                onClick={onSignupOpen}
               >
                 Get started
-              </Link>
+              </button>
               <a
                 href="#profile"
                 className={`${styles.heroBtn} ${styles.heroBtnGhost}`}

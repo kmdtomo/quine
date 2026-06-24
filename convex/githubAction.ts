@@ -9,7 +9,7 @@ import {
   type CanonicalTechnology,
   type TechnologyKey,
 } from "../data/tech-stack";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, type ActionCtx } from "./_generated/server";
 import { auth } from "./auth";
@@ -32,6 +32,8 @@ const MAX_REPOSITORY_LIST_PAGES = 5;
 const MAX_REPOSITORIES_TO_ANALYZE = 30;
 const MAX_MANIFEST_FILES_PER_REPOSITORY = 2;
 const MAX_RECURSIVE_MANIFEST_TARGETS = 120;
+const MAX_PRODUCT_IMPORT_REQUESTS = 35;
+const GITHUB_FETCH_TIMEOUT_MS = 15_000;
 
 type DetectionSource = {
   repository: string;
@@ -53,8 +55,11 @@ type RepositorySummary = {
   name: string;
   description: string | null;
   htmlUrl: string;
+  homepage: string | null;
   defaultBranch: string;
   primaryLanguage: string | null;
+  primaryTechnologyKey: TechnologyKey | null;
+  primaryTechnologyName: string | null;
   private: boolean;
   fork: boolean;
   stargazersCount: number;
@@ -487,6 +492,17 @@ export const analyzeRepos = action({
         "info",
         `Finished with ${detectedTechnologies.length} detected technologies using ${requestBudget.used} requests.`,
       );
+      await ctx.runMutation(api.developerTechnologies.saveDetected, {
+        installationId,
+        technologyKeys: detectedTechnologies.map((technology) => technology.key),
+      });
+      await appendAnalysisLog(
+        ctx,
+        userId,
+        runId,
+        "info",
+        `Saved ${detectedTechnologies.length} technologies to your stack.`,
+      );
 
       return {
         installationId,
@@ -544,6 +560,101 @@ export const listInstallations = action({
     return installations.sort((a, b) =>
       a.accountLogin.localeCompare(b.accountLogin),
     );
+  },
+});
+
+export const listProductRepositories = action({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const installationId = await getCurrentUserGithubInstallationId(ctx);
+    if (installationId === undefined) {
+      return {
+        status: "not_installed",
+        repositories: [],
+      };
+    }
+
+    const requestBudget = createGitHubRequestBudget(12);
+    const token = await createInstallationToken(installationId, requestBudget);
+    const repositories = await listInstallationRepositories(token, requestBudget);
+
+    return {
+      status: "ready",
+      installationId,
+      requestCount: requestBudget.used,
+      requestLimit: requestBudget.limit,
+      repositories: sortRepositoriesForSelection(repositories).map(
+        toProductRepository,
+      ),
+      warnings: requestBudget.warnings,
+    };
+  },
+});
+
+export const importProductRepository = action({
+  args: {
+    repositoryFullName: v.string(),
+  },
+  handler: async (ctx, { repositoryFullName }) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) {
+      throw new Error("Unauthorized");
+    }
+
+    const normalizedRepositoryFullName = repositoryFullName.trim();
+    if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(normalizedRepositoryFullName)) {
+      throw new Error("Invalid repository.");
+    }
+
+    const installationId = await getCurrentUserGithubInstallationId(ctx);
+    if (installationId === undefined) {
+      throw new Error("GitHub App is not installed.");
+    }
+
+    const requestBudget = createGitHubRequestBudget(MAX_PRODUCT_IMPORT_REQUESTS);
+    const token = await createInstallationToken(installationId, requestBudget);
+    const repositories = await listInstallationRepositories(token, requestBudget);
+    const repository = repositories.find(
+      (item) => item.fullName === normalizedRepositoryFullName,
+    );
+    if (!repository) {
+      throw new Error("Repository is not available to this GitHub App installation.");
+    }
+
+    const detections = new Map<TechnologyKey, DetectedTechnology>();
+    const runId = `product-import-${Date.now()}`;
+    const analysis = await analyzeRepository(
+      ctx,
+      userId,
+      runId,
+      token,
+      repository,
+      detections,
+      requestBudget,
+    );
+    const technologyKeys = Array.from(detections.values())
+      .sort((a, b) => b.score - a.score)
+      .map((technology) => technology.key);
+
+    return {
+      repository: toProductRepository(repository),
+      requestCount: requestBudget.used,
+      requestLimit: requestBudget.limit,
+      draft: {
+        githubUrl: repository.htmlUrl,
+        name: repository.name,
+        ...(repository.homepage ? { productUrl: repository.homepage } : {}),
+        projectType: repository.private ? "work" : "open_source",
+        technologyKeys,
+      },
+      analysis,
+      warnings: requestBudget.warnings,
+    };
   },
 });
 
@@ -1311,6 +1422,14 @@ async function appendAnalysisLog(
   });
 }
 
+async function getCurrentUserGithubInstallationId(
+  ctx: ActionCtx,
+): Promise<number | undefined> {
+  const installation: { githubInstallationId: number | undefined } =
+    await ctx.runQuery(api.users.getGithubInstallationForCurrentUser, {});
+  return installation.githubInstallationId;
+}
+
 function createGitHubRequestBudget(limit: number): GitHubRequestBudget {
   return {
     limit,
@@ -1596,6 +1715,7 @@ async function githubJson(
 
   const response = await fetch(url, {
     method,
+    signal: AbortSignal.timeout(GITHUB_FETCH_TIMEOUT_MS),
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${token}`,
@@ -1637,6 +1757,7 @@ function parseRepository(value: unknown): RepositorySummary | null {
   const fullName = readString(value, "full_name");
   const name = readString(value, "name");
   const htmlUrl = readString(value, "html_url");
+  const homepage = readString(value, "homepage");
   const defaultBranch = readString(value, "default_branch");
   if (!fullName || !name || !htmlUrl || !defaultBranch) {
     return null;
@@ -1645,6 +1766,7 @@ function parseRepository(value: unknown): RepositorySummary | null {
   const description = readString(value, "description");
   const updatedAt = readString(value, "updated_at");
   const primaryLanguage = readString(value, "language");
+  const primaryTechnology = getPrimaryTechnologyFromLanguage(primaryLanguage);
   const privateValue = value.private;
   const forkValue = value.fork;
   const starsValue = value.stargazers_count;
@@ -1654,13 +1776,57 @@ function parseRepository(value: unknown): RepositorySummary | null {
     name,
     description,
     htmlUrl,
+    homepage: homepage && homepage.trim().length > 0 ? homepage : null,
     defaultBranch,
     primaryLanguage,
+    primaryTechnologyKey: primaryTechnology?.key ?? null,
+    primaryTechnologyName: primaryTechnology?.name ?? null,
     private: typeof privateValue === "boolean" ? privateValue : false,
     fork: typeof forkValue === "boolean" ? forkValue : false,
     stargazersCount: typeof starsValue === "number" ? starsValue : 0,
     updatedAt,
   };
+}
+
+function sortRepositoriesForSelection(
+  repositories: RepositorySummary[],
+): RepositorySummary[] {
+  return [...repositories].sort((a, b) => {
+    if (a.fork !== b.fork) {
+      return a.fork ? 1 : -1;
+    }
+    const stars = b.stargazersCount - a.stargazersCount;
+    if (stars !== 0) {
+      return stars;
+    }
+    return compareNullableDates(b.updatedAt, a.updatedAt);
+  });
+}
+
+function toProductRepository(repository: RepositorySummary) {
+  return {
+    fullName: repository.fullName,
+    name: repository.name,
+    description: repository.description,
+    htmlUrl: repository.htmlUrl,
+    homepage: repository.homepage,
+    primaryLanguage: repository.primaryLanguage,
+    primaryTechnologyKey: repository.primaryTechnologyKey,
+    primaryTechnologyName: repository.primaryTechnologyName,
+    private: repository.private,
+    fork: repository.fork,
+    stargazersCount: repository.stargazersCount,
+    updatedAt: repository.updatedAt,
+  };
+}
+
+function getPrimaryTechnologyFromLanguage(language: string | null) {
+  if (!language) {
+    return null;
+  }
+
+  const technologyKey = getDetectionKeys(detectionMaps.languages, language)[0];
+  return technologyKey === undefined ? null : catalogByKey.get(technologyKey) ?? null;
 }
 
 function parseInstallation(value: unknown): InstallationSummary | null {

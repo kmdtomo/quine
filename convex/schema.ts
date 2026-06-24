@@ -42,6 +42,9 @@ export default defineSchema({
 
     githubId: v.optional(v.number()),
     username: v.optional(v.string()),
+    githubName: v.optional(v.string()),
+    githubBio: v.optional(v.string()),
+    githubCompany: v.optional(v.string()),
     banner: v.optional(v.string()),
     bio: v.optional(v.string()),
     role: v.optional(v.string()),
@@ -55,6 +58,8 @@ export default defineSchema({
       ),
     ),
     githubInstallationId: v.optional(v.number()),
+    techStackOnboardingCompletedAt: v.optional(v.number()),
+    profileOnboardingCompletedAt: v.optional(v.number()),
     isPublic: v.optional(v.boolean()),
   })
     .index("email", ["email"])

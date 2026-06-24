@@ -4,6 +4,26 @@
 
 ---
 
+## React / Frontend
+
+### ファイル入力イベントは async 後に `event.currentTarget` を触らない
+症状: 画像 resize / FileReader の `await` 後に `event.currentTarget.value = ""` を実行すると `Cannot set properties of null` で落ちる。
+
+原因: React のイベントオブジェクト上の `currentTarget` はイベントハンドラの同期実行中だけを前提に扱う。非同期処理をまたぐ場合は参照が null になることがある。
+
+対処: handler 冒頭で `const input = event.currentTarget` と DOM 要素を退避し、非同期後は `input.value = ""` を使う。
+
+---
+
+### `useEffect` の async request を state guard + cleanup でキャンセルしない
+症状: modal 初回表示で action を呼び出す UI が `Loading...` のまま止まる。
+
+原因: effect 内で `setLoading(true)` した再レンダーや hook 参照の変化により cleanup が走り、進行中 request が `canceled = true` 扱いになる。その後 `loading === true` の guard で次の request も開始されず、永久 loading になる。
+
+対処: 「request 開始済み」は `useRef` で管理し、単なる再レンダーでは進行中 request をキャンセルしない。外部 API 側は action / fetch に timeout を付けて、返らない時は error UI へ落とす。
+
+---
+
 ## Next.js 16
 
 ### `lucide-react` にブランドアイコン（`Github`, `Twitter` 等）が無い
@@ -52,6 +72,13 @@ frontend や app/ を import しちゃダメ。共有データは `data/<name>.t
 
 ### MCP server は `.mcp.json` 追加直後は使えない
 Claude Code はセッション開始時にツールを snapshot するので、`.mcp.json` の変更は **次のセッションから有効**。`claude mcp list` で `convex - ✓ Connected` を確認できれば次回起動で `mcp__convex__*` が使える。
+
+### 関数追加後に Cloud へ push しないと `Could not find public function` になる
+症状: Next.js から新しい Convex query / mutation を呼ぶと `Could not find public function for 'products:getForEdit'` のような Server Error になる。
+
+原因: frontend のコードと `convex/products.ts` は更新済みでも、Cloud dev deployment 側の関数 bundle が古いままになっている。
+
+対処: Cloud 接続時は `pnpm dlx convex dev --once --until-success` を実行して push + codegen 更新を行う。実装後の `pnpm typecheck` だけでは Cloud 側の関数は更新されない。
 
 ---
 
@@ -117,6 +144,20 @@ if (!username) notFound();
 ```
 
 URL 上は `/@kmdtomo` のまま機能する（Next.js の動的 route が `@kmdtomo` を `[username]` にバインドする）。
+
+### `users.username` に `@` を保存すると `/@username` が 404 になる
+症状: `/@kmdtomo` の URL で profile route には入るが、公開プロフィール query が `null` を返して 404 表示になる。
+
+原因: URL は先頭の `@` を strip して `username` index を引くため、DB に `@kmdtomo` と保存されている既存行と一致しない。
+
+対処: GitHub login 由来の `username` は DB 保存前に `@` なしへ正規化する。既存データ互換のため、`getProfile` は `kmdtomo` を先に検索し、見つからない場合だけ `@kmdtomo` も index で検索する。
+
+### Next.js 16 の dynamic segment は `@` を `%40` のまま渡すことがある
+症状: `/@kmdtomo` が `app/(public)/[username]/page.tsx` には入るが、`params.username.startsWith("@")` が false になって 404 になる。
+
+原因: route param が `@kmdtomo` ではなく `%40kmdtomo` として渡るケースがある。
+
+対処: `params.username` は `decodeURIComponent` してから `@` prefix を判定する。`decodeURIComponent` は例外を投げるので、try/catch で不正値を 404 に落とす。
 
 ---
 

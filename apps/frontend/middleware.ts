@@ -6,8 +6,12 @@ import {
 
 const isSignInPage = createRouteMatcher(["/signin"]);
 const isProtectedRoute = createRouteMatcher([
+  "/onboarding(.*)",
   "/settings(.*)",
   "/(app)(.*)",
+  "/products/new(.*)",
+  "/products/(.*)/edit(.*)",
+  "/tech-stack/edit(.*)",
   "/signup(.*)",
   "/api/signup(.*)",
 ]);
@@ -15,7 +19,7 @@ const isProtectedRoute = createRouteMatcher([
 export default convexAuthNextjsMiddleware(
   async (request, { convexAuth }) => {
     if (isSignInPage(request) && (await convexAuth.isAuthenticated())) {
-      return nextjsMiddlewareRedirect(request, "/signup/github-app");
+      return nextjsMiddlewareRedirect(request, "/onboarding");
     }
     if (
       isProtectedRoute(request) &&

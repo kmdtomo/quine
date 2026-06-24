@@ -1,20 +1,31 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { api } from "@convex/_generated/api";
+import { fetchQuery } from "convex/nextjs";
 
 export const metadata: Metadata = {
   title: "Complete your profile — Quine",
 };
 
-export default function SignupProfilePage() {
-  return (
-    <main className="min-h-svh flex items-center justify-center px-6 text-center">
-      <div className="space-y-3">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Complete your profile
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          このページは次のステップで実装されます。
-        </p>
-      </div>
-    </main>
-  );
+export default async function SignupProfilePage() {
+  const token = await convexAuthNextjsToken();
+  if (!token) {
+    redirect("/signin");
+  }
+
+  const me = await fetchQuery(api.users.getMe, {}, { token });
+  if (me?.username) {
+    redirect(getProfileOnboardingHref(me.username));
+  }
+
+  redirect("/tech-stack/edit");
+}
+
+function getProfileOnboardingHref(username: string) {
+  const normalizedUsername = username.startsWith("@")
+    ? username.slice(1)
+    : username;
+  return `/@${encodeURIComponent(normalizedUsername)}?onboarding=1`;
 }

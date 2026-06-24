@@ -30,7 +30,9 @@ export function SigninContent() {
         <Button
           size="lg"
           className="w-full"
-          onClick={() => void signIn("github", { redirectTo: "/signup/github-app" })}
+          onClick={() =>
+            void signIn("github", { redirectTo: "/onboarding" })
+          }
         >
           <GithubIcon className="size-4" />
           Continue with GitHub

@@ -1,9 +1,7 @@
-import Link from "next/link";
-
 import styles from "../lp.module.css";
 import { RevealOnView } from "./RevealOnView";
 
-export function FinalCtaSection() {
+export function FinalCtaSection({ onSignupOpen }: { onSignupOpen: () => void }) {
   return (
     <section className={styles.section}>
       <div className={styles.cta}>
@@ -20,12 +18,13 @@ export function FinalCtaSection() {
           </p>
         </RevealOnView>
         <RevealOnView delay={180}>
-          <Link
-            href="/signin"
+          <button
+            type="button"
             className={`${styles.heroBtn} ${styles.heroBtnPrimary}`}
+            onClick={onSignupOpen}
           >
             Get started
-          </Link>
+          </button>
         </RevealOnView>
         <RevealOnView variant="fade" delay={270}>
           <div className={styles.ctaNote}>
