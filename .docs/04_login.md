@@ -2,7 +2,7 @@
 
 > 上位の思想は [`00_manifesto.md`](./00_manifesto.md) に記載。「設定を最小化」「フローを完璧に」はマニフェスト由来。
 
-> **⚠ 実装注記:** このドキュメント内の「Supabase Auth」記述はかつての方針。現在は **Convex Auth + GitHub Provider** で実装する。フロー（GitHub OAuth → username 取得 → アカウント作成）は変わらない。実装詳細は [`06_convex.md`](./06_convex.md) を参照。
+> **⚠ 実装注記:** このドキュメント内の「Supabase Auth」記述はかつての方針。現在は **Convex Auth + GitHub Provider** で実装する。フロー（GitHub OAuth → username取得 → account作成）は変わらない。実装詳細は[Convex design reference](../.agents/skills/quine-implement/references/convex-design.md)と[`quine-init`](../.agents/skills/quine-init/SKILL.md)を参照。
 
 ## コンセプト
 

@@ -2,7 +2,21 @@
 
 > 命名、型安全、import 順、Server/Client の使い分けなど、全実装で守る規約。
 
-**関連ドキュメント:** [05_directory-structure.md](./05_directory-structure.md), [06_convex.md](./06_convex.md)
+**関連reference:** [architecture](architecture.md), [Convex設計](convex-design.md), [検証](verification.md)
+
+## 目次
+
+- [型安全](#1-型安全絶対ルール)
+- [命名](#2-命名)
+- [import順](#3-import-順)
+- [Server / Client](#4-server--client-の使い分け)
+- [Tailwind](#5-tailwind-の書き方)
+- [フォーム](#6-フォーム)
+- [エラー](#7-エラーハンドリング)
+- [ログ](#8-ログ)
+- [コメント](#9-コメント)
+- [禁止事項](#10-共通の禁止事項)
+- [チェックリスト](#11-チェックリスト)
 
 ---
 
@@ -11,13 +25,14 @@
 - **`any` 禁止**。型がわからない時は `unknown` を使い、型ガードで絞る
 - **`as` キャスト原則禁止**。Convex の `Id<"table">` 等の安全なキャスト以外は使わない
 - **Non-null assertion (`!`) 禁止**。`if (!x) throw` で明示的に絞る
-- **`@ts-ignore` / `@ts-expect-error` 禁止**。理由がある場合は `// @ts-expect-error: <理由>` で必ずコメント
+- **`@ts-ignore`は禁止**。`@ts-expect-error`は外部型との互換で回避不能な場合だけ、理由を同じ行へ書く
 
 ## 2. 命名
 
 | 対象 | 規則 | 例 |
 |---|---|---|
-| ファイル | kebab-case | `product-card.tsx`, `use-debounce.ts` |
+| React component file | PascalCase | `ProductCard.tsx`, `ProfileView.tsx` |
+| helper / schema file | kebab-case | `markdown-edit.ts`, `product-schema.ts` |
 | コンポーネント | PascalCase | `ProductCard`, `ProfileView` |
 | hook | `use*` で始める | `useDebounce`, `useProduct` |
 | Convex 関数 | camelCase | `getProfile`, `updateProduct` |
@@ -112,7 +127,7 @@ import { LocalHelper } from "./LocalHelper";
 
 ### クラスの並び
 
-`prettier-plugin-tailwindcss` に任せる（自動ソート）。手で並びを気にしない。
+既存componentの並びへ揃える。見た目だけを理由に大規模なclass並べ替えを行わず、formatterを追加する場合は別タスクとして合意する。
 
 ### `cn()` で条件分岐
 
@@ -141,8 +156,9 @@ import { cn } from "@/lib/utils";
 
 ## 7. エラーハンドリング
 
-- **mutation / action のエラーは `throw new Error(...)` で投げる**
-- Client 側で `try/catch` してトーストや UI で通知する
+- 認証、権限、入力、競合などのexpected errorは、安定したcodeを持つ`ConvexError`で投げる
+- 予期しない内部エラーは`Error`として扱い、内部messageをclientへ直接表示しない
+- Client側で`try/catch`し、error codeを日本語のトーストやUIへ変換する
 - 「失敗しても無視して続ける」コードを書かない
 
 ```typescript
@@ -191,4 +207,7 @@ async function onSubmit(values) {
 - [ ] `*Content` の末端で `"use client"` している（親に上がっていない）
 - [ ] mutation エラーが try / catch で UI 通知されている
 - [ ] `useEffect + fetch` で初期取得していない
-- [ ] `tsc --noEmit` がエラー 0
+- [ ] `pnpm typecheck` がエラー 0
+- [ ] Convex変更時に`pnpm exec convex dev --once --typecheck enable`が成功している
+- [ ] テストファイルを作成・追記していない
+- [ ] UI変更時に対象flowをブラウザでsmoke確認している

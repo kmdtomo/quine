@@ -1,6 +1,17 @@
 # Gotchas（実装中にハマった / ハマる罠）
 
-> 過去のセッションで実際に踏んだ落とし穴。**新しい問題を踏んだら追記する**。skills が「とりあえずこの doc を読んでおく」で済むのが目的。
+> 過去のセッションで実際に踏んだ落とし穴。**新しい問題を踏んだら追記する**。
+
+## 目次
+
+- [React / Frontend](#react--frontend)
+- [Next.js 16](#nextjs-16)
+- [Convex](#convex)
+- [Convex Auth](#convex-auth)
+- [shadcn / UI](#shadcn--ui)
+- [Frontend ↔ Convex](#frontend--convex-接続)
+- [Routing / URL](#routing--url)
+- [追記方法](#追記時の作法)
 
 ---
 
@@ -29,7 +40,7 @@
 ### `lucide-react` にブランドアイコン（`Github`, `Twitter` 等）が無い
 バージョン 1.x でブランドアイコン群が削除された（ライセンス上の理由）。
 
-**対処**: SVG をインライン定義する。例 [SigninContent.tsx](../apps/frontend/features/auth/components/SigninContent.tsx) の `GithubIcon`。または `simple-icons` を別途追加。
+**対処**: SVGをインライン定義する。例[SigninContent.tsx](../../../../apps/frontend/features/auth/components/SigninContent.tsx)の`GithubIcon`。または`simple-icons`を使う。
 
 ### `next lint` が廃止された
 v16 で removed。`package.json` の lint script は `eslint` 直叩き（create-next-app 16 のデフォルト）。
@@ -41,7 +52,7 @@ v16 で removed。`package.json` の lint script は `eslint` 直叩き（create
 create-next-app 16 が生成: "This is NOT the Next.js you know"。API / 規約に breaking changes あり。実装前に `node_modules/next/dist/docs/` を読むか、エラーが出たら 16 用の解決策を探す。
 
 ### Convex Auth middleware の Next 16 動作未検証
-`convexAuthNextjsMiddleware` を中で使ってる Next の API（`NextResponse` 等）が 16 で変わってる可能性あり。**動作確認時に redirect が効かなかったら、`@convex-dev/auth` の Next 16 対応 release 待ちか手書き middleware に切替**。
+`convexAuthNextjsMiddleware`とNext.jsの組み合わせはversion依存。redirectが効かない場合は、まずinstalled versionの公式docsと実際のrequest / responseを確認する。検証せず手書きmiddlewareへ置き換えない。
 
 ---
 
@@ -56,29 +67,36 @@ create-next-app 16 が生成: "This is NOT the Next.js you know"。API / 規約�
 - 別端末から触れない
 - プロセス維持が必要
 
-**対処**: 必ず Cloud に繋ぐ。`.env.local` に `CONVEX_DEPLOY_KEY` を入れて `pnpm dlx convex dev --once --until-success` で非対話接続（[06_convex.md §3.5](06_convex.md)）。
+**対処**: 必ずCloudへ繋ぐ。`.env.local`に`CONVEX_DEPLOY_KEY`を入れて`pnpm exec convex dev --once --until-success --typecheck enable`で非対話接続（[Convex設計](convex-design.md#cloud-dev環境変数mcp)）。
 
 ### `schema.ts` は 1 ファイル必須
 `defineSchema` は単一エントリポイント。`convex/users.schema.ts` のような分割は不可。**機能（query / mutation / action）はテーブル単位で分割、schema は 1 ファイル集約**。
 
 ### `convex/` 内から外部を import できない（`data/` は OK）
-frontend や app/ を import しちゃダメ。共有データは `data/<name>.ts` に置いて、frontend / convex 両方から import する（[05_directory-structure.md §3](05_directory-structure.md)）。
+frontendやapp/をimportしない。共有データは`data/<name>.ts`に置き、frontend / convexの両方からimportする（[architecture](architecture.md#3-依存方向)）。
 
 ### frontend は `convex/_generated/` か `data/` のみ参照可
 `convex/seeds/` 等への直接 import は禁止。共有静的データは `data/` 経由に。
 
-### Tokyo / Asia リージョンはまだない
-2026 年 5 月時点で利用可能リージョン: US East, EU West。Canada / Australia rolling out 中。**Quine は US East で運用**。Asia 追加されたらマイグレーション検討。
+### Convexリージョンを記憶で決めない
+利用可能リージョンは変わり得る。新規project作成時はdashboardの現在の選択肢を確認する。既存Quine projectはUS Eastを前提とし、明示的なmigration taskなしに変更しない。
 
 ### MCP server は `.mcp.json` 追加直後は使えない
-Claude Code はセッション開始時にツールを snapshot するので、`.mcp.json` の変更は **次のセッションから有効**。`claude mcp list` で `convex - ✓ Connected` を確認できれば次回起動で `mcp__convex__*` が使える。
+agent clientはセッション開始時にtoolをsnapshotするため、`.mcp.json`の変更は次のセッションから有効。利用中のclientで接続状態を確認し、現セッションにtoolが無ければCLIで代替する。
 
 ### 関数追加後に Cloud へ push しないと `Could not find public function` になる
 症状: Next.js から新しい Convex query / mutation を呼ぶと `Could not find public function for 'products:getForEdit'` のような Server Error になる。
 
 原因: frontend のコードと `convex/products.ts` は更新済みでも、Cloud dev deployment 側の関数 bundle が古いままになっている。
 
-対処: Cloud 接続時は `pnpm dlx convex dev --once --until-success` を実行して push + codegen 更新を行う。実装後の `pnpm typecheck` だけでは Cloud 側の関数は更新されない。
+対処: Cloud 接続時は `pnpm exec convex dev --once --typecheck enable` を実行して push + codegen + Convex typecheck を行う。実装後の `pnpm typecheck` だけでは Cloud 側の関数は更新されない。
+
+### root の `pnpm typecheck` は `convex/*.ts` を検査しない
+症状: `pnpm typecheck` が成功しても、Convex push時にrootの`convex/*.ts`で型エラーが見つかる。
+
+原因: root scriptは`pnpm -r typecheck`で、現在`typecheck` scriptを持つのはfrontend workspaceだけ。frontendの`tsconfig.json`は`apps/frontend/`配下を対象にしており、rootのConvex関数本体を直接検査しない。
+
+対処: Convex変更時は`pnpm typecheck`に加えて`pnpm exec convex dev --once --typecheck enable`を必須にする。後者を実行できなかった場合は、Convex検証済みと報告しない。
 
 ---
 
@@ -103,7 +121,7 @@ GitHub OAuth App 作成画面の "Enable Device Flow" は CLI / IoT 向け。Web
 ### `base-nova` style に `form` primitive が無い
 最新スタイル `base-nova` で `pnpm dlx shadcn@latest add form` がサイレント失敗（"Checking registry" で止まる）。
 
-**対処**: 標準テンプレート（`new-york` style 互換）を [components/ui/form.tsx](../apps/frontend/components/ui/form.tsx) に手動配置。依存も自分で install:
+**対処**: 標準テンプレート（`new-york` style互換）を[components/ui/form.tsx](../../../../apps/frontend/components/ui/form.tsx)に手動配置。依存も自分でinstall:
 ```bash
 pnpm --filter frontend add react-hook-form @hookform/resolvers zod @radix-ui/react-label @radix-ui/react-slot
 ```
@@ -125,7 +143,7 @@ pnpm --filter frontend add react-hook-form @hookform/resolvers zod @radix-ui/rea
 Cloud 移行時 / production 切替時は **両方更新**。1 つだけ更新して詰むケース多発。
 
 ### `pnpm convex:dev` を立て続けない方が楽（cloud 接続時）
-ローカル backend と違い、cloud に繋いでる時は schema 変更の度に `pnpm dlx convex dev --once --until-success` を 1 回叩けば済む。立てっぱなしでもいいが必須ではない。**anonymous local の時だけ立てっぱなしが必須**。
+ローカル backend と違い、cloud に繋いでる時はschema変更の度に`pnpm exec convex dev --once --typecheck enable`を1回叩けば済む。立てっぱなしでもいいが必須ではない。**anonymous local の時だけ立てっぱなしが必須**。
 
 ---
 
@@ -167,4 +185,4 @@ URL 上は `/@kmdtomo` のまま機能する（Next.js の動的 route が `@kmd
 1. 該当カテゴリに追加（無ければ新カテゴリ）
 2. **症状 → 原因 → 対処** の 3 行構成で書く
 3. 関連コード / docs へのリンクを貼る
-4. STATUS.md の「既知の課題」から該当項目を削除（解決済みでこちらに移動した場合）
+4. [STATUS.md](../../../../.docs/STATUS.md)の「既知の課題」から該当項目を削除（解決済みでこちらに移動した場合）

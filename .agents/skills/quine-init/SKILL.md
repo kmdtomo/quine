@@ -16,11 +16,11 @@ description: Quine リポジトリの初期セットアップを一回限り実�
 - GitHub OAuth で `/signin` からログインできる
 - Convex MCP が `Codex mcp list` で `✓ Connected`
 
-## 必読 docs
+## 必読 references
 
-- [`.docs/05_directory-structure.md`](../../../.docs/05_directory-structure.md) — 配置ルール
-- [`.docs/06_convex.md`](../../../.docs/06_convex.md) §3.5 — Convex 接続パターン（Deploy Key / .env.local 二重管理 / MCP）
-- [`.docs/09_gotchas.md`](../../../.docs/09_gotchas.md) — Next 16 / shadcn / Convex の罠（必ず眺める）
+- [`architecture.md`](../quine-implement/references/architecture.md) — 配置ルール
+- [`convex-design.md`](../quine-implement/references/convex-design.md) — Cloud dev / Deploy Key / auth / MCP
+- [`gotchas.md`](../quine-implement/references/gotchas.md) — Next 16 / shadcn / Convexの罠
 
 ## 絶対ルール
 
@@ -29,6 +29,7 @@ description: Quine リポジトリの初期セットアップを一回限り実�
 - **secret を git にコミットしない**（`.env.local` が `.gitignore` されてるか確認）
 - **anonymous local に逃げない**（Cloud dev deployment が前提。9 の罠参照）
 - **monorepo 構造を維持**（frontend は `apps/frontend/`、Convex は root）
+- **テストファイルは作成・追記しない**。初期化の検証はtypecheck、lint、Convex push、ログインsmokeで行う
 
 ## 手順（ステップ順）
 
@@ -64,7 +65,7 @@ cd apps/frontend
 pnpm dlx shadcn@latest init --yes --defaults
 pnpm dlx shadcn@latest add button dialog dropdown-menu popover tabs sonner tooltip input label textarea select avatar --yes
 ```
-**`form` primitive は `base-nova` style に存在しない** → 標準テンプレートを手動配置（[09_gotchas.md](../../../.docs/09_gotchas.md) 参照）。`react-hook-form @hookform/resolvers zod @radix-ui/react-label @radix-ui/react-slot` も install。
+**`form` primitiveは`base-nova` styleに存在しない** → 標準テンプレートを手動配置（[gotchas](../quine-implement/references/gotchas.md#base-nova-style-に-form-primitive-が無い)参照）。`react-hook-form @hookform/resolvers zod @radix-ui/react-label @radix-ui/react-slot`もinstall。
 
 ### 5. Convex Cloud に接続
 **ユーザーに依頼**:
@@ -75,14 +76,14 @@ pnpm dlx shadcn@latest add button dialog dropdown-menu popover tabs sonner toolt
 その後:
 ```bash
 pnpm add -D -w convex
-pnpm dlx convex dev --once --until-success    # cloud 接続 + schema push
+pnpm exec convex dev --once --until-success --typecheck enable    # cloud 接続 + schema push + typecheck
 ```
 
 `.env.local` を整える（root と frontend で同じ Cloud URL を 2 重管理）:
 - root `.env.local`: `CONVEX_DEPLOYMENT` / `CONVEX_URL` / `CONVEX_SITE_URL` / `CONVEX_DEPLOY_KEY`
 - `apps/frontend/.env.local`: `NEXT_PUBLIC_CONVEX_URL=https://<project>.convex.cloud`
 
-詳細は [`06_convex.md` §3.5](../../../.docs/06_convex.md)。
+接続契約は[`convex-design.md`](../quine-implement/references/convex-design.md#cloud-dev環境変数mcp)を参照。
 
 ### 6. Convex Auth + GitHub Provider
 ```bash
@@ -97,7 +98,7 @@ pnpm add -w @convex-dev/auth @auth/core@^0.37
 - `apps/frontend/app/providers.tsx` — `ConvexAuthNextjsProvider` で wrap
 - `apps/frontend/app/layout.tsx` を更新して provider を適用
 
-雛形コードは [`06_convex.md` §4](../../../.docs/06_convex.md)。
+既存実装がある場合は`convex/auth.ts`、`convex/auth.config.ts`、`apps/frontend/middleware.ts`を正にする。
 
 **ユーザーに依頼**:
 - GitHub OAuth App 作成
@@ -138,6 +139,8 @@ pnpm dlx convex env set AUTH_GITHUB_SECRET <secret>
 ### 9. 動作確認
 ```bash
 pnpm typecheck    # エラー 0
+pnpm --filter frontend lint
+pnpm exec convex dev --once --typecheck enable
 pnpm dev          # http://localhost:3000 でデフォルトページ
 # /signin で GitHub ログインボタンが表示される（実装済みなら）
 ```

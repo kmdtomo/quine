@@ -16,19 +16,19 @@ $ARGUMENTS が空、またはページ名が不明確な場合は、対象ペー
 - 認証ページなら → mutation も含めて、フォーム送信が DB に書き込まれる状態
 - ボタン / リンクの遷移先が存在しないなら、せめて空ページを置く（404 にしない）
 
-## 必読 docs
+## 必読 references
 
 実装に入る前に必ず:
 
-- [`.docs/INDEX.md`](../../../.docs/INDEX.md) — タスク種別から関連 docs を絞る
 - [`.docs/STATUS.md`](../../../.docs/STATUS.md) — **セッション開始時に最初に読む**（進捗・既知課題）
-- [`.docs/09_gotchas.md`](../../../.docs/09_gotchas.md) — 過去の罠（実装前にざっと眺める）
-- [`.docs/08_mockup.md`](../../../.docs/08_mockup.md) — mockup の構造と移植方針
-- [`.docs/05_directory-structure.md`](../../../.docs/05_directory-structure.md) — 配置、依存方向、View/Content
-- [`.docs/06_convex.md`](../../../.docs/06_convex.md) — schema、query/mutation、権限分岐
-- [`.docs/07_coding-guidelines.md`](../../../.docs/07_coding-guidelines.md) — Tailwind の書き方、Server/Client
+- [`references/mockup.md`](references/mockup.md) — mockupの構造と移植方針
+- [`quine-implement` architecture](../quine-implement/references/architecture.md) — 配置、依存方向、View / Content
+- [`quine-implement` frontend rules](../quine-implement/references/frontend-rules.md) — Tailwind、型、フォーム
+- [`quine-implement` Convex設計](../quine-implement/references/convex-design.md) — schema、query、mutation、権限
+- [`quine-implement` gotchas](../quine-implement/references/gotchas.md) — 過去の罠
+- [`quine-implement` の検証ルール](../quine-implement/references/verification.md) — 完了前の確認
 
-要件確認が必要な場合のみ `01_product.md` `02_account.md` `04_login.md` 等を追加で読む。
+要件確認が必要な場合だけ[`.docs/INDEX.md`](../../../.docs/INDEX.md)からproduct仕様を追加で読む。
 
 ## 絶対ルール（破ったらやり直し）
 
@@ -39,6 +39,9 @@ $ARGUMENTS が空、またはページ名が不明確な場合は、対象ペー
 - **`useEffect + fetch` 禁止**（`*View` で `preloadQuery`）
 - **`components.css` を import しない**（必要なクラスだけ Tailwind 化）
 - **shadcn primitive で代替できるものは shadcn を使う**（Dialog / Popover / DropdownMenu / Tabs / Tooltip / Sonner）
+- **client 由来の `userId` / `authorId` / `installationId` を権限の根拠にしない**
+- **画像・添付は Convex File Storage を使う**（data URL を DB / Action 引数へ保存しない）
+- **テストファイルは作成・追記しない**。静的検証、Convex 実行確認、ブラウザ smoke で検証する
 
 ## 既に揃っているリソース（再生成しない）
 
@@ -62,23 +65,24 @@ mockup 側の `mockup/data/technologies.js` と `mockup/assets/tech_stack_logo/`
 - 該当 class の CSS 定義を `mockup/components.css` から `grep` で抽出
 
 ### 2. ルートと feature ディレクトリを決める
-- ルート: `05_directory-structure.md` §2（公開は `app/(public)/`、認証は `app/(app)/`、`/@username` 形式は `04_login.md` §4）
+- ルート: [`architecture.md`](../quine-implement/references/architecture.md) §2（公開は`app/(public)/`、認証は`app/(app)/`）
 - feature: `apps/frontend/features/<feature>/components/{<Feature>View,<Feature>Content,<Section>...}.tsx`
 
 ### 3. データ層を整える
 - 必要なテーブルが [`convex/schema.ts`](../../../convex/schema.ts) にあるか確認。なければ追加（schema は **1 ファイル集約**、テーブルごとに分割しない）
 - query / mutation / action が `convex/<table>.ts` にあるか確認。なければ追加
+- 公開不要な処理は `internalQuery` / `internalMutation` / `internalAction` にする
 - 技術スタックを表示・編集するページでは、DB と UI の値を `data/tech-stack.ts` の canonical key に揃える。表示名や依存名を別 key として保存しない
-- 公開度に応じた権限分岐（`06_convex.md` §5）
+- 公開度に応じた権限分岐（[`convex-design.md`](../quine-implement/references/convex-design.md)の「認証と権限」）
   - 公開: auth チェックなし
   - 認証必須: `requireUser(ctx)`
   - 所有者限定: `requireUser` + `authorId === user._id`
-- schema 変更後は `pnpm dlx convex dev --once --until-success` を叩いて push + codegen 更新
+- schema / Convex 関数の変更後は `pnpm exec convex dev --once --typecheck enable` を叩いて push + codegen + Convex typecheck
 
 ### 4. View / Content を実装
 - `*View` (Server): `preloadQuery` で初期データ取得
 - `*Content` (Client): `usePreloadedQuery` でリアルタイム購読、`useMutation` で更新
-- 例は `06_convex.md` §6
+- View / Contentの契約は[`architecture.md`](../quine-implement/references/architecture.md) §5に従う
 
 ### 5. HTML → JSX に変換
 - 構造はそのまま、class → className、for → htmlFor
@@ -93,8 +97,9 @@ mockup 側の `mockup/data/technologies.js` と `mockup/assets/tech_stack_logo/`
 ### 7. 確認
 
 ```bash
-pnpm typecheck   # エラー 0 になるまで
-pnpm dev         # ブラウザで mockup と並べて見比べる
+pnpm typecheck
+pnpm --filter frontend lint
+pnpm dev
 ```
 
 MCP が利用可能なら追加で:
@@ -109,7 +114,7 @@ MCP が利用可能なら追加で:
 
 ### 8. STATUS.md を更新
 - 完了タスクは `[ ]` → `[x]`
-- 新しい罠を踏んだら `.docs/09_gotchas.md` に追記
+- 新しい罠を踏んだら[`gotchas.md`](../quine-implement/references/gotchas.md)に追記
 
 ### 9. レポート
 - 追加・変更したファイル
@@ -127,5 +132,6 @@ MCP が利用可能なら追加で:
 - `useEffect + fetch` で初期取得する
 - 公開ページの query で auth 必須にする
 - 型チェック未実施 / ブラウザ確認未実施で完了報告する
+- テストファイルを作成・追記する
 - 「データ繋ぎは別タスク」として分離する（このスキルの範囲）
 - STATUS.md 未更新で完了報告する

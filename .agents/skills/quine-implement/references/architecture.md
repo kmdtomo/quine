@@ -2,7 +2,17 @@
 
 > 新しいファイルをどこに置くか、どこから何を import してよいかを定義する。GENSEKI のレイヤー分離を踏襲しつつ、Convex に合わせて簡略化している。
 
-**関連ドキュメント:** [06_convex.md](./06_convex.md), [07_coding-guidelines.md](./07_coding-guidelines.md)
+**関連reference:** [Convex設計](convex-design.md), [Frontend規約](frontend-rules.md)
+
+## 目次
+
+- [基本原則](#1-基本原則)
+- [全体構造](#2-全体構造)
+- [依存方向](#3-依存方向)
+- [配置ルール](#4-配置ルール)
+- [View / Content / Section](#5-view--content--section)
+- [featureとshared](#6-feature-と-shared-の判断基準)
+- [チェックリスト](#7-チェックリスト)
 
 ---
 
@@ -25,7 +35,7 @@ quine/
 │       ├── app/                    # routing のみ
 │       │   ├── (public)/           # 未ログインでもアクセス可
 │       │   │   ├── page.tsx        # LP
-│       │   │   ├── @[username]/
+│       │   │   ├── [username]/
 │       │   │   │   ├── page.tsx                # 公開プロフィール
 │       │   │   │   └── [productSlug]/page.tsx  # 公開プロダクト詳細
 │       │   │   └── explore/page.tsx
@@ -57,7 +67,6 @@ quine/
 │       ├── public/                 # 静的アセット
 │       ├── middleware.ts           # ルート保護
 │       ├── next.config.ts
-│       ├── tailwind.config.ts
 │       ├── tsconfig.json
 │       └── package.json
 ├── convex/                         # Convex 必須構造（全クライアント共有）
@@ -65,13 +74,16 @@ quine/
 │   ├── auth.config.ts
 │   ├── auth.ts                     # Convex Auth セットアップ
 │   ├── _generated/                 # Convex codegen（gitignore しない）
-│   └── <table>.ts                  # 各テーブルの query / mutation / action
+│   ├── <resource>.ts               # query / mutation / internal function
+│   ├── <feature>Action.ts          # Node action（必要な場合）
+│   └── lib/<feature>/              # 純粋ロジック、外部応答のparse
 ├── data/                           # frontend / convex 共有の静的データ
 │   ├── tech-stack.ts               # 技術スタックの正規カタログ + 型 + 検出 alias
 │   └── technologies.ts             # 互換 re-export（新規実装では tech-stack.ts を使う）
 ├── mockup/                         # デザインの真理値（read-only）
-├── .docs/
-├── .claude/
+├── .docs/                           # プロダクト仕様、STATUS、索引
+├── .agents/skills/                  # 実装ルールとtask workflowの正規ソース
+├── .claude/skills/                  # .agents/skillsを参照する互換入口
 ├── package.json                    # workspace root
 ├── pnpm-workspace.yaml
 └── tsconfig.base.json
@@ -121,7 +133,9 @@ data/                     → 外を import しない（純データのみ）
 | 共有 UI | `apps/frontend/components/` | 複数 feature で再利用する純 UI のみ |
 | shadcn primitive | `apps/frontend/components/ui/` | shadcn CLI が出力する場所 |
 | Convex schema | `convex/schema.ts` | **1 ファイル集約。テーブル単位で分割しない**（`defineSchema` は単一エントリポイント） |
-| query / mutation / action | `convex/<table>.ts` | **テーブル単位で 1 ファイルに分ける**（schema との分割粒度の違いに注意） |
+| query / mutation | `convex/<resource>.ts` | resource責務で分け、public入口を薄くする |
+| Node action | `convex/<feature>Action.ts` | 外部I/Oだけを置き、DB処理はinternal functionへ戻す |
+| Convex helper | `convex/lib/<feature>/` | 純粋ロジック、parser、feature固有helper |
 | 共有静的データ | `data/<name>.ts` | frontend / convex 両方から参照する純データ（技術カタログ等）。関数を含めない |
 | 認証ロジック | `convex/auth.ts` + `apps/frontend/lib/auth.ts` | Convex 側と Next.js 側のヘルパを分離 |
 | フォーム validation | `apps/frontend/features/<feature>/schema.ts` | Zod。Convex の `v.*` とは別物 |
@@ -163,7 +177,7 @@ Convex を使う場合の役割分担。
 ### canonical 例
 
 ```tsx
-// apps/frontend/app/(public)/@[username]/page.tsx
+// apps/frontend/app/(public)/[username]/page.tsx
 export default function Page({ params }) {
   return <ProfileView username={params.username} />;
 }

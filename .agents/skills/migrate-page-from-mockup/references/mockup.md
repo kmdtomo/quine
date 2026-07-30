@@ -2,7 +2,19 @@
 
 > `mockup/` は **デザインの真理値（source of truth）**。Quine の全ページの最終的な見た目・操作はここで定義されている。
 
-**関連ドキュメント:** [05_directory-structure.md](./05_directory-structure.md)
+**関連reference:** [ディレクトリ構造](../../quine-implement/references/architecture.md)
+
+## 目次
+
+- [mockupとは](#1-mockup-とは)
+- [実装側リソース](#11-既に整備済みの実装側リソース)
+- [構成](#2-構成)
+- [ページ一覧](#3-ページ一覧)
+- [CSS設計](#4-css-設計)
+- [HTML構造](#5-html-の構造ルール)
+- [移植方針](#6-nextjs-への移植方針)
+- [チェックリスト](#7-移植時のチェックリスト)
+- [禁止事項](#8-やってはいけないこと)
 
 ---
 
@@ -92,7 +104,7 @@ mockup/
 詳細は `migrate-page-from-mockup` skill を参照。要点だけ:
 
 1. **HTML の `<!-- ========== ComponentName ========== -->` 区切りで `Section.tsx` に分割**
-2. **CSS クラスを Tailwind に置換**（共通トークンは `tailwind.config.ts` の `theme.extend` に移す）
+2. **CSS クラスをTailwindに置換**（共通トークンは`apps/frontend/app/globals.css`の`@theme inline`へ移す）
 3. **shadcn primitive 適用**: Dialog / Popover / DropdownMenu / Tabs / Toast / Tooltip 等は shadcn に置換
 4. **Quine 固有の見た目**（UserCard, TechStack, ProductCard 等）は Tailwind で自前実装
 5. **モックデータを Convex query に置換**（`*View` で preload、`*Content` で `usePreloadedQuery`）
@@ -102,7 +114,7 @@ mockup/
 
 - [ ] mockup の HTML / CSS と並べて見比べた
 - [ ] セクションコメントの単位でコンポーネント分割した
-- [ ] CSS 変数（`--color-primary` 等）を Tailwind config に移した
+- [ ] CSS変数（`--color-primary`等）を`globals.css`のTailwind themeへ移した
 - [ ] `style="..."` のインライン CSS を Tailwind class に置換した
 - [ ] shadcn で代替できる primitive を置き換えた
 - [ ] モックデータ（`data/technologies.js`、HTML 内ベタ書き）を Convex 経由に変えた

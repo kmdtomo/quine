@@ -78,5 +78,5 @@ OpenSSL、Linux、Postgres、世界の重要インフラはすべて中身が公
 - [`02_account.md`](./02_account.md) — アカウント設計 (会社/個人を区別しない)
 - [`03_github.md`](./03_github.md) — GitHub連携 & 技術スタック自動検出
 - [`04_login.md`](./04_login.md) — 認証 (GitHub のみで完結)
-- [`05_frontend.md`](./05_frontend.md) — フロントエンド設計
-- [`06_backend.md`](./06_backend.md) — バックエンド設計
+- [Frontend architecture](../.agents/skills/quine-implement/references/architecture.md) — フロントエンド構造と依存方向
+- [Convex design](../.agents/skills/quine-implement/references/convex-design.md) — データ層、認証、外部処理
