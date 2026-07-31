@@ -32,7 +32,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   ],
   callbacks: {
     async afterUserCreatedOrUpdated(ctx, { profile, userId }) {
-      const user = await ctx.db.get(userId);
+      const user = await ctx.db.get("users", userId);
       if (!user) {
         return;
       }
@@ -96,7 +96,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       }
 
       if (Object.keys(patch).length > 0) {
-        await ctx.db.patch(userId, patch);
+        await ctx.db.patch("users", userId, patch);
       }
     },
   },

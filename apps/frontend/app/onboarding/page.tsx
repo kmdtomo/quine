@@ -1,5 +1,5 @@
-import { OnboardingRedirectView } from "@/features/onboarding/components/OnboardingRedirectView";
+import { HomeRedirectView } from "@/features/onboarding/components/HomeRedirectView";
 
 export default function OnboardingPage() {
-  return <OnboardingRedirectView />;
+  return <HomeRedirectView />;
 }

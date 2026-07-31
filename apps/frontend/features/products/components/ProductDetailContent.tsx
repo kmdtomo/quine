@@ -23,6 +23,7 @@ import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { getProductErrorMessage } from "../lib/product-error";
 import {
   AuthorLink,
   getProjectTypeLabel,
@@ -77,9 +78,7 @@ export function ProductDetailContent({
       setJoinMessage("Request sent.");
     } catch (unknownError: unknown) {
       setJoinMessage(
-        unknownError instanceof Error
-          ? unknownError.message
-          : "Could not send request.",
+        getProductErrorMessage(unknownError, "Could not send request."),
       );
     } finally {
       setJoining(false);
@@ -130,12 +129,14 @@ export function ProductDetailContent({
                       aria-label="View developers"
                       onClick={() => setDeveloperModalOpen(true)}
                     >
-                      {product.developers.slice(0, 4).map((developer) => (
-                        <DeveloperAvatar
-                          key={developer._id}
-                          developer={developer}
-                        />
-                      ))}
+                      {product.developers
+                        .slice(0, 4)
+                        .map((developer: DetailDeveloper) => (
+                          <DeveloperAvatar
+                            key={developer._id}
+                            developer={developer}
+                          />
+                        ))}
                       <span className="grid size-8 place-items-center rounded-full border border-[#272727] bg-primary text-[#111]">
                         <PlusIcon className="size-4" aria-hidden="true" />
                       </span>
@@ -199,18 +200,20 @@ export function ProductDetailContent({
             <h2 className="mb-3 text-sm font-bold text-white/65">Screenshots</h2>
             {product.screenshots.length > 0 ? (
               <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-                {product.screenshots.map((screenshot, index) => (
-                  <div
-                    key={`${screenshot}-${index}`}
-                    className="aspect-video overflow-hidden rounded-xl border border-[#3A3A3A] bg-[#1E1E1E]"
-                  >
-                    <img
-                      src={screenshot}
-                      alt=""
-                      className="size-full object-cover"
-                    />
-                  </div>
-                ))}
+                {product.screenshots.map(
+                  (screenshot: string, index: number) => (
+                    <div
+                      key={`${screenshot}-${index}`}
+                      className="aspect-video overflow-hidden rounded-xl border border-[#3A3A3A] bg-[#1E1E1E]"
+                    >
+                      <img
+                        src={screenshot}
+                        alt=""
+                        className="size-full object-cover"
+                      />
+                    </div>
+                  ),
+                )}
               </div>
             ) : (
               <div className="grid min-h-36 place-items-center rounded-xl border border-dashed border-white/15 bg-[#1E1E1E] text-sm text-white/35">

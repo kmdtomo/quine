@@ -22,10 +22,29 @@ import {
   ProductLogoMark,
   ProductTechBadges,
   ProductTypeIcon,
+  type ProductProjectType,
+  type ProductTechnology,
 } from "./product-ui";
 
 type ProductListContentProps = {
   preloadedProducts: Preloaded<typeof api.products.listPublic>;
+};
+
+type ProductListProduct = {
+  _id: string;
+  author: {
+    company: string | undefined;
+    image: string | undefined;
+    name: string | undefined;
+    username: string | undefined;
+  };
+  content: string;
+  logo: string | undefined;
+  name: string;
+  projectType: ProductProjectType;
+  slug: string;
+  tagline: string;
+  technologies: ProductTechnology[];
 };
 
 const PRODUCT_TYPE_FILTERS = [
@@ -44,10 +63,10 @@ export function ProductListContent({
   const [selectedTechKeys, setSelectedTechKeys] = useState<string[]>([]);
   const [techModalOpen, setTechModalOpen] = useState(false);
 
-  const filteredProducts = useMemo(() => {
+  const filteredProducts = useMemo<ProductListProduct[]>(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return products.filter((product) => {
+    return products.filter((product: ProductListProduct) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
         product.name.toLowerCase().includes(normalizedSearch) ||
@@ -60,11 +79,12 @@ export function ProductListContent({
         product.projectType === projectTypeFilter;
       const matchesTech =
         selectedTechKeys.length === 0 ||
-        selectedTechKeys.every((selectedKey) =>
-          product.technologies.some(
-            (technology) => technology.technologyKey === selectedKey,
-          ),
-        );
+          selectedTechKeys.every((selectedKey) =>
+            product.technologies.some(
+              (technology: ProductTechnology) =>
+                technology.technologyKey === selectedKey,
+            ),
+          );
 
       return matchesSearch && matchesType && matchesTech;
     });

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { XIcon } from "lucide-react";
 
 import RotatingText from "@/components/RotatingText";
@@ -30,7 +31,6 @@ export type DetectedTechnology = {
 
 export type AnalysisResult = {
   analyzedRepositoryCount: number;
-  installationId: number;
   repositoryCount: number;
   requestCount: number;
   requestLimit: number;
@@ -119,13 +119,14 @@ function ConnectState({ onManual }: { onManual: () => void }) {
         Quine reads dependency files to build your tech stack. Repository
         selection happens on GitHub.
       </p>
-      <a
+      <Link
         href="/api/signup/github-app/install"
+        prefetch={false}
         className="mt-7 inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white px-5 text-sm font-semibold text-zinc-950 shadow-lg transition hover:-translate-y-0.5 hover:bg-zinc-100"
       >
         <GithubIcon />
         Install Quine on GitHub
-      </a>
+      </Link>
       <button
         type="button"
         className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-xl border border-white/10 text-sm font-semibold text-white/60 transition hover:bg-white/[0.04] hover:text-white"

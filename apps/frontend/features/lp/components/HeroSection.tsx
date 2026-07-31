@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import styles from "../lp.module.css";
 import { LanguageMarquee } from "./LanguageMarquee";
 import { PrismBackground } from "./PrismBackground";
-import { RevealOnView } from "./RevealOnView";
+import { RevealOnScroll } from "./RevealOnScroll";
 
 export function HeroSection({ onSignupOpen }: { onSignupOpen: () => void }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -55,19 +55,19 @@ export function HeroSection({ onSignupOpen }: { onSignupOpen: () => void }) {
 
       <section className={styles.hero}>
         <div ref={innerRef} className={styles.heroInner}>
-          <RevealOnView delay={200}>
+          <RevealOnScroll delay={200}>
             <h1 className={styles.heroTitle}>
               Built in stack.
               <br />
               Found by stack.
             </h1>
-          </RevealOnView>
-          <RevealOnView delay={360}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={360}>
             <p className={styles.heroSubtitle}>
               Show what you ship. Discover who&rsquo;s shipping it.
             </p>
-          </RevealOnView>
-          <RevealOnView delay={520}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={520}>
             <div className={styles.heroActions}>
               <button
                 type="button"
@@ -83,13 +83,13 @@ export function HeroSection({ onSignupOpen }: { onSignupOpen: () => void }) {
                 See how it works
               </a>
             </div>
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
       </section>
 
-      <RevealOnView variant="fade" delay={720}>
+      <RevealOnScroll variant="fade" delay={720}>
         <LanguageMarquee />
-      </RevealOnView>
+      </RevealOnScroll>
     </div>
   );
 }

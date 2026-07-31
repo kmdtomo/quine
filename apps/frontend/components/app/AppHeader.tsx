@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BellIcon,
   Grid2X2Icon,
   HomeIcon,
   LinkIcon,
@@ -17,8 +16,10 @@ import { cn } from "@/lib/utils";
 
 type AppHeaderItem = "home" | "products" | "search" | "create";
 
+const HOME_HREF = "/home";
+
 type AppHeaderProps = {
-  activeItem?: AppHeaderItem;
+  activeItem?: AppHeaderItem | null;
   createProductHref?: string;
   createTechStackHref?: string;
   fixed?: boolean;
@@ -42,7 +43,7 @@ const navItems = [
   {
     key: "search",
     label: "Search",
-    href: "/products",
+    href: "/users",
     icon: SearchIcon,
   },
   {
@@ -64,7 +65,7 @@ export function AppHeader({
   fixed = true,
   guided = false,
   guideHref = "/",
-  homeHref = "/",
+  homeHref = HOME_HREF,
 }: AppHeaderProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -92,11 +93,10 @@ export function AppHeader({
           <div
             className={cn(
               "pointer-events-auto flex items-center justify-self-start transition",
-              guided &&
-                "pointer-events-none cursor-not-allowed opacity-35 grayscale",
+              guided && "opacity-35 grayscale",
             )}
           >
-            <QuineLogo href={homeHref} priority />
+            <QuineLogo href={HOME_HREF} priority />
           </div>
 
           <nav className="pointer-events-auto flex items-center justify-center">
@@ -105,11 +105,9 @@ export function AppHeader({
                 const Icon = item.icon;
                 const active = !guided && item.key === activeItem;
                 const guide = guided && item.key === "home";
-                const disabled = guided && !guide;
                 const className = cn(
                   "relative flex rounded-lg p-2 text-[#6A6A6A] transition hover:text-white",
                   active && "text-primary",
-                  disabled && "pointer-events-none",
                   guide && "text-primary",
                 );
 
@@ -130,7 +128,11 @@ export function AppHeader({
                 if (item.key === "home") {
                   return (
                     <li key={item.key}>
-                      <Link href={guided ? guideHref : homeHref} className={className} aria-label={item.label}>
+                      <Link
+                        href={guided ? guideHref : HOME_HREF}
+                        className={className}
+                        aria-label={item.label}
+                      >
                         {content}
                       </Link>
                     </li>
@@ -144,11 +146,7 @@ export function AppHeader({
                         type="button"
                         className={className}
                         aria-label={item.label}
-                        onClick={() => {
-                          if (!disabled) {
-                            setCreateOpen(true);
-                          }
-                        }}
+                        onClick={() => setCreateOpen(true)}
                       >
                         {content}
                       </button>
@@ -178,10 +176,7 @@ export function AppHeader({
               <li>
                 <button
                   type="button"
-                  className={cn(
-                    "relative flex rounded-lg p-2 text-[#6A6A6A] transition hover:text-white",
-                    guided && "pointer-events-none",
-                  )}
+                  className="relative flex rounded-lg p-2 text-[#6A6A6A] transition hover:text-white"
                   aria-label="Copy profile link"
                   onClick={copyProfileLink}
                 >
@@ -196,19 +191,7 @@ export function AppHeader({
             </ul>
           </nav>
 
-          <div className="pointer-events-auto inline-flex items-center gap-3 justify-self-end">
-            <button
-              type="button"
-              className={cn(
-                "relative grid size-9 place-items-center rounded-full text-[#999] transition hover:bg-white/[0.06] hover:text-white",
-                guided && "pointer-events-none",
-              )}
-              aria-label="Notifications"
-            >
-              <BellIcon className="size-5" aria-hidden="true" />
-              <span className="absolute top-2 right-2 size-[7px] rounded-full bg-primary shadow-[0_0_6px_rgba(7,222,129,0.6)]" />
-            </button>
-          </div>
+          <div aria-hidden="true" />
         </div>
       </header>
 

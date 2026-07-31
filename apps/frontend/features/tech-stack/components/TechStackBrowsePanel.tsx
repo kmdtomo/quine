@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { TechStackCategoryList } from "./TechStackCategoryList";
 import { TechStackGrid } from "./TechStackGrid";
-import { TechStackSortView } from "./TechStackSortView";
+import { TechStackSortSection } from "./TechStackSortSection";
 import type {
   FilterMode,
   SelectedTechnology,
@@ -35,6 +35,7 @@ type TechStackBrowsePanelProps = {
   search: string;
   selectedKeys: Set<string>;
   selectedTechnologies: SelectedTechnology[];
+  showFilterControls?: boolean;
   technologies: readonly TechnologyGridItem[];
 };
 
@@ -56,9 +57,11 @@ export function TechStackBrowsePanel({
   search,
   selectedKeys,
   selectedTechnologies,
+  showFilterControls = true,
   technologies,
 }: TechStackBrowsePanelProps) {
-  const sortMode = filterMode === "selected" && search.length === 0;
+  const sortMode =
+    showFilterControls && filterMode === "selected" && search.length === 0;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -106,48 +109,50 @@ export function TechStackBrowsePanel({
           )}
         </div>
 
-        <div
-          className="flex shrink-0 gap-0.5 rounded-full border border-white/[0.06] bg-black/30 p-[3px]"
-          role="tablist"
-          aria-label="Filter"
-        >
-          <button
-            type="button"
-            className={cn(
-              "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap text-[#999] transition hover:text-[#D0D0D0]",
-              filterMode === "all" &&
-                "bg-white/[0.08] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]",
-            )}
-            role="tab"
-            aria-selected={filterMode === "all"}
-            onClick={() => onFilterModeChange("all")}
+        {showFilterControls ? (
+          <div
+            className="flex shrink-0 gap-0.5 rounded-full border border-white/[0.06] bg-black/30 p-[3px]"
+            role="tablist"
+            aria-label="Filter"
           >
-            All
-          </button>
-          <button
-            type="button"
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap text-[#999] transition hover:text-[#D0D0D0]",
-              filterMode === "selected" &&
-                "bg-white/[0.08] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]",
-            )}
-            role="tab"
-            aria-selected={filterMode === "selected"}
-            onClick={() => onFilterModeChange("selected")}
-          >
-            <ListFilterIcon
+            <button
+              type="button"
               className={cn(
-                "size-[13px] opacity-70",
-                filterMode === "selected" && "text-primary opacity-100",
+                "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap text-[#999] transition hover:text-[#D0D0D0]",
+                filterMode === "all" &&
+                  "bg-white/[0.08] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]",
               )}
-              aria-hidden="true"
-            />
-            Selected & Sort
-            <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-primary/15 px-1.5 text-[10px] font-bold text-primary tabular-nums">
-              {selectedTechnologies.length}
-            </span>
-          </button>
-        </div>
+              role="tab"
+              aria-selected={filterMode === "all"}
+              onClick={() => onFilterModeChange("all")}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap text-[#999] transition hover:text-[#D0D0D0]",
+                filterMode === "selected" &&
+                  "bg-white/[0.08] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.2)]",
+              )}
+              role="tab"
+              aria-selected={filterMode === "selected"}
+              onClick={() => onFilterModeChange("selected")}
+            >
+              <ListFilterIcon
+                className={cn(
+                  "size-[13px] opacity-70",
+                  filterMode === "selected" && "text-primary opacity-100",
+                )}
+                aria-hidden="true"
+              />
+              Selected & Sort
+              <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-primary/15 px-1.5 text-[10px] font-bold text-primary tabular-nums">
+                {selectedTechnologies.length}
+              </span>
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <div
@@ -169,7 +174,7 @@ export function TechStackBrowsePanel({
 
         <div className="flex min-h-0 min-w-0 flex-col overflow-hidden">
           {sortMode ? (
-            <TechStackSortView
+            <TechStackSortSection
               groupedSelected={groupedSelected}
               onRemoveTechnology={onRemoveTechnology}
               onReorderTechnologies={onReorderTechnologies}

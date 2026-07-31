@@ -1,17 +1,36 @@
 {
   "name": "quine",
   "private": true,
+  "packageManager": "pnpm@11.18.0",
   "scripts": {
     "dev": "pnpm --filter frontend dev",
     "convex:dev": "convex dev",
     "build": "pnpm --filter frontend build",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm run typecheck:frontend",
+    "typecheck:frontend": "pnpm --filter frontend typecheck",
+    "typecheck:convex": "tsc --project convex/tsconfig.json --noEmit",
+    "lint": "pnpm run lint:frontend && pnpm run lint:convex",
+    "lint:frontend": "pnpm --filter frontend lint",
+    "lint:convex": "eslint convex data",
+    "check:secrets": "secret_pattern='(s''bp_|g''hp_|github_''pat_|-----BEGIN [A-Z ]*PRIVATE'' KEY-----)'; if git grep -q -I -E \"$secret_pattern\" -- ':!pnpm-lock.yaml'; then echo 'Potential plaintext credential found in tracked files.' >&2; exit 1; fi",
+    "check": "pnpm run check:secrets && pnpm run typecheck:frontend && pnpm run lint:frontend && pnpm run typecheck:convex && pnpm run lint:convex",
+    "verify:convex": "convex dev --once --typecheck enable",
+    "verify": "pnpm run check && pnpm run verify:convex"
   },
   "devDependencies": {
-    "convex": "^1.37.0"
+    "@convex-dev/eslint-plugin": "^2.0.0",
+    "@types/node": "^20.19.39",
+    "convex": "^1.37.0",
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.1"
   },
   "dependencies": {
     "@auth/core": "^0.37.0",
-    "@convex-dev/auth": "^0.0.92"
+    "@aws-sdk/client-s3": "^3.1078.0",
+    "@convex-dev/auth": "^0.0.92",
+    "@strands-agents/sdk": "^1.7.0",
+    "openai": "^6.45.0",
+    "zod": "^4.4.1"
   }
 }

@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 import type { SelectedTechnology, SelectedTechnologyGroup } from "./types";
 
-type TechStackSortViewProps = {
+type TechStackSortSectionProps = {
   groupedSelected: SelectedTechnologyGroup[];
   onRemoveTechnology: (technologyKey: string) => void;
   onReorderTechnologies: (technologyKeys: string[]) => void;
@@ -24,13 +24,13 @@ type TechStackSortViewProps = {
   selectedTechnologies: SelectedTechnology[];
 };
 
-export function TechStackSortView({
+export function TechStackSortSection({
   groupedSelected,
   onRemoveTechnology,
   onReorderTechnologies,
   onTechnologyYearsChange,
   selectedTechnologies,
-}: TechStackSortViewProps) {
+}: TechStackSortSectionProps) {
   const listRef = useRef<HTMLDivElement | null>(null);
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<{

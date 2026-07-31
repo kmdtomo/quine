@@ -1,3 +1,5 @@
+import { ConvexError } from "convex/values";
+
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 
@@ -56,13 +58,19 @@ export async function requireProductEditor(
   productId: Doc<"products">["_id"],
   user: Doc<"users">,
 ) {
-  const product = await ctx.db.get(productId);
+  const product = await ctx.db.get("products", productId);
   if (!product) {
-    throw new Error("Product not found.");
+    throw new ConvexError({
+      code: "PRODUCT_NOT_FOUND",
+      message: "Product not found.",
+    });
   }
 
   if (!(await canEditProduct(ctx, product, user))) {
-    throw new Error("Forbidden.");
+    throw new ConvexError({
+      code: "FORBIDDEN",
+      message: "You do not have permission to edit this product.",
+    });
   }
 
   return product;
@@ -73,13 +81,19 @@ export async function requireProductAuthor(
   productId: Doc<"products">["_id"],
   user: Doc<"users">,
 ) {
-  const product = await ctx.db.get(productId);
+  const product = await ctx.db.get("products", productId);
   if (!product) {
-    throw new Error("Product not found.");
+    throw new ConvexError({
+      code: "PRODUCT_NOT_FOUND",
+      message: "Product not found.",
+    });
   }
 
   if (product.authorId !== user._id) {
-    throw new Error("Forbidden.");
+    throw new ConvexError({
+      code: "FORBIDDEN",
+      message: "Only the product author can perform this action.",
+    });
   }
 
   return product;

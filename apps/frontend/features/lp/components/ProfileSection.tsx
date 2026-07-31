@@ -3,7 +3,7 @@ import Image from "next/image";
 import { PROFILE_IDENTITY } from "../data/showcase";
 import styles from "../lp.module.css";
 import { ProfileTechRail } from "./ProfileTechRail";
-import { RevealOnView } from "./RevealOnView";
+import { RevealOnScroll } from "./RevealOnScroll";
 
 export function ProfileSection() {
   return (
@@ -13,27 +13,27 @@ export function ProfileSection() {
     >
       <div className={`${styles.featureInner} ${styles.profileFeatureInner}`}>
         <div className={styles.featureCopy}>
-          <RevealOnView>
+          <RevealOnScroll>
             <span className={styles.eyebrow}>Profile</span>
-          </RevealOnView>
-          <RevealOnView delay={90}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={90}>
             <h2 className={styles.title}>
               Your stack is
               <br />
               your profile.
             </h2>
-          </RevealOnView>
-          <RevealOnView delay={180}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={180}>
             <p className={styles.lead}>
               Stop writing &ldquo;proficient in React.&rdquo;{" "}
               <strong>Show the stack you ship with</strong> — and let people
               scroll through it.
             </p>
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
 
         <div className={styles.profileSide}>
-          <RevealOnView>
+          <RevealOnScroll>
             <div className={styles.profileIdentity}>
               <div className={styles.profileAvatar}>
                 <Image
@@ -52,11 +52,11 @@ export function ProfileSection() {
                 </div>
               </div>
             </div>
-          </RevealOnView>
+          </RevealOnScroll>
 
-          <RevealOnView delay={120}>
+          <RevealOnScroll delay={120}>
             <ProfileTechRail />
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
       </div>
     </section>

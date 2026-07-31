@@ -6,6 +6,7 @@ import {
 
 const isSignInPage = createRouteMatcher(["/signin"]);
 const isProtectedRoute = createRouteMatcher([
+  "/home(.*)",
   "/onboarding(.*)",
   "/settings(.*)",
   "/(app)(.*)",

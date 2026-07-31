@@ -1,3 +1,5 @@
+import { ConvexError } from "convex/values";
+
 import type { Doc } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { auth } from "../auth";
@@ -9,7 +11,7 @@ export async function getCurrentUser(
   if (!userId) {
     return null;
   }
-  return await ctx.db.get(userId);
+  return await ctx.db.get("users", userId);
 }
 
 export async function requireUser(
@@ -17,7 +19,10 @@ export async function requireUser(
 ): Promise<Doc<"users">> {
   const user = await getCurrentUser(ctx);
   if (!user) {
-    throw new Error("Unauthorized");
+    throw new ConvexError({
+      code: "UNAUTHORIZED",
+      message: "Authentication is required.",
+    });
   }
   return user;
 }

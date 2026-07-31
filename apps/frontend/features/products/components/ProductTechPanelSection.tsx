@@ -1,12 +1,6 @@
 import { PencilIcon } from "lucide-react";
 
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
-import { cn } from "@/lib/utils";
-
-import {
-  buttonBaseClass,
-  gradientButtonClass,
-} from "./ProductEditPrimitives";
 
 export type ProductEditTechnology = {
   categoryName?: string;
@@ -27,20 +21,18 @@ export function ProductTechPanelSection({
   onEdit: () => void;
 }) {
   return (
-    <aside className="sticky top-4 flex max-h-[calc(100vh-56px-32px)] flex-col gap-4 overflow-y-auto rounded-[8px] border border-white/[0.04] bg-[#212121] p-5 max-lg:static max-lg:max-h-none">
-      <header className="flex items-center justify-between gap-3">
-        <h3 className="text-base font-bold text-white">Product Tech Stack</h3>
-        <button
-          type="button"
-          className={cn(buttonBaseClass, gradientButtonClass, "px-3.5 py-1.5 text-xs")}
-          onClick={onEdit}
-        >
-          <PencilIcon className="size-3" aria-hidden="true" />
-          Edit
-        </button>
-      </header>
+    <aside className="sticky top-4 relative flex max-h-[calc(100vh-56px-32px)] flex-col overflow-y-auto rounded-[8px] border border-white/[0.04] bg-[#212121] p-4 max-lg:static max-lg:max-h-none">
+      <button
+        type="button"
+        aria-label="Edit product technologies"
+        title="Edit technologies"
+        className="absolute top-4 right-4 z-10 grid size-6 place-items-center text-[#8A8A8A] transition hover:text-white focus-visible:text-white focus-visible:outline-none"
+        onClick={onEdit}
+      >
+        <PencilIcon className="size-3.5" aria-hidden="true" />
+      </button>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-[18px]">
         {groups.length === 0 ? (
           <button
             type="button"
@@ -51,21 +43,23 @@ export function ProductTechPanelSection({
           </button>
         ) : (
           groups.map((group) => (
-            <section key={group.categoryName} className="flex flex-col gap-2">
-              <h4 className="text-[11px] font-medium tracking-[0.02em] text-[#D0D0D0]">
+            <section key={group.categoryName} className="flex flex-col gap-1.5">
+              <h4 className="text-xs leading-none font-medium tracking-[0.02em] text-white">
                 {group.categoryName}
               </h4>
-              <div className="grid grid-cols-3 gap-1">
+              <div className="grid grid-cols-3 gap-x-1 gap-y-2">
                 {group.technologies.map((technology) => (
                   <div
                     key={technology.key}
-                    className="flex flex-col items-center gap-1 rounded-[6px] px-1 py-2 transition hover:bg-white/[0.03]"
+                    className="flex min-w-0 flex-col items-center gap-1 rounded-[6px] px-1 py-1.5 transition hover:bg-white/[0.03]"
                   >
                     <TechnologyLogo
                       name={technology.name}
+                      backdrop="auto"
                       className="size-8 rounded-none border-0 bg-transparent"
                       imageClassName="size-full"
                       fallbackClassName="text-[10px] text-white"
+                      logoColor="auto"
                     />
                     <span className="max-w-full truncate text-center text-[10px] leading-[1.25] text-[#D0D0D0]">
                       {technology.name}

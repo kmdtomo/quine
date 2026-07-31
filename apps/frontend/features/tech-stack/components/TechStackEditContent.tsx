@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import {
-  useAction,
   useMutation,
   usePreloadedQuery,
   useQuery,
@@ -15,6 +15,10 @@ import {
 import { AppHeader } from "@/components/app/AppHeader";
 import { allTechnologies, techStackCategories } from "@data/tech-stack";
 
+import {
+  getAnalysisErrorMessage,
+  getTechStackErrorMessage,
+} from "../lib/tech-stack-error";
 import { TechEditHero } from "./TechEditHero";
 import { TechStackBrowsePanel } from "./TechStackBrowsePanel";
 import { TechStackEditToast } from "./TechStackEditToast";
@@ -31,25 +35,30 @@ import type {
 } from "./types";
 
 type TechStackEditContentProps = {
+  githubAppConnected: boolean;
   githubAppError: string | null;
-  installationId: number | null;
+  githubInstallationId: Id<"githubInstallations"> | null;
   manual: boolean;
   onboarding: boolean;
+  preloadedInstallations: Preloaded<typeof api.githubInstallations.listMine>;
   preloadedStack: Preloaded<typeof api.developerTechnologies.listMine>;
-};
-
-type InstallationSummary = {
-  accountLogin: string;
-  accountType: string;
-  id: number;
-  repositorySelection: string;
-  targetType: string;
+  runId: Id<"githubAnalysisRuns"> | null;
 };
 
 const ERROR_MESSAGES: Record<string, string> = {
+  authorization_failed:
+    "GitHub account or installation authorization could not be verified.",
+  authorization_start_failed:
+    "GitHub authorization could not be started. Check the GitHub App configuration.",
+  invalid_oauth_callback:
+    "GitHub authorization expired or could not be verified.",
+  invalid_setup_callback:
+    "GitHub installation response expired or could not be verified.",
   invalid_state: "GitHub did not return a valid installation response.",
   missing_config: "GitHub App is not configured yet.",
   missing_installation: "GitHub did not return an installation id.",
+  organization_not_supported:
+    "Organization connections require secure renewable authorization. Choose your personal GitHub account for now.",
 };
 
 const TOAST_PROMPT_MS = 8000;
@@ -58,16 +67,24 @@ const TOAST_UNDO_MS = 4000;
 const TECH_STACK_EDIT_HREF = "/tech-stack/edit";
 
 export function TechStackEditContent({
+  githubAppConnected,
   githubAppError,
-  installationId,
+  githubInstallationId,
   manual,
   onboarding,
+  preloadedInstallations,
   preloadedStack,
+  runId,
 }: TechStackEditContentProps) {
   const router = useRouter();
+  const installations = usePreloadedQuery(preloadedInstallations);
   const stack = usePreloadedQuery(preloadedStack);
-  const listInstallations = useAction(api.githubAction.listInstallations);
-  const analyzeRepos = useAction(api.githubAction.analyzeRepos);
+  const startTechnologyAnalysis = useMutation(
+    api.githubAnalysisRuns.startTechnologyAnalysis,
+  );
+  const retryTechnologyAnalysis = useMutation(
+    api.githubAnalysisRuns.retryTechnologyAnalysis,
+  );
   const addTechnology = useMutation(api.developerTechnologies.add);
   const completeTechStackOnboarding = useMutation(
     api.users.completeTechStackOnboarding,
@@ -88,13 +105,15 @@ export function TechStackEditContent({
   const needsProfileOnboarding =
     stack?.user.profileOnboardingCompletedAt === undefined;
   const forcedModalOpen =
-    installationId !== null || githubAppError !== null || manual;
+    githubAppConnected ||
+    githubInstallationId !== null ||
+    runId !== null ||
+    githubAppError !== null ||
+    manual;
   const shouldOpenModal =
     forcedModalOpen || (onboarding && needsTechStackOnboarding) || needsTechStackOnboarding;
   const [modalOpen, setModalOpen] = useState(shouldOpenModal);
-  const [modalPhase, setModalPhase] = useState<ModalPhase>(
-    manual ? "manual" : githubAppError ? "error" : "checking",
-  );
+  const [manualMode, setManualMode] = useState(manual);
   const [modalError, setModalError] = useState<string | null>(
     githubAppError
       ? ERROR_MESSAGES[githubAppError] ?? ERROR_MESSAGES.invalid_state
@@ -104,22 +123,53 @@ export function TechStackEditContent({
     () => new Set(),
   );
   const [panelYear, setPanelYear] = useState<number | null>(null);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [runId] = useState(() => crypto.randomUUID());
   const [search, setSearch] = useState("");
   const [toast, setToast] = useState<ToastState>({ mode: "hidden" });
 
-  const startedAnalysisRef = useRef<string | null>(null);
+  const startedAnalysisRef = useRef<Id<"githubInstallations"> | null>(
+    null,
+  );
   const toastTimerRef = useRef<number | null>(null);
 
-  const logs = useQuery(
-    api.githubAnalysisLogs.listByRun,
-    modalOpen ? { runId } : "skip",
+  const analysisRun = useQuery(
+    api.githubAnalysisRuns.getMine,
+    runId === null ? "skip" : { runId },
   );
+  const logs = useQuery(
+    api.githubAnalysisLogs.listByAnalysisRun,
+    modalOpen && runId !== null ? { runId } : "skip",
+  );
+  const activeInstallations = installations.filter(
+    (installation) => installation.status === "active",
+  );
+  const selectedInstallation =
+    activeInstallations.find(
+      (installation) => installation._id === githubInstallationId,
+    ) ??
+    activeInstallations[0] ??
+    null;
+  const analysisError =
+    analysisRun?.status === "failed"
+      ? getAnalysisErrorMessage(analysisRun.errorCode)
+      : null;
+  const modalPhase: ModalPhase = modalError || analysisError
+    ? "error"
+    : manualMode
+      ? "manual"
+      : analysisRun?.status === "succeeded"
+        ? "done"
+        : analysisRun?.status === "queued" ||
+            analysisRun?.status === "running"
+          ? "scanning"
+          : selectedInstallation
+            ? "checking"
+            : "connect";
+  const result: AnalysisResult | null =
+    analysisRun?.status === "succeeded" ? analysisRun : null;
 
   const selectedTechnologies = useMemo<SelectedTechnology[]>(
     () =>
-      (stack?.technologies ?? []).map((technology) => ({
+      (stack?.technologies ?? []).map((technology: SelectedTechnology) => ({
         categoryName: technology.categoryName,
         description: technology.description,
         name: technology.name,
@@ -164,7 +214,7 @@ export function TechStackEditContent({
       activeCategory.technologies.map((technology) => technology.key),
     );
     return allTechnologies.filter((technology) => activeKeys.has(technology.key));
-  }, [activeCategory?.technologies, normalizedSearch]);
+  }, [activeCategory, normalizedSearch]);
 
   const groupedSelected = useMemo<SelectedTechnologyGroup[]>(
     () =>
@@ -225,7 +275,6 @@ export function TechStackEditContent({
 
   const reportMutationError = useCallback((message: string) => {
     setModalError(message);
-    setModalPhase("error");
     setModalOpen(true);
   }, []);
 
@@ -235,7 +284,7 @@ export function TechStackEditContent({
         await operation();
       } catch (unknownError: unknown) {
         reportMutationError(
-          unknownError instanceof Error ? unknownError.message : fallbackMessage,
+          getTechStackErrorMessage(unknownError, fallbackMessage),
         );
       }
     },
@@ -243,90 +292,52 @@ export function TechStackEditContent({
   );
 
   const startAnalysis = useCallback(
-    (targetInstallationId: number) => {
-      const analysisKey = `${targetInstallationId}:${runId}`;
-      if (startedAnalysisRef.current === analysisKey) {
+    (targetInstallationId: Id<"githubInstallations">) => {
+      if (startedAnalysisRef.current === targetInstallationId) {
         return;
       }
-      startedAnalysisRef.current = analysisKey;
-      setModalPhase("scanning");
+      startedAnalysisRef.current = targetInstallationId;
       setModalError(null);
-      setResult(null);
 
-      analyzeRepos({ installationId: targetInstallationId, runId })
-        .then((analysis) => {
-          setResult(analysis);
-          setModalPhase("done");
+      startTechnologyAnalysis({
+        githubInstallationId: targetInstallationId,
+      })
+        .then(({ runId: nextRunId }) => {
+          const params = new URLSearchParams();
+          params.set("onboarding", "1");
+          params.set("github_run", nextRunId);
+          router.replace(`${TECH_STACK_EDIT_HREF}?${params.toString()}`);
         })
         .catch((unknownError: unknown) => {
+          startedAnalysisRef.current = null;
           setModalError(
-            unknownError instanceof Error
-              ? unknownError.message
-              : "GitHub repository analysis failed.",
+            getTechStackErrorMessage(
+              unknownError,
+              "GitHub repository analysis failed.",
+            ),
           );
-          setModalPhase("error");
         });
     },
-    [analyzeRepos, runId],
+    [router, startTechnologyAnalysis],
   );
 
   useEffect(() => {
-    if (!modalOpen) {
+    if (
+      !modalOpen ||
+      manualMode ||
+      modalError !== null ||
+      runId !== null ||
+      !selectedInstallation
+    ) {
       return;
     }
-    if (manual) {
-      setModalPhase("manual");
-      return;
-    }
-    if (githubAppError) {
-      setModalError(ERROR_MESSAGES[githubAppError] ?? ERROR_MESSAGES.invalid_state);
-      setModalPhase("error");
-      return;
-    }
-
-    const storedInstallationId = stack?.user.githubInstallationId ?? null;
-    const targetInstallationId = installationId ?? storedInstallationId;
-    if (targetInstallationId !== null) {
-      startAnalysis(targetInstallationId);
-      return;
-    }
-
-    let canceled = false;
-    setModalPhase("checking");
-    listInstallations({})
-      .then((installations: InstallationSummary[]) => {
-        if (canceled) {
-          return;
-        }
-        const firstInstallation = installations[0];
-        if (!firstInstallation) {
-          setModalPhase("connect");
-          return;
-        }
-        startAnalysis(firstInstallation.id);
-      })
-      .catch((unknownError: unknown) => {
-        if (canceled) {
-          return;
-        }
-        setModalError(
-          unknownError instanceof Error
-            ? unknownError.message
-            : "Could not check GitHub App installations.",
-        );
-        setModalPhase("error");
-      });
-
-    return () => {
-      canceled = true;
-    };
+    startAnalysis(selectedInstallation._id);
   }, [
-    githubAppError,
-    installationId,
-    listInstallations,
-    manual,
+    manualMode,
+    modalError,
     modalOpen,
-    stack?.user.githubInstallationId,
+    runId,
+    selectedInstallation,
     startAnalysis,
   ]);
 
@@ -351,7 +362,27 @@ export function TechStackEditContent({
 
   const handleManualOnboarding = () => {
     setModalError(null);
-    setModalPhase("manual");
+    setManualMode(true);
+  };
+
+  const handleRetryAnalysis = () => {
+    setModalError(null);
+    setManualMode(false);
+    if (runId === null) {
+      startedAnalysisRef.current = null;
+      return;
+    }
+
+    retryTechnologyAnalysis({ runId }).catch(
+      (unknownError: unknown) => {
+        setModalError(
+          getTechStackErrorMessage(
+            unknownError,
+            "GitHub repository analysis could not be retried.",
+          ),
+        );
+      },
+    );
   };
 
   const handleSearchChange = (value: string) => {
@@ -591,14 +622,10 @@ export function TechStackEditContent({
       {modalOpen ? (
         <TechStackOnboardingModal
           logs={logs ?? []}
-          modalError={modalError}
+          modalError={modalError ?? analysisError}
           onClose={closeModal}
           onManual={handleManualOnboarding}
-          onRetry={() => {
-            startedAnalysisRef.current = null;
-            setModalPhase("checking");
-            setModalError(null);
-          }}
+          onRetry={handleRetryAnalysis}
           phase={modalPhase}
           result={result}
         />

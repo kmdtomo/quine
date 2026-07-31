@@ -17,5 +17,5 @@ export default async function EditProductPage({
   params: Params;
 }) {
   const { productId } = await params;
-  return <ProductEditView productId={productId as Id<"products">} />;
+  return <ProductEditView mode="edit" productId={productId as Id<"products">} />;
 }

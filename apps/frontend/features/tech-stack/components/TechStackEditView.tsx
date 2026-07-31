@@ -1,5 +1,6 @@
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { preloadQuery } from "convex/nextjs";
 import { redirect } from "next/navigation";
 
@@ -7,35 +8,41 @@ import { TechStackEditContent } from "./TechStackEditContent";
 
 type TechStackEditViewProps = {
   githubAppError: string | null;
-  installationId: number | null;
+  githubAppConnected: boolean;
+  githubInstallationId: Id<"githubInstallations"> | null;
   manual: boolean;
   onboarding: boolean;
+  runId: Id<"githubAnalysisRuns"> | null;
 };
 
 export async function TechStackEditView({
   githubAppError,
-  installationId,
+  githubAppConnected,
+  githubInstallationId,
   manual,
   onboarding,
+  runId,
 }: TechStackEditViewProps) {
   const token = await convexAuthNextjsToken();
   if (!token) {
     redirect("/signin");
   }
 
-  const preloadedStack = await preloadQuery(
-    api.developerTechnologies.listMine,
-    {},
-    { token },
-  );
+  const [preloadedInstallations, preloadedStack] = await Promise.all([
+    preloadQuery(api.githubInstallations.listMine, {}, { token }),
+    preloadQuery(api.developerTechnologies.listMine, {}, { token }),
+  ]);
 
   return (
     <TechStackEditContent
       githubAppError={githubAppError}
-      installationId={installationId}
+      githubAppConnected={githubAppConnected}
+      githubInstallationId={githubInstallationId}
       manual={manual}
       onboarding={onboarding}
+      preloadedInstallations={preloadedInstallations}
       preloadedStack={preloadedStack}
+      runId={runId}
     />
   );
 }

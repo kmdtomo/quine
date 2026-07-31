@@ -6,7 +6,7 @@ import { fetchQuery } from "convex/nextjs";
 
 const TECH_STACK_EDIT_HREF = "/tech-stack/edit";
 
-export async function OnboardingRedirectView() {
+export async function HomeRedirectView() {
   const token = await convexAuthNextjsToken();
   if (!token) {
     redirect("/signin");
@@ -24,9 +24,7 @@ export async function OnboardingRedirectView() {
 
   if (me.profileOnboardingCompletedAt === undefined) {
     redirect(
-      profileHref
-        ? `${profileHref}?onboarding=1`
-        : TECH_STACK_EDIT_HREF,
+      profileHref ? `${profileHref}?onboarding=1` : TECH_STACK_EDIT_HREF,
     );
   }
 

@@ -23,6 +23,7 @@
 3. `convex/` は DB スキーマと query / mutation / action の単一ソース
 4. `components/` は複数 feature で再利用する UI のみ置く
 5. `lib/` は認証ヘルパ、env、logger など横断関心事を持つ
+6. `data/` は frontend / Convexで共有するcanonical data、型、決定的helperだけを持つ
 
 ## 2. 全体構造
 
@@ -77,7 +78,7 @@ quine/
 │   ├── <resource>.ts               # query / mutation / internal function
 │   ├── <feature>Action.ts          # Node action（必要な場合）
 │   └── lib/<feature>/              # 純粋ロジック、外部応答のparse
-├── data/                           # frontend / convex 共有の静的データ
+├── data/                           # frontend / convex 共有のcanonical data + 決定的helper
 │   ├── tech-stack.ts               # 技術スタックの正規カタログ + 型 + 検出 alias
 │   └── technologies.ts             # 互換 re-export（新規実装では tech-stack.ts を使う）
 ├── mockup/                         # デザインの真理値（read-only）
@@ -110,7 +111,7 @@ apps/frontend/app/        → apps/frontend/features/, components/, lib/, data/
 apps/frontend/features/   → convex/_generated/, apps/frontend/components/, lib/, data/
 apps/frontend/components/ → apps/frontend/lib/, data/
 convex/                   → convex/ 内 + data/ のみ（features/ や app/ を import しない）
-data/                     → 外を import しない（純データのみ）
+data/                     → 外を import しない（canonical data、型、決定的helperのみ）
 ```
 
 ### 禁止
@@ -119,7 +120,8 @@ data/                     → 外を import しない（純データのみ）
 - `convex/_generated/` 以外を features から import する（`convex/seeds/` 等への直接 import は禁止 → 共有データは `data/` に置く）
 - `convex/` 内から `features/` や `app/` を import する（`data/` の import は OK）
 - `components/` に feature 固有のロジック・文言を置く
-- `data/` に動的処理（関数）を置く（純データ・型のみ）
+- `data/` にI/O、環境変数参照、mutable state、feature / DB依存を置く
+- `data/`に置いたcanonical dataだけから結果を返す、環境非依存の決定的helperは許可する
 
 ## 4. 配置ルール
 
@@ -136,7 +138,7 @@ data/                     → 外を import しない（純データのみ）
 | query / mutation | `convex/<resource>.ts` | resource責務で分け、public入口を薄くする |
 | Node action | `convex/<feature>Action.ts` | 外部I/Oだけを置き、DB処理はinternal functionへ戻す |
 | Convex helper | `convex/lib/<feature>/` | 純粋ロジック、parser、feature固有helper |
-| 共有静的データ | `data/<name>.ts` | frontend / convex 両方から参照する純データ（技術カタログ等）。関数を含めない |
+| 共有canonical data | `data/<name>.ts` | frontend / convex 両方から参照するdata・型と、それだけを読む決定的helper。I/O、環境依存、mutable state、feature / DB依存は禁止 |
 | 認証ロジック | `convex/auth.ts` + `apps/frontend/lib/auth.ts` | Convex 側と Next.js 側のヘルパを分離 |
 | フォーム validation | `apps/frontend/features/<feature>/schema.ts` | Zod。Convex の `v.*` とは別物 |
 | 横断 helper | `apps/frontend/lib/` | UI / feature 業務に依存しない |
@@ -145,6 +147,9 @@ data/                     → 外を import しない（純データのみ）
 
 `data/tech-stack.ts` は Quine 内で扱う技術スタックの **canonical catalog**。`technology.key` は DB / UI / URL / GitHub 解析 / 編集フォームで共通利用する唯一の正規 ID とする。`data/technologies.ts` は既存 import 互換の re-export であり、新規実装では使わない。
 
+- `allTechnologies`のようなcanonical dataからの派生値と、`getTechnologyByKey` / `isTechnologyKey`のような副作用のないlookup・type guardは同じmoduleに置いてよい
+- helperは同じ入力に対して同じ結果を返し、network、filesystem、環境変数、時刻、random値、mutableなmodule stateを参照しない
+- feature固有の表示加工は`features/<feature>/lib/`、DBを読む処理はConvex query / helperへ置き、`data/`へ持ち込まない
 - key は lowercase ASCII の安定 slug。表示名や依存パッケージ名をそのまま key にしない
 - key はリリース後に変更しない前提で扱う。リリース前に命名を整える
 - 表示名、説明、カテゴリ、検出 alias は `data/tech-stack.ts` に集約する
@@ -225,4 +230,5 @@ export function ProfileContent({ preloaded }) {
 - [ ] `*Content` が `"use client"` で `usePreloadedQuery` を使っている
 - [ ] 公開ページの query が auth チェックなしで動く（あるいは null を許容している）
 - [ ] feature 固有の UI が `components/` に漏れていない
-- [ ] `convex/` 内から外部 import していない
+- [ ] `convex/` 内からfrontendをimportしていない（共有`data/`のimportだけを許可）
+- [ ] `data/`のhelperがI/O、環境依存、mutable state、feature / DB依存を持っていない

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { PRODUCT_SHOWCASE, techLogoSrc } from "../data/showcase";
 import styles from "../lp.module.css";
-import { RevealOnView } from "./RevealOnView";
+import { RevealOnScroll } from "./RevealOnScroll";
 
 const META_ICONS = {
   fork: (
@@ -87,25 +87,25 @@ export function ProductSection() {
     >
       <div className={`${styles.featureInner} ${styles.productFeatureInner}`}>
         <div className={`${styles.featureCopy} ${styles.productCopy}`}>
-          <RevealOnView>
+          <RevealOnScroll>
             <span className={styles.eyebrow}>Product</span>
-          </RevealOnView>
-          <RevealOnView delay={90}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={90}>
             <h2 className={styles.title}>
               Every product is
               <br />
               a stack signature.
             </h2>
-          </RevealOnView>
-          <RevealOnView delay={180}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={180}>
             <p className={styles.lead}>
               Behind every product is a stack &mdash; and that stack{" "}
               <strong>is the story</strong> of how it was built.
             </p>
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
 
-        <RevealOnView variant="left" className={styles.featureVisual}>
+        <RevealOnScroll variant="left" className={styles.featureVisual}>
           <div className={styles.productCard}>
             <article className={styles.productDetail}>
               <header className={styles.productHead}>
@@ -159,7 +159,7 @@ export function ProductSection() {
               </div>
             </article>
           </div>
-        </RevealOnView>
+        </RevealOnScroll>
       </div>
     </section>
   );

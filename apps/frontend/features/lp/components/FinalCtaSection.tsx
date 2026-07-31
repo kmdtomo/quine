@@ -1,23 +1,23 @@
 import styles from "../lp.module.css";
-import { RevealOnView } from "./RevealOnView";
+import { RevealOnScroll } from "./RevealOnScroll";
 
 export function FinalCtaSection({ onSignupOpen }: { onSignupOpen: () => void }) {
   return (
     <section className={styles.section}>
       <div className={styles.cta}>
-        <RevealOnView>
+        <RevealOnScroll>
           <h2 className={styles.ctaTitle}>
             Built in stack.
             <br />
             <span className={styles.ctaTitleAccent}>Found by stack.</span>
           </h2>
-        </RevealOnView>
-        <RevealOnView delay={90}>
+        </RevealOnScroll>
+        <RevealOnScroll delay={90}>
           <p className={styles.ctaSubtitle}>
             Show what you ship. Discover who&rsquo;s shipping it.
           </p>
-        </RevealOnView>
-        <RevealOnView delay={180}>
+        </RevealOnScroll>
+        <RevealOnScroll delay={180}>
           <button
             type="button"
             className={`${styles.heroBtn} ${styles.heroBtnPrimary}`}
@@ -25,12 +25,12 @@ export function FinalCtaSection({ onSignupOpen }: { onSignupOpen: () => void }) 
           >
             Get started
           </button>
-        </RevealOnView>
-        <RevealOnView variant="fade" delay={270}>
+        </RevealOnScroll>
+        <RevealOnScroll variant="fade" delay={270}>
           <div className={styles.ctaNote}>
             Free during beta. Sign in with GitHub.
           </div>
-        </RevealOnView>
+        </RevealOnScroll>
       </div>
     </section>
   );

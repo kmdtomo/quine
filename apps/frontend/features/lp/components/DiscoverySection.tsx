@@ -6,7 +6,7 @@ import {
   techLogoSrc,
 } from "../data/showcase";
 import styles from "../lp.module.css";
-import { RevealOnView } from "./RevealOnView";
+import { RevealOnScroll } from "./RevealOnScroll";
 
 const SearchIcon = () => (
   <svg
@@ -44,28 +44,28 @@ export function DiscoverySection() {
     >
       <div className={`${styles.featureInner} ${styles.featureStack}`}>
         <div className={`${styles.featureCopy} ${styles.featureCopyCenter}`}>
-          <RevealOnView>
+          <RevealOnScroll>
             <span className={styles.eyebrow}>Discovery</span>
-          </RevealOnView>
-          <RevealOnView delay={90}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={90}>
             <h2 className={styles.title}>
               Filter by stack.
               <br />
               Find your people.
             </h2>
-          </RevealOnView>
-          <RevealOnView delay={180}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={180}>
             <p className={styles.lead}>
               Pick the technologies you care about. Quine surfaces the{" "}
               <strong>products built with them</strong> and the{" "}
               <strong>engineers behind them</strong>.
             </p>
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
 
         <div className={`${styles.featureVisual} ${styles.featureVisualWide}`}>
           <div className={styles.discovery}>
-            <RevealOnView>
+            <RevealOnScroll>
               <div className={styles.discoveryBar}>
                 <div className={styles.discoverySearch}>
                   <SearchIcon />
@@ -88,11 +88,11 @@ export function DiscoverySection() {
                   ))}
                 </div>
               </div>
-            </RevealOnView>
+            </RevealOnScroll>
 
             <div className={styles.discoveryGrid}>
               {DISCOVERY_PRODUCTS.map((product, idx) => (
-                <RevealOnView key={product.title} delay={idx * 90}>
+                <RevealOnScroll key={product.title} delay={idx * 90}>
                   <div className={styles.productItem}>
                     <div className={styles.productItemHeader}>
                       <Image
@@ -158,7 +158,7 @@ export function DiscoverySection() {
                       </span>
                     </div>
                   </div>
-                </RevealOnView>
+                </RevealOnScroll>
               ))}
             </div>
           </div>

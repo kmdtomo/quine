@@ -1,6 +1,6 @@
 import { HUB_SHOWCASE, techLogoSrc } from "../data/showcase";
 import styles from "../lp.module.css";
-import { RevealOnView } from "./RevealOnView";
+import { RevealOnScroll } from "./RevealOnScroll";
 
 const ORBIT_CLASSES = [
   styles.hubOrbit1,
@@ -18,28 +18,28 @@ export function TechHubSection() {
     <section id="hub" className={`${styles.section} ${styles.feature}`}>
       <div className={styles.featureInner}>
         <div className={styles.featureCopy}>
-          <RevealOnView>
+          <RevealOnScroll>
             <span className={styles.eyebrow}>Hub</span>
-          </RevealOnView>
-          <RevealOnView delay={90}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={90}>
             <h2 className={styles.title}>
               Every technology
               <br />
               has a home.
             </h2>
-          </RevealOnView>
-          <RevealOnView delay={180}>
+          </RevealOnScroll>
+          <RevealOnScroll delay={180}>
             <p className={styles.lead}>
               Tap any logo. Meet the{" "}
               <strong>products built with it</strong> and the{" "}
               <strong>engineers shipping them</strong>. Each stack is its own
               community page.
             </p>
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
 
         <div className={styles.featureVisual}>
-          <RevealOnView variant="right">
+          <RevealOnScroll variant="right">
             <div className={styles.hub}>
               <div className={styles.hubHalo}>
                 {hub.orbitKeys.slice(0, 6).map((key, idx) => (
@@ -81,7 +81,7 @@ export function TechHubSection() {
                 </div>
               </div>
             </div>
-          </RevealOnView>
+          </RevealOnScroll>
         </div>
       </div>
     </section>

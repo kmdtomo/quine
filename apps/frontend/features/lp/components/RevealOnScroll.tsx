@@ -15,7 +15,7 @@ type Props = {
   children: ReactNode;
 };
 
-export function RevealOnView({
+export function RevealOnScroll({
   variant = "default",
   delay,
   className,

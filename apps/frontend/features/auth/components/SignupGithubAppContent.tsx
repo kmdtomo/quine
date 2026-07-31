@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { api } from "@convex/_generated/api";
-import { useAction } from "convex/react";
+import { useQuery } from "convex/react";
 
 import styles from "../auth.module.css";
 
@@ -14,53 +13,11 @@ type SignupGithubAppContentProps = {
   error: string | null;
 };
 
-type InstallationSummary = {
-  id: number;
-  accountLogin: string;
-  accountType: string;
-  repositorySelection: string;
-  targetType: string;
-};
-
 export function SignupGithubAppContent({
   appConfigured,
   error,
 }: SignupGithubAppContentProps) {
-  const listInstallations = useAction(api.githubAction.listInstallations);
-  const [installations, setInstallations] = useState<InstallationSummary[]>([]);
-  const [loadingInstallations, setLoadingInstallations] = useState(appConfigured);
-  const [installationError, setInstallationError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!appConfigured) {
-      return;
-    }
-
-    let canceled = false;
-    listInstallations({})
-      .then((items) => {
-        if (canceled) {
-          return;
-        }
-        setInstallations(items);
-        setLoadingInstallations(false);
-      })
-      .catch((unknownError: unknown) => {
-        if (canceled) {
-          return;
-        }
-        setInstallationError(
-          unknownError instanceof Error
-            ? unknownError.message
-            : "Could not load existing GitHub App installations.",
-        );
-        setLoadingInstallations(false);
-      });
-
-    return () => {
-      canceled = true;
-    };
-  }, [appConfigured, listInstallations]);
+  const installations = useQuery(api.githubInstallations.listMine);
 
   return (
     <div className={styles.shell}>
@@ -112,14 +69,19 @@ export function SignupGithubAppContent({
           </div>
 
           <div className={styles.action}>
-            <a href="/api/signup/github-app/install" className={`${styles.btn} ${styles.btnGithub}`} aria-disabled={!appConfigured}>
+            <Link
+              href="/api/signup/github-app/install"
+              prefetch={false}
+              className={`${styles.btn} ${styles.btnGithub}`}
+              aria-disabled={!appConfigured}
+            >
               <GithubIcon />
               <span>
                 {appConfigured
                   ? "Install Quine on GitHub"
                   : "GitHub App is not configured"}
               </span>
-            </a>
+            </Link>
             <Link
               href="/tech-stack/edit?onboarding=1&manual=1"
               className={`${styles.btn} ${styles.btnGhost}`}
@@ -129,9 +91,8 @@ export function SignupGithubAppContent({
           </div>
 
           <ExistingInstallations
-            error={installationError}
-            installations={installations}
-            loading={loadingInstallations}
+            installations={installations ?? []}
+            loading={appConfigured && installations === undefined}
           />
 
           <p className={styles.note}>
@@ -148,26 +109,21 @@ export function SignupGithubAppContent({
 }
 
 function ExistingInstallations({
-  error,
   installations,
   loading,
 }: {
-  error: string | null;
-  installations: InstallationSummary[];
+  installations: Array<{
+    _id: string;
+    accountLogin?: string;
+    accountType?: "Organization" | "User";
+    status: "active" | "pending" | "revoked";
+  }>;
   loading: boolean;
 }) {
   if (loading) {
     return (
       <div className={styles.installations}>
         <p className={styles.installationsTitle}>Checking existing installs...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.installations}>
-        <p className={styles.errorText}>{error}</p>
       </div>
     );
   }
@@ -182,14 +138,23 @@ function ExistingInstallations({
       <div className={styles.installationList}>
         {installations.map((installation) => (
           <Link
-            key={installation.id}
-            href={`/tech-stack/edit?onboarding=1&installation_id=${installation.id}`}
+            key={installation._id}
+            href={
+              installation.status === "active"
+                ? `/tech-stack/edit?onboarding=1&github_installation=${installation._id}`
+                : "/api/signup/github-app/install"
+            }
             className={styles.installationItem}
           >
             <span>
-              {installation.accountLogin} · {installation.repositorySelection}
+              {installation.accountLogin ?? "Pending verification"} ·{" "}
+              {installation.accountType ?? "GitHub"}
             </span>
-            <span>Analyze</span>
+            <span>
+              {installation.status === "active"
+                ? "Analyze"
+                : "Finish connection"}
+            </span>
           </Link>
         ))}
       </div>
