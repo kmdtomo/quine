@@ -95,8 +95,8 @@ Data:       [BigQuery] [dbt]
 Monitoring: [Datadog] [Sentry]
 ```
 
-選択式。technologies.type.ts の600+技術から選ぶ。
-レイヤーは technologies.type.ts のカテゴリに対応。
+選択式。`data/tech-stack.ts` の canonical catalog から選ぶ。
+レイヤーは `data/tech-stack.ts` のカテゴリに対応。
 
 **シンプルにする理由:**
 - 嘘がつけない（使ってるか使ってないかだけ）
