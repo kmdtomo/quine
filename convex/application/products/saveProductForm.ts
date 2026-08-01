@@ -7,7 +7,7 @@ import {
   requireProductImageStorage,
   requireProductStorageOwnership,
   syncProductScreenshots,
-} from "../../lib/productAssets";
+} from "./productAssets";
 import { uniqueValidTechnologyKeys } from "../../lib/technologyKeys";
 import {
   assertProductAiDraftIsUnsaved,

@@ -6,9 +6,12 @@ import {
 import { ConvexError, v } from "convex/values";
 
 import { getTechnologyByKey } from "../data/tech-stack";
-import type { Doc, Id } from "./_generated/dataModel";
+import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import { addConnection } from "./application/connections/addConnection";
+import { approveConnection } from "./application/connections/approveConnection";
+import { resolveDeveloper } from "./application/connections/resolveDeveloper";
 import { getCurrentUser } from "./lib/auth";
 import { getUserByUsername } from "./lib/users";
 
@@ -87,31 +90,7 @@ export const approve = mutation({
   returns: v.id("connections"),
   handler: async (ctx, args) => {
     const user = await requireConnectionUser(ctx);
-    const source = await resolveDeveloper(ctx, {
-      developerId: args.fromDeveloperId,
-      username: args.username,
-    });
-    if (!source) {
-      throw new ConvexError({
-        code: "CONNECTION_USER_NOT_FOUND",
-        message: "Connection user not found.",
-      });
-    }
-
-    const incoming = await ctx.db
-      .query("connections")
-      .withIndex("by_pair", (q) =>
-        q.eq("fromDeveloperId", source._id).eq("toDeveloperId", user._id),
-      )
-      .first();
-    if (!incoming) {
-      throw new ConvexError({
-        code: "CONNECTION_REQUEST_NOT_FOUND",
-        message: "Connection request not found.",
-      });
-    }
-
-    return await addConnection(ctx, user, { toDeveloperId: source._id });
+    return await approveConnection(ctx, user, args);
   },
 });
 
@@ -145,66 +124,6 @@ export const remove = mutation({
     return null;
   },
 });
-
-async function addConnection(
-  ctx: MutationCtx,
-  user: Doc<"users">,
-  args: {
-    toDeveloperId?: Id<"users">;
-    username?: string;
-  },
-) {
-  const target = await resolveDeveloper(ctx, {
-    developerId: args.toDeveloperId,
-    username: args.username,
-  });
-  if (!target) {
-    throw new ConvexError({
-      code: "CONNECTION_USER_NOT_FOUND",
-      message: "Connection user not found.",
-    });
-  }
-  if (target._id === user._id) {
-    throw new ConvexError({
-      code: "SELF_CONNECTION_NOT_ALLOWED",
-      message: "You cannot connect to yourself.",
-    });
-  }
-
-  const current = await ctx.db
-    .query("connections")
-    .withIndex("by_pair", (q) =>
-      q.eq("fromDeveloperId", user._id).eq("toDeveloperId", target._id),
-    )
-    .first();
-  if (current) {
-    return current._id;
-  }
-
-  return await ctx.db.insert("connections", {
-    fromDeveloperId: user._id,
-    toDeveloperId: target._id,
-  });
-}
-
-async function resolveDeveloper(
-  ctx: QueryCtx | MutationCtx,
-  {
-    developerId,
-    username,
-  }: {
-    developerId?: Id<"users">;
-    username?: string;
-  },
-) {
-  if (developerId !== undefined) {
-    return await ctx.db.get("users", developerId);
-  }
-  if (username !== undefined) {
-    return await getUserByUsername(ctx, username);
-  }
-  return null;
-}
 
 async function listConnectionsFrom(
   ctx: Parameters<typeof getCurrentUser>[0],

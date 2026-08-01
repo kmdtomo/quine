@@ -18,9 +18,9 @@ import {
   normalizeTagline,
 } from "./application/products/productInput";
 import { saveProductForm } from "./application/products/saveProductForm";
+import { deleteProductMedia } from "./application/products/productAssets";
 import { getCurrentUser } from "./lib/auth";
 import {
-  deleteProductMedia,
   resolveProductLogo,
   resolveProductMedia,
 } from "./lib/productAssets";

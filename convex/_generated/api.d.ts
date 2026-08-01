@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as application_connections_addConnection from "../application/connections/addConnection.js";
+import type * as application_connections_approveConnection from "../application/connections/approveConnection.js";
+import type * as application_connections_resolveDeveloper from "../application/connections/resolveDeveloper.js";
 import type * as application_developerTechnologies_reorder from "../application/developerTechnologies/reorder.js";
 import type * as application_developerTechnologies_saveDetected from "../application/developerTechnologies/saveDetected.js";
 import type * as application_developerTechnologies_setManyYears from "../application/developerTechnologies/setManyYears.js";
@@ -41,6 +44,8 @@ import type * as application_productTechnologies_productTechnologyLimits from ".
 import type * as application_productTechnologies_reorderProductTechnologies from "../application/productTechnologies/reorderProductTechnologies.js";
 import type * as application_productTechnologies_setManyProductTechnologies from "../application/productTechnologies/setManyProductTechnologies.js";
 import type * as application_products_productAccess from "../application/products/productAccess.js";
+import type * as application_products_productAssetLimits from "../application/products/productAssetLimits.js";
+import type * as application_products_productAssets from "../application/products/productAssets.js";
 import type * as application_products_productInput from "../application/products/productInput.js";
 import type * as application_products_saveProductForm from "../application/products/saveProductForm.js";
 import type * as application_profile_completeProfileOnboarding from "../application/profile/completeProfileOnboarding.js";
@@ -94,6 +99,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "application/connections/addConnection": typeof application_connections_addConnection;
+  "application/connections/approveConnection": typeof application_connections_approveConnection;
+  "application/connections/resolveDeveloper": typeof application_connections_resolveDeveloper;
   "application/developerTechnologies/reorder": typeof application_developerTechnologies_reorder;
   "application/developerTechnologies/saveDetected": typeof application_developerTechnologies_saveDetected;
   "application/developerTechnologies/setManyYears": typeof application_developerTechnologies_setManyYears;
@@ -127,6 +135,8 @@ declare const fullApi: ApiFromModules<{
   "application/productTechnologies/reorderProductTechnologies": typeof application_productTechnologies_reorderProductTechnologies;
   "application/productTechnologies/setManyProductTechnologies": typeof application_productTechnologies_setManyProductTechnologies;
   "application/products/productAccess": typeof application_products_productAccess;
+  "application/products/productAssetLimits": typeof application_products_productAssetLimits;
+  "application/products/productAssets": typeof application_products_productAssets;
   "application/products/productInput": typeof application_products_productInput;
   "application/products/saveProductForm": typeof application_products_saveProductForm;
   "application/profile/completeProfileOnboarding": typeof application_profile_completeProfileOnboarding;
