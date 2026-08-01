@@ -6,15 +6,6 @@ import { finalizeUpload as finalizeUploadUseCase } from "./application/files/fin
 import { requireUser } from "./lib/auth";
 import { uploadIntentPurpose } from "./lib/uploadIntents";
 
-export const generateUploadUrl = mutation({
-  args: {},
-  returns: v.string(),
-  handler: async (ctx) => {
-    await requireUser(ctx);
-    return await ctx.storage.generateUploadUrl();
-  },
-});
-
 export const createUploadIntent = mutation({
   args: {
     purpose: uploadIntentPurpose,

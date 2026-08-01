@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 
 import type { Doc, Id } from "../../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../../_generated/server";
+import { consumeUploadIntent } from "../files/consumeUploadIntent";
 import { MAX_PRODUCT_SCREENSHOTS } from "./productAssetLimits";
 
 const MAX_PRODUCT_IMAGE_BYTES = 6 * 1024 * 1024;
@@ -160,6 +161,14 @@ export async function syncProductScreenshots(
       q.eq("productId", productId).eq("kind", "screenshot"),
     )
     .take(MAX_PRODUCT_SCREENSHOTS + 1);
+  for (const storageId of uniqueStorageIds) {
+    await consumeUploadIntent(ctx, {
+      consumptionTarget: { kind: "product", productId },
+      purpose: "product_screenshot",
+      storageId,
+      userId,
+    });
+  }
   const currentByStorageId = new Map(
     currentRows.map((row) => [row.storageId, row]),
   );

@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 
 import type { Doc, Id } from "../../_generated/dataModel";
 import type { MutationCtx } from "../../_generated/server";
+import { consumeUploadIntent } from "../files/consumeUploadIntent";
 import {
   deleteProductStorageIfUnreferenced,
   requireProductImageStorage,
@@ -127,6 +128,12 @@ export async function saveProductForm(
         productId,
         args.logoStorageId,
       );
+      await consumeUploadIntent(ctx, {
+        consumptionTarget: { kind: "product", productId },
+        purpose: "product_logo",
+        storageId: args.logoStorageId,
+        userId: user._id,
+      });
     }
 
     await ctx.db.insert("productDevelopers", {
@@ -172,6 +179,12 @@ export async function saveProductForm(
       product._id,
       args.logoStorageId,
     );
+    await consumeUploadIntent(ctx, {
+      consumptionTarget: { kind: "product", productId: product._id },
+      purpose: "product_logo",
+      storageId: args.logoStorageId,
+      userId: user._id,
+    });
   }
   await ctx.db.patch("products", product._id, {
     content: input.content,

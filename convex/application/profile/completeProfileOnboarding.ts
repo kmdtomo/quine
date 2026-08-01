@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 
 import type { Doc, Id } from "../../_generated/dataModel";
 import type { MutationCtx } from "../../_generated/server";
+import { consumeUploadIntent } from "../files/consumeUploadIntent";
 import { normalizeSocialLinks } from "./socialLinks";
 
 const MAX_PROFILE_IMAGE_BYTES = 6 * 1024 * 1024;
@@ -80,17 +81,35 @@ export async function completeProfileOnboarding(
     args.bannerStorageId === undefined
       ? user.bannerStorageId
       : (args.bannerStorageId ?? undefined);
-  if (
+  const profileImageChanged =
     profileImageStorageId !== undefined &&
-    profileImageStorageId !== user.profileImageStorageId
-  ) {
+    profileImageStorageId !== user.profileImageStorageId;
+  const bannerStorageChanged =
+    bannerStorageId !== undefined && bannerStorageId !== user.bannerStorageId;
+  if (profileImageChanged) {
     await requireProfileImageStorage(ctx, profileImageStorageId);
   }
-  if (
-    bannerStorageId !== undefined &&
-    bannerStorageId !== user.bannerStorageId
-  ) {
+  if (bannerStorageChanged) {
     await requireProfileImageStorage(ctx, bannerStorageId);
+  }
+  if (
+    args.profileImageStorageId !== undefined &&
+    args.profileImageStorageId !== null
+  ) {
+    await consumeUploadIntent(ctx, {
+      consumptionTarget: { kind: "profile", userId: user._id },
+      purpose: "profile_avatar",
+      storageId: args.profileImageStorageId,
+      userId: user._id,
+    });
+  }
+  if (args.bannerStorageId !== undefined && args.bannerStorageId !== null) {
+    await consumeUploadIntent(ctx, {
+      consumptionTarget: { kind: "profile", userId: user._id },
+      purpose: "profile_banner",
+      storageId: args.bannerStorageId,
+      userId: user._id,
+    });
   }
 
   await ctx.db.patch("users", user._id, {

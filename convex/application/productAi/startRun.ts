@@ -1,6 +1,7 @@
 import { internal } from "../../_generated/api";
 import type { Doc, Id } from "../../_generated/dataModel";
 import type { MutationCtx } from "../../_generated/server";
+import { consumeUploadIntent } from "../files/consumeUploadIntent";
 import { createMarkdownContentHash } from "./markdownContentHash";
 import { MAX_ATTACHMENTS, productAiError } from "./productAiError";
 import { findActiveRun } from "./runState";
@@ -110,6 +111,14 @@ export async function startRun(
     userId: user._id,
     userMessageId,
   });
+  for (const attachment of attachments) {
+    await consumeUploadIntent(ctx, {
+      consumptionTarget: { kind: "product_ai_run", runId },
+      purpose: "product_ai_attachment",
+      storageId: attachment.storageId,
+      userId: user._id,
+    });
+  }
   const scheduledFunctionId = await ctx.scheduler.runAfter(
     0,
     internal.productAiAction.run,

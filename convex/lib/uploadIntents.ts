@@ -37,6 +37,10 @@ export const uploadIntentConsumptionTarget = v.union(
   }),
 );
 
+export type UploadIntentConsumptionTarget = Infer<
+  typeof uploadIntentConsumptionTarget
+>;
+
 export function isAllowedUploadContentType(
   purpose: UploadIntentPurpose,
   contentType: string,

@@ -15,6 +15,7 @@ import type * as application_developerTechnologies_reorder from "../application/
 import type * as application_developerTechnologies_saveDetected from "../application/developerTechnologies/saveDetected.js";
 import type * as application_developerTechnologies_setManyYears from "../application/developerTechnologies/setManyYears.js";
 import type * as application_developerTechnologies_technologyRules from "../application/developerTechnologies/technologyRules.js";
+import type * as application_files_consumeUploadIntent from "../application/files/consumeUploadIntent.js";
 import type * as application_files_createUploadIntent from "../application/files/createUploadIntent.js";
 import type * as application_files_finalizeUpload from "../application/files/finalizeUpload.js";
 import type * as application_githubAnalysis_beginExecution from "../application/githubAnalysis/beginExecution.js";
@@ -110,6 +111,7 @@ declare const fullApi: ApiFromModules<{
   "application/developerTechnologies/saveDetected": typeof application_developerTechnologies_saveDetected;
   "application/developerTechnologies/setManyYears": typeof application_developerTechnologies_setManyYears;
   "application/developerTechnologies/technologyRules": typeof application_developerTechnologies_technologyRules;
+  "application/files/consumeUploadIntent": typeof application_files_consumeUploadIntent;
   "application/files/createUploadIntent": typeof application_files_createUploadIntent;
   "application/files/finalizeUpload": typeof application_files_finalizeUpload;
   "application/githubAnalysis/beginExecution": typeof application_githubAnalysis_beginExecution;
