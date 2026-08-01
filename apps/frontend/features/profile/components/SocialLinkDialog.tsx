@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import {
   profileSocialLinkSchema,
   type ProfileSocialLink,
-} from "../schema";
+} from "../profile-form-schema";
 import { SOCIAL_TYPES, SocialIcon } from "./profile-social";
 
 export function SocialLinkDialog({

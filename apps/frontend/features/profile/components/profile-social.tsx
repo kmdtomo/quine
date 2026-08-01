@@ -2,7 +2,7 @@ import { LinkIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-import type { ProfileSocialPlatform } from "../schema";
+import type { ProfileSocialPlatform } from "../profile-form-schema";
 
 export type SocialType = {
   label: string;

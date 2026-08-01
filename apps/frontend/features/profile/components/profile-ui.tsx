@@ -4,7 +4,7 @@ import { LinkIcon, PlusIcon } from "lucide-react";
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 import { cn } from "@/lib/utils";
 
-import type { ProductTechnology } from "../types";
+import type { ProductTechnology } from "../profile-types";
 
 export function EmptyState({
   actionLabel,

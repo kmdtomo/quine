@@ -15,8 +15,8 @@ import {
 import { DropdownSelect } from "@/components/controls/DropdownSelect";
 import { cn } from "@/lib/utils";
 
-import type { ProfileSocialLink } from "../schema";
-import type { StackSummary } from "../types";
+import type { ProfileSocialLink } from "../profile-form-schema";
+import type { StackSummary } from "../profile-types";
 import { SocialIcon } from "./profile-social";
 import { getInitials } from "./profile-ui";
 

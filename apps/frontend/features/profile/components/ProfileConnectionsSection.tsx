@@ -3,8 +3,8 @@ import { PlusIcon, UserPlusIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-import { getProfileHref } from "../lib/profile-links";
-import type { ProfileConnection } from "../types";
+import { getProfileHref } from "../profile-links";
+import type { ProfileConnection } from "../profile-types";
 import {
   EmptyState,
   getInitials,

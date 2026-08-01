@@ -17,18 +17,18 @@ import {
 import { AppHeader } from "@/components/app/AppHeader";
 import { cn } from "@/lib/utils";
 
-import { getProfileErrorMessage } from "../lib/profile-errors";
+import { getProfileErrorMessage } from "../profile-error";
 import {
   getProfileHref,
   normalizeUsername,
-} from "../lib/profile-links";
+} from "../profile-links";
 import {
   profileBannerGallerySchema,
   profileFormSchema,
   profileSocialLinkSchema,
   type ProfileFormValues,
   type ProfileSocialLink,
-} from "../schema";
+} from "../profile-form-schema";
 import { BannerGalleryDialog } from "./BannerGalleryDialog";
 import { ConnectionAddDialog } from "./ConnectionAddDialog";
 import { ProfileConnectionsSection } from "./ProfileConnectionsSection";
