@@ -16,7 +16,7 @@ import {
   GITHUB_APP_SETUP_STATE_COOKIE,
   hashFlowSecret,
   withGithubAppError,
-} from "@/features/auth/lib/githubAppFlow";
+} from "@/features/auth/github-app-flow";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
