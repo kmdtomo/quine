@@ -1,0 +1,1 @@
+export const MAX_INSTALLATIONS_PER_USER = 100;

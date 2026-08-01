@@ -8,7 +8,17 @@
  * @module
  */
 
+import type * as application_githubAnalysis_beginExecution from "../application/githubAnalysis/beginExecution.js";
+import type * as application_githubAnalysis_commitTechnologyAnalysis from "../application/githubAnalysis/commitTechnologyAnalysis.js";
+import type * as application_githubAnalysis_retryTechnologyAnalysis from "../application/githubAnalysis/retryTechnologyAnalysis.js";
+import type * as application_githubAnalysis_startTechnologyAnalysis from "../application/githubAnalysis/startTechnologyAnalysis.js";
+import type * as application_githubInstallations_accountVerification from "../application/githubInstallations/accountVerification.js";
+import type * as application_githubInstallations_activateDiscovered from "../application/githubInstallations/activateDiscovered.js";
+import type * as application_githubInstallations_activateVerified from "../application/githubInstallations/activateVerified.js";
+import type * as application_githubInstallations_beginVerification from "../application/githubInstallations/beginVerification.js";
+import type * as application_githubInstallations_installationLimit from "../application/githubInstallations/installationLimit.js";
 import type * as application_productAi_attachDraftToProduct from "../application/productAi/attachDraftToProduct.js";
+import type * as application_productAi_upsertRepoContext from "../application/productAi/upsertRepoContext.js";
 import type * as application_products_productAccess from "../application/products/productAccess.js";
 import type * as application_profile_completeProfileOnboarding from "../application/profile/completeProfileOnboarding.js";
 import type * as application_profile_socialLinks from "../application/profile/socialLinks.js";
@@ -22,6 +32,7 @@ import type * as githubAnalysisRuns from "../githubAnalysisRuns.js";
 import type * as githubInstallations from "../githubInstallations.js";
 import type * as githubOAuthAction from "../githubOAuthAction.js";
 import type * as http from "../http.js";
+import type * as infra_github_authorization from "../infra/github/authorization.js";
 import type * as infra_github_githubError from "../infra/github/githubError.js";
 import type * as infra_github_oauth from "../infra/github/oauth.js";
 import type * as infra_openai_client from "../infra/openai/client.js";
@@ -60,7 +71,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "application/githubAnalysis/beginExecution": typeof application_githubAnalysis_beginExecution;
+  "application/githubAnalysis/commitTechnologyAnalysis": typeof application_githubAnalysis_commitTechnologyAnalysis;
+  "application/githubAnalysis/retryTechnologyAnalysis": typeof application_githubAnalysis_retryTechnologyAnalysis;
+  "application/githubAnalysis/startTechnologyAnalysis": typeof application_githubAnalysis_startTechnologyAnalysis;
+  "application/githubInstallations/accountVerification": typeof application_githubInstallations_accountVerification;
+  "application/githubInstallations/activateDiscovered": typeof application_githubInstallations_activateDiscovered;
+  "application/githubInstallations/activateVerified": typeof application_githubInstallations_activateVerified;
+  "application/githubInstallations/beginVerification": typeof application_githubInstallations_beginVerification;
+  "application/githubInstallations/installationLimit": typeof application_githubInstallations_installationLimit;
   "application/productAi/attachDraftToProduct": typeof application_productAi_attachDraftToProduct;
+  "application/productAi/upsertRepoContext": typeof application_productAi_upsertRepoContext;
   "application/products/productAccess": typeof application_products_productAccess;
   "application/profile/completeProfileOnboarding": typeof application_profile_completeProfileOnboarding;
   "application/profile/socialLinks": typeof application_profile_socialLinks;
@@ -74,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   githubInstallations: typeof githubInstallations;
   githubOAuthAction: typeof githubOAuthAction;
   http: typeof http;
+  "infra/github/authorization": typeof infra_github_authorization;
   "infra/github/githubError": typeof infra_github_githubError;
   "infra/github/oauth": typeof infra_github_oauth;
   "infra/openai/client": typeof infra_openai_client;

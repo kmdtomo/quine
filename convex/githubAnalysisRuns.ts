@@ -1,29 +1,25 @@
 import { v } from "convex/values";
 
-import { getTechnologyByKey, isTechnologyKey } from "../data/tech-stack";
-import { internal } from "./_generated/api";
-import type { Id } from "./_generated/dataModel";
+import { getTechnologyByKey } from "../data/tech-stack";
 import {
   internalMutation,
   mutation,
   query,
 } from "./_generated/server";
+import {
+  beginExecution as beginExecutionUseCase,
+  type BeginExecutionResult,
+} from "./application/githubAnalysis/beginExecution";
+import {
+  commitTechnologyAnalysis as commitTechnologyAnalysisUseCase,
+} from "./application/githubAnalysis/commitTechnologyAnalysis";
+import {
+  retryTechnologyAnalysis as retryTechnologyAnalysisUseCase,
+} from "./application/githubAnalysis/retryTechnologyAnalysis";
+import {
+  startTechnologyAnalysis as startTechnologyAnalysisUseCase,
+} from "./application/githubAnalysis/startTechnologyAnalysis";
 import { requireUser } from "./lib/auth";
-import { githubError } from "./lib/githubErrors";
-
-const MAX_ATTEMPTS = 3;
-const MAX_REPOSITORIES_PER_RUN = 30;
-const MAX_TECHNOLOGIES_PER_RUN = 100;
-
-type BeginExecutionResult =
-  | {
-      status: "rejected";
-    }
-  | {
-      installationId: number;
-      status: "ready";
-      userId: Id<"users">;
-    };
 
 const runStatusValidator = v.union(
   v.literal("queued"),
@@ -91,82 +87,7 @@ export const startTechnologyAnalysis = mutation({
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const installation =
-      args.githubInstallationId === undefined
-        ? await ctx.db
-            .query("githubInstallations")
-            .withIndex("by_user_status", (q) =>
-              q.eq("userId", user._id).eq("status", "active"),
-            )
-            .order("desc")
-            .first()
-        : await ctx.db.get(
-            "githubInstallations",
-            args.githubInstallationId,
-          );
-    if (!installation) {
-      throw githubError("GITHUB_INSTALLATION_NOT_FOUND");
-    }
-    if (
-      installation.userId !== user._id ||
-      installation.status !== "active" ||
-      installation.accountType !== "User" ||
-      installation.accountId !== installation.verifiedByGithubId
-    ) {
-      throw githubError("GITHUB_INSTALLATION_NOT_FOUND");
-    }
-
-    const [queued, running] = await Promise.all([
-      ctx.db
-        .query("githubAnalysisRuns")
-        .withIndex("by_installation_status", (q) =>
-          q
-            .eq("githubInstallationId", installation._id)
-            .eq("status", "queued"),
-        )
-        .first(),
-      ctx.db
-        .query("githubAnalysisRuns")
-        .withIndex("by_installation_status", (q) =>
-          q
-            .eq("githubInstallationId", installation._id)
-            .eq("status", "running"),
-        )
-        .first(),
-    ]);
-    const activeRun = running ?? queued;
-    if (activeRun) {
-      return { runId: activeRun._id };
-    }
-
-    const now = Date.now();
-    const runId = await ctx.db.insert("githubAnalysisRuns", {
-      analyzedRepositoryCount: 0,
-      attempt: 0,
-      createdAt: now,
-      detectedTechnologies: [],
-      githubInstallationId: installation._id,
-      idempotencyKey: `${user._id}:technology:${installation._id}:${now}`,
-      kind: "technology_analysis",
-      maxAttempts: MAX_ATTEMPTS,
-      phase: "queued",
-      repositoryCount: 0,
-      requestCount: 0,
-      requestLimit: 0,
-      status: "queued",
-      updatedAt: now,
-      userId: user._id,
-      warningCodes: [],
-    });
-    const scheduledFunctionId = await ctx.scheduler.runAfter(
-      0,
-      internal.githubAction.analyzeRepos,
-      { runId },
-    );
-    await ctx.db.patch("githubAnalysisRuns", runId, {
-      scheduledFunctionId,
-    });
-    return { runId };
+    return await startTechnologyAnalysisUseCase(ctx, user._id, args);
   },
 });
 
@@ -179,44 +100,7 @@ export const retryTechnologyAnalysis = mutation({
   }),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const run = await ctx.db.get("githubAnalysisRuns", args.runId);
-    if (!run || run.userId !== user._id || run.kind !== "technology_analysis") {
-      throw githubError("GITHUB_ANALYSIS_NOT_FOUND");
-    }
-    if (run.status !== "failed" || run.attempt >= run.maxAttempts) {
-      throw githubError("GITHUB_ANALYSIS_NOT_RETRYABLE");
-    }
-
-    const installation = await ctx.db.get(
-      "githubInstallations",
-      run.githubInstallationId,
-    );
-    if (
-      !installation ||
-      installation.userId !== user._id ||
-      installation.status !== "active" ||
-      installation.accountType !== "User" ||
-      installation.accountId !== installation.verifiedByGithubId
-    ) {
-      throw githubError("GITHUB_INSTALLATION_NOT_FOUND");
-    }
-
-    const now = Date.now();
-    const scheduledFunctionId = await ctx.scheduler.runAfter(
-      0,
-      internal.githubAction.analyzeRepos,
-      { runId: run._id },
-    );
-    await ctx.db.patch("githubAnalysisRuns", run._id, {
-      completedAt: undefined,
-      errorCode: undefined,
-      nextRetryAt: undefined,
-      phase: "queued",
-      scheduledFunctionId,
-      status: "queued",
-      updatedAt: now,
-    });
-    return { runId: run._id };
+    return await retryTechnologyAnalysisUseCase(ctx, user._id, args);
   },
 });
 
@@ -287,51 +171,7 @@ export const beginExecution = internalMutation({
     }),
   ),
   handler: async (ctx, args): Promise<BeginExecutionResult> => {
-    const run = await ctx.db.get("githubAnalysisRuns", args.runId);
-    if (
-      !run ||
-      run.kind !== "technology_analysis" ||
-      run.status !== "queued" ||
-      run.attempt >= run.maxAttempts
-    ) {
-      return { status: "rejected" };
-    }
-    const installation = await ctx.db.get(
-      "githubInstallations",
-      run.githubInstallationId,
-    );
-    if (
-      !installation ||
-      installation.userId !== run.userId ||
-      installation.status !== "active" ||
-      installation.accountType !== "User" ||
-      installation.accountId !== installation.verifiedByGithubId
-    ) {
-      const now = Date.now();
-      await ctx.db.patch("githubAnalysisRuns", run._id, {
-        completedAt: now,
-        errorCode: "GITHUB_INSTALLATION_NOT_FOUND",
-        phase: "completed",
-        status: "failed",
-        updatedAt: now,
-      });
-      return { status: "rejected" };
-    }
-
-    const now = Date.now();
-    await ctx.db.patch("githubAnalysisRuns", run._id, {
-      attempt: run.attempt + 1,
-      errorCode: undefined,
-      phase: "authorizing",
-      startedAt: run.startedAt ?? now,
-      status: "running",
-      updatedAt: now,
-    });
-    return {
-      installationId: installation.installationId,
-      status: "ready",
-      userId: run.userId,
-    };
+    return await beginExecutionUseCase(ctx, args);
   },
 });
 
@@ -383,85 +223,7 @@ export const commitTechnologyAnalysis = internalMutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const run = await ctx.db.get("githubAnalysisRuns", args.runId);
-    if (!run || run.kind !== "technology_analysis" || run.status !== "running") {
-      throw githubError("GITHUB_ANALYSIS_NOT_FOUND");
-    }
-    if (
-      args.repositories.length > MAX_REPOSITORIES_PER_RUN ||
-      args.detectedTechnologies.length > MAX_TECHNOLOGIES_PER_RUN
-    ) {
-      throw githubError("GITHUB_ANALYSIS_REQUEST_FAILED");
-    }
-
-    const technologyKeys = args.detectedTechnologies
-      .map((technology) => technology.technologyKey)
-      .filter(isTechnologyKey);
-    const existingTechnologies = await ctx.db
-      .query("developerTechnologies")
-      .withIndex("by_developer", (q) => q.eq("developerId", run.userId))
-      .collect();
-    const existingKeys = new Set(
-      existingTechnologies.map((row) => row.technologyKey),
-    );
-    let nextOrder =
-      existingTechnologies.reduce(
-        (maximum, row) => Math.max(maximum, row.order),
-        0,
-      ) + 1;
-    for (const technologyKey of new Set(technologyKeys)) {
-      if (existingKeys.has(technologyKey)) {
-        continue;
-      }
-      await ctx.db.insert("developerTechnologies", {
-        developerId: run.userId,
-        order: nextOrder,
-        technologyKey,
-      });
-      nextOrder += 1;
-    }
-
-    const previousRepositoryResults = await ctx.db
-      .query("githubAnalysisRunRepositories")
-      .withIndex("by_run", (q) => q.eq("runId", run._id))
-      .take(MAX_REPOSITORIES_PER_RUN + 1);
-    for (const row of previousRepositoryResults) {
-      await ctx.db.delete("githubAnalysisRunRepositories", row._id);
-    }
-    const now = Date.now();
-    for (const repository of args.repositories) {
-      await ctx.db.insert("githubAnalysisRunRepositories", {
-        createdAt: now,
-        description: repository.description,
-        detectedTechnologyKeys: repository.detectedTechnologyKeys,
-        filesRead: repository.filesRead,
-        fork: repository.fork,
-        githubUpdatedAt: repository.githubUpdatedAt,
-        htmlUrl: repository.htmlUrl,
-        languages: repository.languages,
-        private: repository.private,
-        repositoryFullName: repository.repositoryFullName,
-        repositoryName: repository.repositoryName,
-        runId: run._id,
-        stargazersCount: repository.stargazersCount,
-        warningCodes: repository.warningCodes,
-      });
-    }
-
-    await ctx.db.patch("githubAnalysisRuns", run._id, {
-      analyzedRepositoryCount: args.analyzedRepositoryCount,
-      completedAt: now,
-      detectedTechnologies: args.detectedTechnologies,
-      errorCode: undefined,
-      phase: "completed",
-      repositoryCount: args.repositoryCount,
-      requestCount: args.requestCount,
-      requestLimit: args.requestLimit,
-      status: "succeeded",
-      updatedAt: now,
-      warningCodes: args.warningCodes,
-    });
-    return null;
+    return await commitTechnologyAnalysisUseCase(ctx, args);
   },
 });
 
