@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react";
 import { ArrowLeftIcon, ArrowRightIcon, ImagePlusIcon, XIcon } from "lucide-react";
 
-import type { ProductScreenshotDraft } from "../lib/product-screenshot-draft";
+import type { ProductScreenshotDraft } from "../product-screenshot-draft";
 
 type ProductEditScreenshotsSectionProps = {
   disabled: boolean;

@@ -27,18 +27,18 @@ import type {
   MarkdownEditKind,
   MarkdownProposal,
   MarkdownSelection,
-} from "../lib/markdown-edit";
+} from "../markdown-edit";
 import type {
   ApplyProductFormProposalResult,
   ProductFormEdit,
   ProductFormProposal,
-} from "../lib/product-form-edit";
-import { getProductErrorMessage } from "../lib/product-error";
+} from "../product-form-edit";
+import { getProductErrorMessage } from "../product-error";
 import {
   formatProductFormValue,
   getProductFormFieldLabel,
-} from "../lib/product-form-edit";
-import { uploadProductImage } from "../lib/upload-product-image";
+} from "../product-form-edit";
+import { uploadProductImage } from "../upload-product-image";
 import {
   ArrowUpIcon,
   ExpandIcon,

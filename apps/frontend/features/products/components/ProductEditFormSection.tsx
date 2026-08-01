@@ -8,7 +8,7 @@ import {
 import { ProductEditProjectHeaderSection } from "./ProductEditProjectHeaderSection";
 import { ProductEditProjectInfoSection } from "./ProductEditProjectInfoSection";
 import { ProductEditScreenshotsSection } from "./ProductEditScreenshotsSection";
-import type { ProductScreenshotDraft } from "../lib/product-screenshot-draft";
+import type { ProductScreenshotDraft } from "../product-screenshot-draft";
 import {
   type ProductProjectType,
   type ProductTeamSize,

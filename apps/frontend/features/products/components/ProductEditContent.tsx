@@ -37,18 +37,18 @@ import {
   applyMarkdownProposal,
   type MarkdownProposal,
   type MarkdownSelection,
-} from "../lib/markdown-edit";
+} from "../markdown-edit";
 import {
   applyProductFormProposal,
   type ProductFormProposal,
-} from "../lib/product-form-edit";
-import type { ProductScreenshotDraft } from "../lib/product-screenshot-draft";
-import { getProductErrorMessage } from "../lib/product-error";
-import { uploadProductImage } from "../lib/upload-product-image";
+} from "../product-form-edit";
+import type { ProductScreenshotDraft } from "../product-screenshot-draft";
+import { getProductErrorMessage } from "../product-error";
+import { uploadProductImage } from "../upload-product-image";
 import {
   productEditFormSchema,
   type ProductEditFormValues,
-} from "../schema";
+} from "../product-form-schema";
 
 type ProductEditContentProps = {
   draftKey?: string;
