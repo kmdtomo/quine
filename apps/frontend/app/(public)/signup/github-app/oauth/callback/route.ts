@@ -8,6 +8,8 @@ import {
   flowSecretsMatch,
   getSafeGithubAppReturnTo,
   GITHUB_APP_CODE_VERIFIER_COOKIE,
+  GITHUB_APP_CONNECTION_MODE_COOKIE,
+  GITHUB_APP_EXISTING_CONNECTION_MODE,
   GITHUB_APP_OAUTH_STATE_COOKIE,
   GITHUB_APP_RETURN_TO_COOKIE,
   hashFlowSecret,
@@ -25,6 +27,9 @@ export async function GET(request: NextRequest) {
   const returnTo = getSafeGithubAppReturnTo(
     request.cookies.get(GITHUB_APP_RETURN_TO_COOKIE)?.value ?? null,
   );
+  const connectionMode =
+    request.cookies.get(GITHUB_APP_CONNECTION_MODE_COOKIE)?.value ??
+    null;
 
   if (
     !code ||
@@ -44,15 +49,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const verification = await fetchAction(
-      api.githubOAuthAction.completeInstallationAuthorization,
-      {
-        code,
-        codeVerifier,
-        stateHash: hashFlowSecret(oauthState),
-      },
-      { token },
-    );
+    const verification =
+      connectionMode === GITHUB_APP_EXISTING_CONNECTION_MODE
+        ? await fetchAction(
+            api.githubOAuthAction
+              .completeExistingInstallationAuthorization,
+            {
+              code,
+              codeVerifier,
+            },
+            { token },
+          )
+        : await fetchAction(
+            api.githubOAuthAction.completeInstallationAuthorization,
+            {
+              code,
+              codeVerifier,
+              stateHash: hashFlowSecret(oauthState),
+            },
+            { token },
+          );
     return redirectWithClearedOauth(
       request,
       withGithubAppConnected(
@@ -66,13 +82,23 @@ export async function GET(request: NextRequest) {
       request,
       withGithubAppError(
         returnTo,
-        errorCode ===
-          "GITHUB_ORGANIZATION_REQUIRES_SECURE_TOKEN_STORAGE"
-          ? "organization_not_supported"
-          : "authorization_failed",
+        mapAuthorizationError(errorCode),
       ),
     );
   }
+}
+
+function mapAuthorizationError(errorCode: string | null): string {
+  if (
+    errorCode ===
+    "GITHUB_ORGANIZATION_REQUIRES_SECURE_TOKEN_STORAGE"
+  ) {
+    return "organization_not_supported";
+  }
+  if (errorCode === "GITHUB_INSTALLATION_NOT_ACCESSIBLE") {
+    return "installation_not_found";
+  }
+  return "authorization_failed";
 }
 
 function readConvexErrorCode(error: unknown): string | null {
@@ -97,5 +123,6 @@ function redirectWithClearedOauth(
   response.cookies.delete(GITHUB_APP_OAUTH_STATE_COOKIE);
   response.cookies.delete(GITHUB_APP_CODE_VERIFIER_COOKIE);
   response.cookies.delete(GITHUB_APP_RETURN_TO_COOKIE);
+  response.cookies.delete(GITHUB_APP_CONNECTION_MODE_COOKIE);
   return response;
 }

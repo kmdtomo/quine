@@ -70,7 +70,7 @@ export function SignupGithubAppContent({
 
           <div className={styles.action}>
             <Link
-              href="/api/signup/github-app/install"
+              href="/api/signup/github-app/connect"
               prefetch={false}
               className={`${styles.btn} ${styles.btnGithub}`}
               aria-disabled={!appConfigured}
@@ -78,9 +78,17 @@ export function SignupGithubAppContent({
               <GithubIcon />
               <span>
                 {appConfigured
-                  ? "Install Quine on GitHub"
+                  ? "Connect existing GitHub App"
                   : "GitHub App is not configured"}
               </span>
+            </Link>
+            <Link
+              href="/api/signup/github-app/install"
+              prefetch={false}
+              className={`${styles.btn} ${styles.btnGhost}`}
+              aria-disabled={!appConfigured}
+            >
+              Install or configure Quine
             </Link>
             <Link
               href="/tech-stack/edit?onboarding=1&manual=1"
@@ -142,7 +150,7 @@ function ExistingInstallations({
             href={
               installation.status === "active"
                 ? `/tech-stack/edit?onboarding=1&github_installation=${installation._id}`
-                : "/api/signup/github-app/install"
+                : "/api/signup/github-app/connect"
             }
             className={styles.installationItem}
           >

@@ -12,6 +12,9 @@ export const GITHUB_APP_CODE_VERIFIER_COOKIE =
   "quine_github_app_code_verifier";
 export const GITHUB_APP_RETURN_TO_COOKIE =
   "quine_github_app_return_to";
+export const GITHUB_APP_CONNECTION_MODE_COOKIE =
+  "quine_github_app_connection_mode";
+export const GITHUB_APP_EXISTING_CONNECTION_MODE = "existing";
 export const GITHUB_APP_DEFAULT_RETURN_TO =
   "/tech-stack/edit?onboarding=1";
 export const GITHUB_APP_COOKIE_MAX_AGE_SECONDS = 10 * 60;

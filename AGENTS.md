@@ -1,104 +1,100 @@
-# Quine プロジェクトルール
+# Quine project rules
 
-## 現在のフェーズ: 実装（mockup → Next.js + Convex）
+## Phase and stack
 
-`mockup/` で完成済みのデザインを、Next.js 16 / Convex / Tailwind v4 / shadcn/ui で実装する。
+`mockup/`で完成したdesignを、Next.js 16 App Router、TypeScript、Convex、Convex Auth、GitHub App、Tailwind CSS v4、shadcn/ui、pnpmで実装する。
 
-## Stack
+ConvexはDB、registered functions、realtime、auth、外部処理のserver boundaryでありrootへ置く。別DB、repository layer、別認証基盤を追加しない。
 
-- **Next.js 16** App Router / TypeScript
-- **Convex** （DB + 関数 + リアルタイム + 認証）
-- **Convex Auth** + GitHub OAuth（ログイン用）
-- **GitHub App** 別途インストール（リポ解析用）
-- **Tailwind CSS v4** + **shadcn/ui**（primitive のみ採用、固有 UI は自前 Tailwind）
-- **pnpm**
+## Source of truth
 
-## Commands（実装着手後に確定）
+新しいsessionでは最初に[実装ステータス](.docs/STATUS.md)を読む。
 
-```bash
-pnpm dev              # Next.js dev server
-pnpm convex:dev       # Convex dev（別ターミナル）
-pnpm build
-pnpm typecheck        # tsc --noEmit
-pnpm --filter frontend lint
-pnpm exec convex dev --once --typecheck enable  # Convex 変更時
-```
+実装・修正・refactor・reviewでは、必ず[quine-implement](.agents/skills/quine-implement/SKILL.md)を使い、taskに該当するreferenceをSKILL.mdのroutingから直接読む。product requirementが不足する時だけ[product docs index](.docs/INDEX.md)から必要なdocsを読む。
 
-## Architecture（要点）
+- `.docs/` — product requirementと実装進捗。
+- `.agents/skills/quine-implement/` — workflowと実装ルール。
+- `mockup/` — designの真理値。read-only。
 
-monorepo。将来 iOS を追加できるよう Convex は root に置く。
+同じ情報を複数referenceへ複製しない。
 
-```
+## Architecture
+
+```text
 apps/frontend/
-  ├── app/        → routing のみ。(public)/ と (app)/ で auth 境界を分ける
-  ├── features/   → UI + Convex 呼び出し。*View（Server）/ *Content（Client）/ *Section
-  ├── components/ → 複数 feature で再利用する純 UI（shadcn は components/ui/）
-  ├── lib/        → auth ヘルパ、env、cn() などの横断関心事
-  ├── hooks/, contexts/, public/
-  └── middleware.ts
-convex/           → schema.ts と <table>.ts に query / mutation / action（全クライアント共有）
+├── app/                  # route、metadata、composition
+├── features/<feature>/   # feature UI、form contract、optional Next adapter
+├── components/           # 複数featureで使う純UI
+├── lib/                  # frontend横断基盤
+├── hooks/
+└── contexts/
+
+convex/
+├── schema.ts             # 唯一のDB schema entrypoint
+├── <resource>.ts         # public/internal Convex adapter
+├── <feature>Action.ts    # Node Action entrypoint
+├── application/<feature>/# 複雑なtransaction use case
+├── infra/<provider>/     # GitHub/OpenAI等の外部接続
+├── lib/                  # Convex横断基盤
+└── _generated/           # codegen、手動編集禁止
 ```
 
-import alias: `@/*` = `apps/frontend/*`、`@convex/*` = `convex/*`。
-詳細は [architecture reference](.agents/skills/quine-implement/references/architecture.md) を参照。
+- 独立した`domain/`層は作らない。
+- `convex/schema.ts`をDB schemaの正規ソースにする。
+- Convex DBをrepositoryで包まない。
+- feature固有コードを汎用`lib/`へ置かない。
+- 詳細は[project structure](.agents/skills/quine-implement/references/project-structure.md)を正にする。
 
-## Hard Rules
+import aliasは`@/* = apps/frontend/*`、`@convex/* = convex/*`、`@data/* = data/*`。
 
-- **IMPORTANT**: 実装前に[quine-implement](.agents/skills/quine-implement/SKILL.md)のroutingに従って必要なreferenceを読む。要件確認時だけ[product docs](.docs/INDEX.md)を追加で読む
-- **IMPORTANT**: コード変更後に必ず `pnpm typecheck` を実行。エラー 0 にする
-- **IMPORTANT**: Convex 変更時は `pnpm exec convex dev --once --typecheck enable` も実行する。root の `pnpm typecheck` だけでは `convex/*.ts` の検証にならない
-- **`any` / `!`（non-null assertion）/ `as` キャスト禁止**（Convex `Id<>` 等の安全なキャスト除く）
-- **mutation の最初で `requireUser(ctx)` を呼ぶ**。所有者限定なら `authorId` チェックも
-- **client 由来の `userId` / `authorId` / GitHub `installationId` を権限の根拠にしない**。認証ユーザーと DB の関連から導出する
-- **画像・添付は Convex File Storage を使う**。data URL や巨大 string を document / Action 引数に保存しない
-- **長時間の外部 API 処理は public mutation → Run 作成 → scheduled internalAction を基本にする**
-- **`*View` は Server Component、`*Content` は Client Component**。`useEffect + fetch` 禁止（`preloadQuery` を使う）
-- **mockup を直接編集しない**: mockup は read-only の参照元。実装は `app/` `features/` 側に作る
-- **test file は作成・追記しない**。typecheck / lint / Convex 実行確認 / ブラウザ smoke で検証する
+## Non-negotiable rules
+
+- `app/`はrouteとcompositionだけにする。
+- `*View`はServer Component、`*Content`はClient Componentにする。
+- Server Componentに`"use server"`を書かない。これはServer Actionだけに使う。
+- 初期取得は`preloadQuery` / `fetchQuery`を使い、`useEffect + fetch`を使わない。
+- 通常の更新はclientからConvex mutationを直接呼ぶ。`features/<feature>/actions.ts`はNext runtimeが必要な場合だけ作る。
+- Convex root functionを薄いadapterにし、owner確認・状態遷移・複数table更新を含む複雑なtransactionだけ`convex/application/<feature>/`へ置く。
+- public mutation/actionの最初で`requireUser(ctx)`を呼ぶ。
+- client由来の`userId`、`authorId`、GitHub `installationId`を権限の根拠にしない。DB relationから導出する。
+- 長時間外部処理はpublic mutationでRunを作り、scheduled internalActionを起動する。
+- GitHub/OpenAIのSDK、request/response、provider errorだけを`convex/infra/<provider>/`へ置く。
+- 画像・添付はConvex File Storageを使い、data URLや巨大stringをdocument/Action argsへ保存しない。
+- `any`、non-null assertion、unsafe cast、理由のないTypeScript抑制を使わない。
+- mockupを直接編集しない。
+- test fileを作成・追記しない。
+- 無関係なuser変更を編集、format、revertしない。
 
 ## Workflow
 
-- 着手前: 関連 docs 読む → 既存類似コード探す → 設計提示 → 承認後に実装
-- 最小限の変更のみ。無関係コードのリファクタ禁止
-- 論理単位ごとに分けてコミット
-- 2 案で迷ったら両方説明してユーザーに選ばせる
-- 完了報告前に `pnpm typecheck`。Convex 変更時は Convex typecheck、UI 変更時はブラウザ smoke も行う
+1. STATUSとtaskに必要なskill referenceを読む。
+2. 同じ責務の既存実装を複数確認する。
+3. 変更file、責務、auth/owner、data flow、schema/index/storage変更を提示する。
+4. 承認後、最小の変更を実装する。
+5. diffと対象flowを確認し、必要なcommandを実行する。
+6. 完了内容と検証結果をSTATUSへ反映する。
 
-## ディレクトリ概要
+権限、公開API、破壊的schema変更、外部状態を変える判断が分かれる場合は実装前に確認する。
 
-- `mockup/` — **デザインの真理値（read-only）**。詳細は [mockup reference](.agents/skills/migrate-page-from-mockup/references/mockup.md)
-- `app/` `features/` `components/` `lib/` `convex/` — 実装本体
-- `.docs/` — プロダクト仕様、進捗、仕様索引
-- `.agents/skills/` — 実装workflowと実装referenceの正規ソース
-- `.claude/skills/` — `.agents/skills/`を参照する互換入口
+## Commands
 
-## 情報の正規ソース
+```bash
+pnpm dev
+pnpm convex:dev
+pnpm build
+pnpm typecheck
+pnpm --filter frontend lint
+pnpm run typecheck:convex
+pnpm run lint:convex
+pnpm exec convex dev --once --typecheck enable
+pnpm verify
+```
 
-**新規セッション開始時は [.docs/STATUS.md](.docs/STATUS.md) を最初に読む**（進捗状況・次のタスク・既知課題）。  
-**実装着手時は [reference index](.agents/skills/quine-implement/references/index.md) から必要なreferenceを選ぶ**。
-
-実装ルール:
-
-| ファイル | 内容 |
-|---|---|
-| `.agents/skills/quine-implement/references/core-rules.md` | 共通責務、identity、trust boundary |
-| `.agents/skills/quine-implement/references/architecture.md` | 配置、依存方向、View / Content |
-| `.agents/skills/quine-implement/references/frontend-rules.md` | 型、命名、Tailwind、フォーム |
-| `.agents/skills/quine-implement/references/convex-design.md` | Convex、auth、Action、Run、Storage、migration |
-| `.agents/skills/quine-implement/references/gotchas.md` | 過去に踏んだ罠と対処 |
-| `.agents/skills/quine-implement/references/verification.md` | 完了前検証 |
-| `.agents/skills/migrate-page-from-mockup/references/mockup.md` | mockupの構成と移植方針 |
-
-プロダクト仕様（`.docs/00_manifesto.md`〜`04_login.md`）は要件確認が必要な時だけ参照する。
-
-## Skills
-
-- **`migrate-page-from-mockup`** — mockup の 1 ページを Next.js + Tailwind に移植
-- **`quine-implement`** — 機能実装全般（references → 設計 → 実装 → 検証）
-- **`quine-init`** — 初期セットアップ（一回限り）
+実装コード変更後は最低限`pnpm typecheck`を成功させる。Convex変更時は`pnpm exec convex dev --once --typecheck enable`も必須。UI変更時は対象flowをbrowser smokeする。詳細は[verification](.agents/skills/quine-implement/references/verification.md)を正にする。
 
 ## Out of scope
 
-- mockup の HTML / CSS の編集（デザイン変更は mockup 側を直してから移植）
-- Convex 以外の DB / バックエンド（Supabase, Prisma 等を持ち込まない）
-- 認証ライブラリの追加（Convex Auth 一本）
+- `mockup/`のHTML/CSS編集。
+- Supabase、Prisma等、Convex以外のDB/backend導入。
+- Convex Auth以外の認証library追加。
+- taskと無関係なrefactorやcleanup。

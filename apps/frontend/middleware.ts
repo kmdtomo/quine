@@ -5,6 +5,9 @@ import {
 } from "@convex-dev/auth/nextjs/server";
 
 const isSignInPage = createRouteMatcher(["/signin"]);
+const isGithubAppOAuthCallback = createRouteMatcher([
+  "/signup/github-app/oauth/callback",
+]);
 const isProtectedRoute = createRouteMatcher([
   "/home(.*)",
   "/onboarding(.*)",
@@ -28,6 +31,10 @@ export default convexAuthNextjsMiddleware(
     ) {
       return nextjsMiddlewareRedirect(request, "/signin");
     }
+  },
+  {
+    shouldHandleCode: (request) =>
+      !isGithubAppOAuthCallback(request),
   },
 );
 

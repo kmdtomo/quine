@@ -29,6 +29,7 @@ export type ProductImportRepository = {
 };
 
 type ProductRepoImportModalProps = {
+  connectHref: string;
   error: string | null;
   importingRepository: string | null;
   installHref: string;
@@ -40,6 +41,7 @@ type ProductRepoImportModalProps = {
 };
 
 export function ProductRepoImportModal({
+  connectHref,
   error,
   importingRepository,
   installHref,
@@ -94,7 +96,10 @@ export function ProductRepoImportModal({
 
       <div className="flex min-h-0 flex-1 flex-col gap-3.5 overflow-y-auto px-6 pb-5">
         {notInstalled ? (
-          <GitHubInstallState installHref={installHref} />
+          <GitHubInstallState
+            connectHref={connectHref}
+            installHref={installHref}
+          />
         ) : (
           <>
             <div className="grid grid-cols-[190px_1fr] gap-2 max-sm:grid-cols-1">
@@ -172,7 +177,13 @@ export function ProductRepoImportModal({
   );
 }
 
-function GitHubInstallState({ installHref }: { installHref: string }) {
+function GitHubInstallState({
+  connectHref,
+  installHref,
+}: {
+  connectHref: string;
+  installHref: string;
+}) {
   return (
     <div className="rounded-[10px] border border-white/[0.08] bg-white/[0.02] px-6 py-8 text-center">
       <div className="mx-auto grid size-11 place-items-center rounded-[12px] bg-white/[0.06] text-white">
@@ -182,14 +193,23 @@ function GitHubInstallState({ installHref }: { installHref: string }) {
         Connect GitHub App
       </h3>
       <p className="mx-auto mt-2 max-w-[44ch] text-sm leading-6 text-[#888888]">
-        Quine needs a read-only GitHub App installation before it can list your repositories.
+        Quine does not have a verified GitHub App connection yet. If you
+        already installed Quine, reconnect it to list your repositories.
       </p>
-      <a
-        href={installHref}
-        className="mt-5 inline-flex h-10 items-center justify-center rounded-[8px] border border-[#d1d5db] bg-[#191918] px-5 text-[13px] font-bold text-white transition hover:border-white hover:bg-white hover:text-[#0A0A0A]"
-      >
-        Install Quine on GitHub
-      </a>
+      <div className="mt-5 flex flex-col items-center gap-2">
+        <a
+          href={connectHref}
+          className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[#d1d5db] bg-[#191918] px-5 text-[13px] font-bold text-white transition hover:border-white hover:bg-white hover:text-[#0A0A0A]"
+        >
+          Connect existing installation
+        </a>
+        <a
+          href={installHref}
+          className="inline-flex h-9 items-center justify-center rounded-[8px] px-4 text-[12px] font-medium text-[#888888] transition hover:bg-white/[0.04] hover:text-white"
+        >
+          Install or configure GitHub App
+        </a>
+      </div>
     </div>
   );
 }

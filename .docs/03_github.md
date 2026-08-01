@@ -2,7 +2,7 @@
 
 > 上位の思想は [`00_manifesto.md`](./00_manifesto.md) に記載。「AI で自動化」「フローを完璧にする」はマニフェスト由来。
 
-> **⚠ 実装注記:** このドキュメント内の「Supabase」記述はかつての方針。現在は **Convex** で実装する。リポ解析は認証済みmutationでRunを作成し、scheduled internalAction（`"use node"`）で実行する。詳細は[Convex design reference](../.agents/skills/quine-implement/references/convex-design.md)を参照。
+> **⚠ 実装注記:** このドキュメント内の「Supabase」記述はかつての方針。現在は **Convex** で実装する。リポ解析は認証済みmutationでRunを作成し、scheduled internalAction（`"use node"`）で実行する。実装詳細は[external services](../.agents/skills/quine-implement/references/external-services.md)と[security](../.agents/skills/quine-implement/references/security.md)を参照。
 
 ## コンセプト
 

@@ -6,64 +6,34 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   createCodeChallenge,
   createFlowSecret,
-  flowSecretsMatch,
   getSafeGithubAppReturnTo,
   GITHUB_APP_CODE_VERIFIER_COOKIE,
   GITHUB_APP_CONNECTION_MODE_COOKIE,
   GITHUB_APP_COOKIE_MAX_AGE_SECONDS,
+  GITHUB_APP_EXISTING_CONNECTION_MODE,
   GITHUB_APP_OAUTH_STATE_COOKIE,
   GITHUB_APP_RETURN_TO_COOKIE,
   GITHUB_APP_SETUP_STATE_COOKIE,
-  hashFlowSecret,
   withGithubAppError,
 } from "@/features/auth/lib/githubAppFlow";
 
 export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-  const installationId = params.get("installation_id");
-  const receivedState = params.get("state");
-  const setupState =
-    request.cookies.get(GITHUB_APP_SETUP_STATE_COOKIE)?.value ?? null;
-  const returnTo = getSafeGithubAppReturnTo(
-    request.cookies.get(GITHUB_APP_RETURN_TO_COOKIE)?.value ?? null,
-  );
-
-  if (
-    !flowSecretsMatch(setupState, receivedState) ||
-    !installationId ||
-    !/^\d+$/.test(installationId)
-  ) {
-    return redirectWithClearedFlow(
-      request,
-      withGithubAppError(returnTo, "invalid_setup_callback"),
-    );
-  }
-
-  const numericInstallationId = Number(installationId);
-  if (
-    !Number.isSafeInteger(numericInstallationId) ||
-    numericInstallationId <= 0
-  ) {
-    return redirectWithClearedFlow(
-      request,
-      withGithubAppError(returnTo, "invalid_setup_callback"),
-    );
-  }
-
   const token = await convexAuthNextjsToken();
   if (!token) {
-    return redirectWithClearedFlow(request, "/signin");
+    return NextResponse.redirect(new URL("/signin", request.url));
   }
 
+  const returnTo = getSafeGithubAppReturnTo(
+    request.nextUrl.searchParams.get("return_to"),
+  );
   const oauthState = createFlowSecret();
   const codeVerifier = createFlowSecret();
+
   try {
     const verification = await fetchMutation(
-      api.githubInstallations.beginVerification,
+      api.githubInstallations.beginExistingVerification,
       {
         codeChallenge: createCodeChallenge(codeVerifier),
-        installationId: numericInstallationId,
-        stateHash: hashFlowSecret(oauthState),
       },
       { token },
     );
@@ -73,12 +43,17 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(authorizationUrl);
     response.headers.set("Cache-Control", "no-store");
     response.cookies.delete(GITHUB_APP_SETUP_STATE_COOKIE);
-    response.cookies.delete(GITHUB_APP_CONNECTION_MODE_COOKIE);
     setFlowCookie(response, GITHUB_APP_OAUTH_STATE_COOKIE, oauthState);
     setFlowCookie(
       response,
       GITHUB_APP_CODE_VERIFIER_COOKIE,
       codeVerifier,
+    );
+    setFlowCookie(response, GITHUB_APP_RETURN_TO_COOKIE, returnTo);
+    setFlowCookie(
+      response,
+      GITHUB_APP_CONNECTION_MODE_COOKIE,
+      GITHUB_APP_EXISTING_CONNECTION_MODE,
     );
     return response;
   } catch {

@@ -5,6 +5,7 @@ import {
   createFlowSecret,
   getSafeGithubAppReturnTo,
   GITHUB_APP_COOKIE_MAX_AGE_SECONDS,
+  GITHUB_APP_CONNECTION_MODE_COOKIE,
   GITHUB_APP_RETURN_TO_COOKIE,
   GITHUB_APP_SETUP_STATE_COOKIE,
   withGithubAppError,
@@ -47,5 +48,6 @@ export async function GET(request: NextRequest) {
     maxAge: GITHUB_APP_COOKIE_MAX_AGE_SECONDS,
     path: "/",
   });
+  response.cookies.delete(GITHUB_APP_CONNECTION_MODE_COOKIE);
   return response;
 }

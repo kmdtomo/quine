@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quine Implement"
+  short_description: "Quineの実装・修正を明確な責務境界と検証手順で進める"
+  default_prompt: "Use $quine-implement to implement this Quine change with the approved project structure, security boundaries, and verification workflow."

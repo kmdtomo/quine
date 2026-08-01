@@ -657,6 +657,7 @@ export function ProductEditContent({
 
       {repoModalOpen ? (
         <ProductRepoImportModal
+          connectHref={`/api/signup/github-app/connect?return_to=${encodeURIComponent(newProductHref)}`}
           error={repoImportError}
           importingRepository={importingRepository}
           installHref={`/api/signup/github-app/install?return_to=${encodeURIComponent(newProductHref)}`}

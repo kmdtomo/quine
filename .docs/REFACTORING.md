@@ -3,7 +3,7 @@
 監査日: 2026-07-30
 最終更新: 2026-07-30
 対象: `ec7daa67` + 監査時点の未コミット変更
-判定基準: [quine-implement](../.agents/skills/quine-implement/SKILL.md) とその [references](../.agents/skills/quine-implement/references/index.md)
+判定基準: [quine-implement](../.agents/skills/quine-implement/SKILL.md) とtask別routing先のreference
 
 > このファイルは「今の実装をどの順で直すか」の作業一覧です。プロダクト仕様の正規ソースではありません。
 > 行番号は監査時点の目安です。実装開始時に対象コードを再確認してください。
@@ -591,7 +591,7 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 
 - `.docs/STATUS.md` — `productDevelopers.ts`、`connections.ts`、auth/users/onboardingの状態
 - `data/tech-stack.ts:2128` — 派生配列とlookup/type guard
-- `.agents/skills/quine-implement/references/architecture.md` — `data/`の責務
+- `.agents/skills/quine-implement/references/project-structure.md` — `data/`の責務
 
 ### 対応
 

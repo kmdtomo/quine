@@ -48,6 +48,32 @@ function isValidStateHash(stateHash: string): boolean {
   return /^[a-f0-9]{64}$/.test(stateHash);
 }
 
+function isValidCodeChallenge(codeChallenge: string): boolean {
+  return /^[A-Za-z0-9_-]{43}$/.test(codeChallenge);
+}
+
+function assertVerifiedPersonalAccount(
+  accountId: number,
+  accountType: "Organization" | "User",
+  githubUserId: number | undefined,
+  verifiedGithubUserId: number,
+): void {
+  if (
+    githubUserId === undefined ||
+    githubUserId !== verifiedGithubUserId
+  ) {
+    throw githubError("GITHUB_AUTHORIZATION_MISMATCH");
+  }
+  if (accountType !== "User") {
+    throw githubError(
+      "GITHUB_ORGANIZATION_REQUIRES_SECURE_TOKEN_STORAGE",
+    );
+  }
+  if (accountId !== verifiedGithubUserId) {
+    throw githubError("GITHUB_AUTHORIZATION_MISMATCH");
+  }
+}
+
 function getAuthorizationUrl(codeChallenge: string): string {
   const clientId = process.env.GITHUB_APP_CLIENT_ID;
   const callbackUrl = process.env.GITHUB_APP_USER_OAUTH_CALLBACK_URL;
@@ -113,7 +139,7 @@ export const beginVerification = mutation({
     }
     if (
       !isValidStateHash(args.stateHash) ||
-      !/^[A-Za-z0-9_-]{43}$/.test(args.codeChallenge)
+      !isValidCodeChallenge(args.codeChallenge)
     ) {
       throw githubError("GITHUB_INVALID_STATE");
     }
@@ -146,6 +172,25 @@ export const beginVerification = mutation({
         verificationExpiresAt: now + VERIFICATION_TTL_MS,
         verificationStateHash: args.stateHash,
       });
+    }
+
+    return {
+      authorizationUrl: getAuthorizationUrl(args.codeChallenge),
+    };
+  },
+});
+
+export const beginExistingVerification = mutation({
+  args: {
+    codeChallenge: v.string(),
+  },
+  returns: v.object({
+    authorizationUrl: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    await requireUser(ctx);
+    if (!isValidCodeChallenge(args.codeChallenge)) {
+      throw githubError("GITHUB_INVALID_STATE");
     }
 
     return {
@@ -212,20 +257,12 @@ export const activateVerified = internalMutation({
     if (pending.verificationExpiresAt <= Date.now()) {
       throw githubError("GITHUB_AUTHORIZATION_EXPIRED");
     }
-    if (
-      user?.githubId === undefined ||
-      user.githubId !== args.verifiedGithubUserId
-    ) {
-      throw githubError("GITHUB_AUTHORIZATION_MISMATCH");
-    }
-    if (
-      args.accountType !== "User" ||
-      args.accountId !== args.verifiedGithubUserId
-    ) {
-      throw githubError(
-        "GITHUB_ORGANIZATION_REQUIRES_SECURE_TOKEN_STORAGE",
-      );
-    }
+    assertVerifiedPersonalAccount(
+      args.accountId,
+      args.accountType,
+      user?.githubId,
+      args.verifiedGithubUserId,
+    );
 
     const now = Date.now();
     const userInstallations = await ctx.db
@@ -260,6 +297,95 @@ export const activateVerified = internalMutation({
       verificationStateHash: "",
     });
     return pending._id;
+  },
+});
+
+export const activateDiscovered = internalMutation({
+  args: {
+    accountId: v.number(),
+    accountLogin: v.string(),
+    accountType: accountTypeValidator,
+    githubInstallationId: v.number(),
+    repositorySelection: repositorySelectionValidator,
+    userId: v.id("users"),
+    verifiedGithubUserId: v.number(),
+  },
+  returns: v.id("githubInstallations"),
+  handler: async (ctx, args) => {
+    if (
+      !Number.isSafeInteger(args.githubInstallationId) ||
+      args.githubInstallationId <= 0
+    ) {
+      throw githubError("GITHUB_INVALID_INSTALLATION");
+    }
+
+    const user = await ctx.db.get("users", args.userId);
+    assertVerifiedPersonalAccount(
+      args.accountId,
+      args.accountType,
+      user?.githubId,
+      args.verifiedGithubUserId,
+    );
+
+    const now = Date.now();
+    const userInstallations = await ctx.db
+      .query("githubInstallations")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .order("desc")
+      .take(MAX_INSTALLATIONS_PER_USER);
+    const existing = userInstallations.find(
+      (installation) =>
+        installation.installationId === args.githubInstallationId,
+    );
+    const installationId =
+      existing?._id ??
+      (await ctx.db.insert("githubInstallations", {
+        accountId: args.accountId,
+        accountLogin: args.accountLogin,
+        accountType: args.accountType,
+        createdAt: now,
+        installationId: args.githubInstallationId,
+        repositorySelection: args.repositorySelection,
+        status: "active",
+        updatedAt: now,
+        userId: args.userId,
+        verifiedAt: now,
+        verifiedByGithubId: args.verifiedGithubUserId,
+        verificationExpiresAt: now,
+        verificationStateHash: "",
+      }));
+
+    if (existing) {
+      await ctx.db.patch("githubInstallations", existing._id, {
+        accountId: args.accountId,
+        accountLogin: args.accountLogin,
+        accountType: args.accountType,
+        repositorySelection: args.repositorySelection,
+        revokedAt: undefined,
+        status: "active",
+        updatedAt: now,
+        verifiedAt: now,
+        verifiedByGithubId: args.verifiedGithubUserId,
+        verificationExpiresAt: now,
+        verificationStateHash: "",
+      });
+    }
+
+    for (const installation of userInstallations) {
+      if (
+        installation._id !== installationId &&
+        installation.installationId === args.githubInstallationId &&
+        installation.status === "active"
+      ) {
+        await ctx.db.patch("githubInstallations", installation._id, {
+          revokedAt: now,
+          status: "revoked",
+          updatedAt: now,
+        });
+      }
+    }
+
+    return installationId;
   },
 });
 
