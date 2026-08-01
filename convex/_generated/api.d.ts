@@ -8,6 +8,10 @@
  * @module
  */
 
+import type * as application_developerTechnologies_reorder from "../application/developerTechnologies/reorder.js";
+import type * as application_developerTechnologies_saveDetected from "../application/developerTechnologies/saveDetected.js";
+import type * as application_developerTechnologies_setManyYears from "../application/developerTechnologies/setManyYears.js";
+import type * as application_developerTechnologies_technologyRules from "../application/developerTechnologies/technologyRules.js";
 import type * as application_githubAnalysis_beginExecution from "../application/githubAnalysis/beginExecution.js";
 import type * as application_githubAnalysis_commitTechnologyAnalysis from "../application/githubAnalysis/commitTechnologyAnalysis.js";
 import type * as application_githubAnalysis_retryTechnologyAnalysis from "../application/githubAnalysis/retryTechnologyAnalysis.js";
@@ -25,6 +29,17 @@ import type * as application_productAi_runState from "../application/productAi/r
 import type * as application_productAi_startRun from "../application/productAi/startRun.js";
 import type * as application_productAi_threadAccess from "../application/productAi/threadAccess.js";
 import type * as application_productAi_upsertRepoContext from "../application/productAi/upsertRepoContext.js";
+import type * as application_productDevelopers_approveDeveloper from "../application/productDevelopers/approveDeveloper.js";
+import type * as application_productDevelopers_declineInvitation from "../application/productDevelopers/declineInvitation.js";
+import type * as application_productDevelopers_inviteDeveloper from "../application/productDevelopers/inviteDeveloper.js";
+import type * as application_productDevelopers_productDeveloperAccess from "../application/productDevelopers/productDeveloperAccess.js";
+import type * as application_productDevelopers_productDeveloperRoles from "../application/productDevelopers/productDeveloperRoles.js";
+import type * as application_productDevelopers_removeDeveloper from "../application/productDevelopers/removeDeveloper.js";
+import type * as application_productDevelopers_requestToJoinProduct from "../application/productDevelopers/requestToJoinProduct.js";
+import type * as application_productTechnologies_addProductTechnology from "../application/productTechnologies/addProductTechnology.js";
+import type * as application_productTechnologies_productTechnologyLimits from "../application/productTechnologies/productTechnologyLimits.js";
+import type * as application_productTechnologies_reorderProductTechnologies from "../application/productTechnologies/reorderProductTechnologies.js";
+import type * as application_productTechnologies_setManyProductTechnologies from "../application/productTechnologies/setManyProductTechnologies.js";
 import type * as application_products_productAccess from "../application/products/productAccess.js";
 import type * as application_products_productInput from "../application/products/productInput.js";
 import type * as application_products_saveProductForm from "../application/products/saveProductForm.js";
@@ -79,6 +94,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "application/developerTechnologies/reorder": typeof application_developerTechnologies_reorder;
+  "application/developerTechnologies/saveDetected": typeof application_developerTechnologies_saveDetected;
+  "application/developerTechnologies/setManyYears": typeof application_developerTechnologies_setManyYears;
+  "application/developerTechnologies/technologyRules": typeof application_developerTechnologies_technologyRules;
   "application/githubAnalysis/beginExecution": typeof application_githubAnalysis_beginExecution;
   "application/githubAnalysis/commitTechnologyAnalysis": typeof application_githubAnalysis_commitTechnologyAnalysis;
   "application/githubAnalysis/retryTechnologyAnalysis": typeof application_githubAnalysis_retryTechnologyAnalysis;
@@ -96,6 +115,17 @@ declare const fullApi: ApiFromModules<{
   "application/productAi/startRun": typeof application_productAi_startRun;
   "application/productAi/threadAccess": typeof application_productAi_threadAccess;
   "application/productAi/upsertRepoContext": typeof application_productAi_upsertRepoContext;
+  "application/productDevelopers/approveDeveloper": typeof application_productDevelopers_approveDeveloper;
+  "application/productDevelopers/declineInvitation": typeof application_productDevelopers_declineInvitation;
+  "application/productDevelopers/inviteDeveloper": typeof application_productDevelopers_inviteDeveloper;
+  "application/productDevelopers/productDeveloperAccess": typeof application_productDevelopers_productDeveloperAccess;
+  "application/productDevelopers/productDeveloperRoles": typeof application_productDevelopers_productDeveloperRoles;
+  "application/productDevelopers/removeDeveloper": typeof application_productDevelopers_removeDeveloper;
+  "application/productDevelopers/requestToJoinProduct": typeof application_productDevelopers_requestToJoinProduct;
+  "application/productTechnologies/addProductTechnology": typeof application_productTechnologies_addProductTechnology;
+  "application/productTechnologies/productTechnologyLimits": typeof application_productTechnologies_productTechnologyLimits;
+  "application/productTechnologies/reorderProductTechnologies": typeof application_productTechnologies_reorderProductTechnologies;
+  "application/productTechnologies/setManyProductTechnologies": typeof application_productTechnologies_setManyProductTechnologies;
   "application/products/productAccess": typeof application_products_productAccess;
   "application/products/productInput": typeof application_products_productInput;
   "application/products/saveProductForm": typeof application_products_saveProductForm;

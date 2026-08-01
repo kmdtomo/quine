@@ -3,14 +3,24 @@ import { ConvexError, v } from "convex/values";
 import {
   getTechnologyByKey,
   isTechnologyKey,
-  technologyKeys as canonicalTechnologyKeys,
-  type TechnologyKey,
 } from "../data/tech-stack";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { internalMutation, mutation, query } from "./_generated/server";
+import {
+  MAX_DEVELOPER_TECHNOLOGIES,
+  normalizeDeveloperYears,
+} from "./application/developerTechnologies/technologyRules";
+import {
+  reorder as reorderUseCase,
+} from "./application/developerTechnologies/reorder";
+import {
+  saveDetected as saveDetectedUseCase,
+} from "./application/developerTechnologies/saveDetected";
+import {
+  setManyYears as setManyYearsUseCase,
+} from "./application/developerTechnologies/setManyYears";
 import { getCurrentUser } from "./lib/auth";
 
-const MAX_DEVELOPER_TECHNOLOGIES = canonicalTechnologyKeys.length;
 const listMineValidator = v.union(
   v.null(),
   v.object({
@@ -35,21 +45,6 @@ const listMineValidator = v.union(
     }),
   }),
 );
-
-function uniqueValidTechnologyKeys(keys: string[]): TechnologyKey[] {
-  const seen = new Set<TechnologyKey>();
-  const result: TechnologyKey[] = [];
-
-  for (const key of keys) {
-    if (!isTechnologyKey(key) || seen.has(key)) {
-      continue;
-    }
-    seen.add(key);
-    result.push(key);
-  }
-
-  return result;
-}
 
 export const listMine = query({
   args: {},
@@ -107,44 +102,7 @@ export const saveDetected = internalMutation({
     detectedCount: v.number(),
     insertedCount: v.number(),
   }),
-  handler: async (ctx, args) => {
-    const technologyKeys = uniqueValidTechnologyKeys(args.technologyKeys);
-
-    const existing = await ctx.db
-      .query("developerTechnologies")
-      .withIndex("by_developer", (q) => q.eq("developerId", args.userId))
-      .take(MAX_DEVELOPER_TECHNOLOGIES);
-
-    const existingByKey = new Map(
-      existing.map((row) => [row.technologyKey, row]),
-    );
-    const maxOrder = existing.reduce(
-      (currentMax, row) => Math.max(currentMax, row.order),
-      0,
-    );
-    let nextOrder = maxOrder + 1;
-    let insertedCount = 0;
-
-    for (const technologyKey of technologyKeys) {
-      const current = existingByKey.get(technologyKey);
-      if (current) {
-        continue;
-      }
-
-      await ctx.db.insert("developerTechnologies", {
-        developerId: args.userId,
-        technologyKey,
-        order: nextOrder,
-      });
-      nextOrder += 1;
-      insertedCount += 1;
-    }
-
-    return {
-      detectedCount: technologyKeys.length,
-      insertedCount,
-    };
-  },
+  handler: async (ctx, args) => await saveDetectedUseCase(ctx, args),
 });
 
 export const add = mutation({
@@ -243,27 +201,9 @@ export const setManyYears = mutation({
     years: v.union(v.number(), v.null()),
   },
   returns: v.null(),
-  handler: async (ctx, { technologyKeys, years }) => {
+  handler: async (ctx, args) => {
     const user = await requireDeveloperTechnologyUser(ctx);
-    const normalizedYears = normalizeDeveloperYears(years);
-
-    const validKeys = uniqueValidTechnologyKeys(technologyKeys);
-    for (const technologyKey of validKeys) {
-      const current = await ctx.db
-        .query("developerTechnologies")
-        .withIndex("by_developer_technology", (q) =>
-          q.eq("developerId", user._id).eq("technologyKey", technologyKey),
-        )
-        .first();
-      if (!current) {
-        continue;
-      }
-
-      await ctx.db.patch("developerTechnologies", current._id, {
-        years: normalizedYears,
-      });
-    }
-    return null;
+    return await setManyYearsUseCase(ctx, args, user._id);
   },
 });
 
@@ -272,50 +212,11 @@ export const reorder = mutation({
     technologyKeys: v.array(v.string()),
   },
   returns: v.null(),
-  handler: async (ctx, { technologyKeys }) => {
+  handler: async (ctx, args) => {
     const user = await requireDeveloperTechnologyUser(ctx);
-    const validKeys = uniqueValidTechnologyKeys(technologyKeys);
-    const requestedKeys = new Set<string>(validKeys);
-    const rows = await ctx.db
-      .query("developerTechnologies")
-      .withIndex("by_developer", (q) => q.eq("developerId", user._id))
-      .take(MAX_DEVELOPER_TECHNOLOGIES);
-    const rowsByKey = new Map(rows.map((row) => [row.technologyKey, row]));
-
-    let order = 1;
-    for (const technologyKey of validKeys) {
-      const row = rowsByKey.get(technologyKey);
-      if (!row) {
-        continue;
-      }
-      await ctx.db.patch("developerTechnologies", row._id, { order });
-      order += 1;
-    }
-
-    const remainingRows = rows
-      .filter((row) => !requestedKeys.has(row.technologyKey))
-      .sort((a, b) => a.order - b.order);
-    for (const row of remainingRows) {
-      await ctx.db.patch("developerTechnologies", row._id, { order });
-      order += 1;
-    }
-    return null;
+    return await reorderUseCase(ctx, args, user._id);
   },
 });
-
-function normalizeDeveloperYears(years: number | null) {
-  if (years === null) {
-    return undefined;
-  }
-  if (!Number.isInteger(years) || years < 1 || years > 11) {
-    throw new ConvexError({
-      code: "INVALID_YEARS",
-      message: "Years must be an integer between 1 and 11.",
-    });
-  }
-
-  return years;
-}
 
 async function requireDeveloperTechnologyUser(ctx: QueryCtx | MutationCtx) {
   const user = await getCurrentUser(ctx);

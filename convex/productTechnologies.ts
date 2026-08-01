@@ -1,25 +1,25 @@
 import { ConvexError, v } from "convex/values";
 
-import {
-  getTechnologyByKey,
-  technologyKeys as canonicalTechnologyKeys,
-} from "../data/tech-stack";
+import { getTechnologyByKey } from "../data/tech-stack";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 import {
   canEditProduct,
   canViewProduct,
+  requireProductEditor,
 } from "./application/products/productAccess";
+import { addProductTechnology } from "./application/productTechnologies/addProductTechnology";
+import { MAX_PRODUCT_TECHNOLOGY_RELATIONS } from "./application/productTechnologies/productTechnologyLimits";
+import { reorderProductTechnologies } from "./application/productTechnologies/reorderProductTechnologies";
+import { setManyProductTechnologies } from "./application/productTechnologies/setManyProductTechnologies";
 import { getCurrentUser } from "./lib/auth";
-import { uniqueValidTechnologyKeys } from "./lib/technologyKeys";
 import { normalizeUsername } from "./lib/username";
 
 const MAX_PUBLIC_PRODUCTS = 60;
 const MAX_PRODUCT_RELATIONSHIPS_TO_SCAN = 240;
 const MAX_ENGINEER_RELATIONSHIPS_TO_SCAN = 500;
 const MAX_PRODUCT_TECHNOLOGIES = 7;
-const MAX_PRODUCT_TECHNOLOGY_RELATIONS = canonicalTechnologyKeys.length;
 
 const projectTypeValidator = v.union(
   v.literal("personal"),
@@ -272,38 +272,9 @@ export const setMany = mutation({
     technologyKeys: v.array(v.string()),
   },
   returns: v.null(),
-  handler: async (ctx, { productId, technologyKeys }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductTechnologyUser(ctx);
-    await requireProductTechnologyEditor(ctx, productId, user);
-    const validKeys = uniqueValidTechnologyKeys(technologyKeys);
-    const rows = await ctx.db
-      .query("productTechnologies")
-      .withIndex("by_product", (q) => q.eq("productId", productId))
-      .take(MAX_PRODUCT_TECHNOLOGY_RELATIONS);
-    const rowsByKey = new Map(rows.map((row) => [row.technologyKey, row]));
-    const requestedKeys = new Set<string>(validKeys);
-
-    let order = 1;
-    for (const technologyKey of validKeys) {
-      const current = rowsByKey.get(technologyKey);
-      if (current) {
-        await ctx.db.patch("productTechnologies", current._id, { order });
-      } else {
-        await ctx.db.insert("productTechnologies", {
-          order,
-          productId,
-          technologyKey,
-        });
-      }
-      order += 1;
-    }
-
-    for (const row of rows) {
-      if (!requestedKeys.has(row.technologyKey)) {
-        await ctx.db.delete("productTechnologies", row._id);
-      }
-    }
-    return null;
+    return await setManyProductTechnologies(ctx, user, args);
   },
 });
 
@@ -313,40 +284,9 @@ export const add = mutation({
     technologyKey: v.string(),
   },
   returns: v.id("productTechnologies"),
-  handler: async (ctx, { productId, technologyKey }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductTechnologyUser(ctx);
-    await requireProductTechnologyEditor(ctx, productId, user);
-    const validKeys = uniqueValidTechnologyKeys([technologyKey]);
-    const validKey = validKeys[0];
-    if (validKey === undefined) {
-      throw new ConvexError({
-        code: "UNKNOWN_TECHNOLOGY",
-        message: "Unknown technology.",
-      });
-    }
-
-    const current = await ctx.db
-      .query("productTechnologies")
-      .withIndex("by_product_technology", (q) =>
-        q.eq("productId", productId).eq("technologyKey", validKey),
-      )
-      .first();
-    if (current) {
-      return current._id;
-    }
-
-    const rows = await ctx.db
-      .query("productTechnologies")
-      .withIndex("by_product", (q) => q.eq("productId", productId))
-      .take(MAX_PRODUCT_TECHNOLOGY_RELATIONS);
-    const nextOrder =
-      rows.reduce((currentMax, row) => Math.max(currentMax, row.order), 0) + 1;
-
-    return await ctx.db.insert("productTechnologies", {
-      order: nextOrder,
-      productId,
-      technologyKey: validKey,
-    });
+    return await addProductTechnology(ctx, user, args);
   },
 });
 
@@ -358,7 +298,7 @@ export const remove = mutation({
   returns: v.null(),
   handler: async (ctx, { productId, technologyKey }) => {
     const user = await requireProductTechnologyUser(ctx);
-    await requireProductTechnologyEditor(ctx, productId, user);
+    await requireProductEditor(ctx, productId, user);
     const row = await ctx.db
       .query("productTechnologies")
       .withIndex("by_product_technology", (q) =>
@@ -380,35 +320,9 @@ export const reorder = mutation({
     technologyKeys: v.array(v.string()),
   },
   returns: v.null(),
-  handler: async (ctx, { productId, technologyKeys }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductTechnologyUser(ctx);
-    await requireProductTechnologyEditor(ctx, productId, user);
-    const validKeys = uniqueValidTechnologyKeys(technologyKeys);
-    const requestedKeys = new Set<string>(validKeys);
-    const rows = await ctx.db
-      .query("productTechnologies")
-      .withIndex("by_product", (q) => q.eq("productId", productId))
-      .take(MAX_PRODUCT_TECHNOLOGY_RELATIONS);
-    const rowsByKey = new Map(rows.map((row) => [row.technologyKey, row]));
-
-    let order = 1;
-    for (const technologyKey of validKeys) {
-      const row = rowsByKey.get(technologyKey);
-      if (!row) {
-        continue;
-      }
-      await ctx.db.patch("productTechnologies", row._id, { order });
-      order += 1;
-    }
-
-    const remainingRows = rows
-      .filter((row) => !requestedKeys.has(row.technologyKey))
-      .sort((a, b) => a.order - b.order);
-    for (const row of remainingRows) {
-      await ctx.db.patch("productTechnologies", row._id, { order });
-      order += 1;
-    }
-    return null;
+    return await reorderProductTechnologies(ctx, user, args);
   },
 });
 
@@ -449,28 +363,6 @@ async function requireProductTechnologyUser(ctx: QueryCtx | MutationCtx) {
   }
 
   return user;
-}
-
-async function requireProductTechnologyEditor(
-  ctx: MutationCtx,
-  productId: Id<"products">,
-  user: Doc<"users">,
-) {
-  const product = await ctx.db.get("products", productId);
-  if (product === null) {
-    throw new ConvexError({
-      code: "PRODUCT_NOT_FOUND",
-      message: "Product not found.",
-    });
-  }
-  if (!(await canEditProduct(ctx, product, user))) {
-    throw new ConvexError({
-      code: "FORBIDDEN",
-      message: "You do not have permission to edit this product.",
-    });
-  }
-
-  return product;
 }
 
 async function getPublicProductTechnologies(
