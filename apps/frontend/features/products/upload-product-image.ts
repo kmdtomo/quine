@@ -1,12 +1,21 @@
 import type { Id } from "@convex/_generated/dataModel";
 
-type GenerateUploadUrl = () => Promise<string>;
+type CreateUploadIntent = () => Promise<{
+  uploadIntentId: Id<"uploadIntents">;
+  uploadUrl: string;
+}>;
+
+type FinalizeUpload = (args: {
+  storageId: Id<"_storage">;
+  uploadIntentId: Id<"uploadIntents">;
+}) => Promise<null>;
 
 export async function uploadProductImage(
   file: File,
-  generateUploadUrl: GenerateUploadUrl,
+  createUploadIntent: CreateUploadIntent,
+  finalizeUpload: FinalizeUpload,
 ): Promise<Id<"_storage">> {
-  const uploadUrl = await generateUploadUrl();
+  const { uploadIntentId, uploadUrl } = await createUploadIntent();
   const response = await fetch(uploadUrl, {
     body: file,
     headers: {
@@ -29,5 +38,7 @@ export async function uploadProductImage(
     throw new Error("INVALID_UPLOAD_RESPONSE");
   }
 
-  return result.storageId as Id<"_storage">;
+  const storageId = result.storageId as Id<"_storage">;
+  await finalizeUpload({ storageId, uploadIntentId });
+  return storageId;
 }
