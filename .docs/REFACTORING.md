@@ -50,20 +50,19 @@
 | RF-014 | P2 | 一部完了（PR CI接続済み） | frontend/Convexを一括検証するcommandを作る | root scripts, ESLint, GitHub Actions |
 | RF-015 | P3 | 完了 | STATUSとarchitecture referenceを実装へ同期する | `.docs/STATUS.md`, skill references |
 | RF-016 | P3 | 完了 | feature/application/workflow/infra/libの配置境界を統一する | frontend features, `convex/application`, `convex/workflows`, `convex/infra` |
-| RF-017 | P1 | 一部完了（schema/API expand済み） | Product Storageにupload ownership contractを追加する | `files.ts`, Product assets/logo, schema |
+| RF-017 | P1 | 完了 | Product Storageにupload ownership contractを追加する | `files.ts`, Product assets/logo, schema |
 
 ## 今回の実装結果
 
 サブエージェントによる領域別実装と統合監督を行い、P0/P1のコード上の危険経路と主要な責務違反を修正した。`完了`はコード・型・lint・Convex contractまで確認済み、`一部完了`は外部操作、移行cleanup、互換契約の整理が残る項目を示す。
 
-残作業は次の6群に限定される。
+残作業は次の5群に限定される。
 
 1. 漏えい済みSupabase credentialの外部revokeとGit履歴からの除去
 2. Organization Installation向けの安全なGitHub user token更新・再検証設計
-3. Product Storage IDにupload user、用途、期限、消費状態を結び付けるownership contract
-4. 保存前に放棄されたFile Storage objectの期限付きcleanup
-5. Product repository importのRun化、公開Users/Products検索の全件pagination、外部contract未確認public APIのdeprecation設計
-6. 保護されたConvex Cloud CI jobと必要なsecret / Environment設定
+3. 保存前に放棄されたFile Storage objectの期限付きcleanup
+4. Product repository importのRun化、公開Users/Products検索の全件pagination、外部contract未確認public APIのdeprecation設計
+5. 保護されたConvex Cloud CI jobと必要なsecret / Environment設定
 
 ### 統合検証実績
 
@@ -186,8 +185,9 @@ profile画像、banner、product logo、screenshots、Product AI添付をdata UR
 - [x] binary本体がConvex documentやAction引数を通らない
 - [x] profile、product、Product AI添付がstorage ID経由で動く
 - [x] data URLは必要な場合でもclient内previewだけに限定される
-- [ ] 既存データの移行とrollback方針がある
-- [ ] 削除・置換・失敗時のstorage cleanupがある
+- [x] 既存Storage参照を棚卸しし、対象0件のためmigration不要と確認する
+- [x] resource削除・画像置換時のStorage cleanupがある
+- [ ] upload後にresource保存せず離脱したobjectの期限付きcleanupがある
 
 ---
 
@@ -640,33 +640,38 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 ## RF-017 Product Storageにupload ownership contractを追加する
 
 - 優先度: **P1**
-- 状態: **一部完了（schema/API expand済み、consumer切替・backfill・cleanup未実施）**
+- 状態: **完了**（放棄uploadの期限付きcleanupはRF-003の残件）
 - 種別: Security / File Storage
 
 ### 問題
 
-現行`requireProductStorageOwnership`が確認するのは`productAssets.by_storage`のrelation衝突だけで、Storage objectをuploadしたuser、upload intent、用途、期限、消費状態を証明しない。`deleteProductStorageIfUnreferenced`も`productAssets`だけを確認し、`products.logoStorageId`による別Productからの参照を保証に含めない。
+`requireProductStorageOwnership`が確認するのは`productAssets.by_storage`のrelation衝突だけで、Storage objectをuploadしたuser、upload intent、用途、期限、消費状態を単独では証明しなかった。
 
 ### 方針
 
-挙動不変refactorの中でerror順や既存upload flowを暗黙に変えない。別taskでauthenticated userとStorage IDを結ぶupload intentを設計し、logo/screenshot attach時の消費、期限切れobject cleanup、既存objectのmigration、全参照を考慮したdelete条件をまとめて導入する。
+authenticated userとStorage IDを用途付きintentで結び、finalizeとresource attachを分離する。resource mutationでaccess確認、purpose/expiry/target検証、consume、relation更新を同じtransactionに置く。
 
-### Schema / API expand結果
+### 実装結果
 
 - `uploadIntents`を追加し、authenticated user、用途、`pending / uploaded / consumed`、Storage ID、期限、消費先resourceを表現した。
-- `files.createUploadIntent`と`files.finalizeUpload`をadditiveに追加した。両mutationは入口で認証し、finalizeはintent owner、期限、状態、Storage ID重複、metadata、用途別MIME、6MB上限を確認する。
-- upload URLとStorage IDの厳密な発行元証明ではなく、intent作成後に生成された未登録Storage IDの一回claimである。旧API廃止、backfill、resource attach時のconsumeが完了するまで、最終ownership保証とは扱わない。
+- `files.createUploadIntent`と`files.finalizeUpload`を追加した。両mutationは入口で認証し、finalizeはintent owner、期限、状態、Storage ID重複、metadata、用途別MIME、6MB上限を確認する。
+- Profile / Product / Product AI consumerを`create → upload → finalize`へ切り替え、resource mutationの引数とUIは維持した。
+- resource mutationは新規利用時にcurrent uploader・用途・期限、再利用時に同じ用途・消費先を確認し、relation更新と同一transactionでconsumeする。Productの別editorは現在のeditor accessと同じProduct targetで再利用できる。
+- upload URLとStorage IDの厳密な発行元証明ではなく、intent作成後に生成された未登録Storage IDの一回claimである。finalizeだけをownership確定とせず、resource mutationのconsumeを必須にした。
 - 未完了intentはuserあたり20件にbounded。pendingは1時間、uploadedは24時間の期限を持つ。
-- 既存`files.generateUploadUrl`、Profile / Product / Product AI consumer、resource mutationのargsとerror順は変更していない。現行UIは新APIをまだ使用しない。
+- 共有devを棚卸しした結果、既存Storage参照、`_storage`、`uploadIntents`はいずれも0件だったため、backfillも実データ削除も不要だった。legacy bypassは残していない。
+- repo内consumerがなくなった`files.generateUploadUrl`は廃止した。
 
 ### 完了条件
 
 - [x] upload intent用schema / indexとadditive public APIを追加する
 - [x] 既存upload API / consumerのcontractをexpand phaseで変更しない
-- [ ] client由来Storage IDをrelation衝突だけでなくserver上のupload owner/intentから検証する
-- [ ] logoとscreenshotを含む全参照を確認してからStorage objectを削除する
-- [ ] 未消費intentと放棄objectの期限付きcleanupを実装する
-- [ ] migrationと既存error/操作順への影響を確認する
+- [x] client由来Storage IDをrelation衝突だけでなくserver上のupload owner/intentから検証する
+- [x] purposeとconsumption targetを固定し、別resourceとの参照共有を禁止する
+- [x] migration要否と既存error/操作順への影響を確認する
+- [x] 旧upload APIを廃止する
+
+未消費intentと放棄objectの期限付きcleanupは、ownership contractとは分けてRF-003で追跡する。
 
 ---
 

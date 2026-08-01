@@ -219,14 +219,17 @@ convex/
 
 標準flow:
 
-1. 認証済みmutationがupload URLを発行する。
+1. 認証済みmutationが用途付きupload intentとupload URLを発行する。
 2. clientがbinaryをuploadする。
-3. owner確認付きmutationが`Id<"_storage">`をresourceへ関連付ける。
-4. 表示またはActionがstorage IDからURL/blobを得る。
-5. 置換・削除時に旧objectを削除するか、orphan cleanup方針を持つ。
+3. finalize mutationがStorage metadataとintentを検証し、storage IDを一回claimする。
+4. owner/access確認付きresource mutationが、用途・期限・消費先を検証してintent消費とresource関連付けを同じtransactionで行う。
+5. 表示またはActionがstorage IDからURL/blobを得る。
+6. 置換・削除時に旧objectを削除し、未消費objectには期限付きcleanup方針を持つ。
 
 - data URLやbase64巨大stringをdocument、Action args、Runへ保存しない。
 - client指定storage IDをowner確認なしで他resourceへ関連付けない。
+- finalizeはupload完了の登録であり、resourceへの関連付けやconsumeの代わりではない。
+- consumed storage IDの再利用は、同じ用途・同じ消費先で、呼び出し元がそのresourceへ現在もaccess可能な場合だけ許可する。
 - GitHub avatar等の外部URLとQuine管理storage IDはfieldを分ける。
 - upload完了とresource確定の間に残るorphanを想定する。
 

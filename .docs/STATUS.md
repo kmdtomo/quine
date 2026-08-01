@@ -43,7 +43,7 @@
 - [x] `data/tech-stack.ts`（457 件 / 26 カテゴリ）frontend / convex 共有。`data/technologies.ts` は互換 re-export
 - [x] Product Writing Agent: Strands + OpenAI Responses provider をscheduled internal actionで実行。`productAiRuns`をsource of truthとしてqueued / running / succeeded / failed、retry、idempotency、多重実行防止を管理する。`productAiThreads` / `productAiMessages` / `productAiProposals` / `productRepoContexts` / `productAiAttachmentContexts` にrepo context、会話履歴、画像analysis text、Markdown / form proposalを保持し、proposal確定とRun成功は同一transactionでcommitする。画像本体はConvex File Storage、公開mutation/actionにはStorage IDだけを渡す。
 - [x] Product作成・更新はRHF + Zodの単一form contractから`products.saveForm`へ保存。新規Product作成、developer / technology / screenshot関連、Product AI draft関連付けを単一transactionに統合し、`creationKey`で再送時の重複作成を防止する。
-- [x] RF-017 expand: `uploadIntents`と`files.createUploadIntent` / `files.finalizeUpload`をadditiveに導入。owner・用途・期限・未完了数・Storage metadataを検査するが、既存`generateUploadUrl`とProfile / Product / Product AI consumerは未切替のため、まだresource ownershipの最終根拠とは扱わない。Cloud schema/index/function typecheck済み
+- [x] RF-017: Profile / Product / Product AIを`createUploadIntent → upload → finalizeUpload → resource mutation`へ切替。resource mutationはowner/access・用途・期限・消費先を検証し、attachと同一transactionでconsumeする。共有devは既存Storage参照・`_storage`とも0件だったためbackfill/削除は不要で、旧`generateUploadUrl`も廃止。Cloud function contract確認済み
 - [x] Product AI editor初期状態をboundedな`getEditorState` queryへ統合し、Server `ProductEditView`でpreload。新規draft keyはServer生成のURL queryへ固定し、既存・新規ともreload後に履歴とRunを復元する。
 - [x] 2026-07-30 browser smoke: `/`、`/products`、`/@smoke-profile`はconsole errorなし。未認証`/products/new`は`/signin`へredirect。認証済みGitHub / Product AI / 保存操作のE2Eは未実施
 
@@ -154,12 +154,12 @@
 - **`form.tsx`**: shadcn の `base-nova` style に form primitive がなく、標準テンプレートを手動配置
 - **Supabase credential**: `.cursor/mcp.json`はcurrent treeから削除・ignore済み。漏えい済みcredentialの外部revokeとGit履歴からの除去は未実施
 - **Convex MCP**: `.mcp.json`の設定は存在する。利用セッションで接続できない場合はConvex CLIで代替する
-- **Storage ownership**: upload intent schema/APIのexpandは完了。consumer切替、既存Storage参照のbackfill、attach時consume、全参照cleanup、旧`generateUploadUrl`廃止は未実施
+- **Storage ownership**: upload intent consumer切替、finalize、attach時consume、旧`generateUploadUrl`廃止まで完了。finalizeは一回claim、resource mutationのconsumeがownership確定という境界をreferenceへ反映済み
 - **GitHub App 解析方針**: 現時点では AI を使わない。package / language / manifest / config / workflow / IaC resource type 由来の確定情報を `data/tech-stack.ts` の key にマッピングし、残りはユーザー編集で補う。AI による長いローディングや推測混入は避ける。
 - **GitHub App rate limit 方針**: 初回解析は精度60〜70%でよく、後でユーザー編集する前提。全 repo 完全解析ではなく、95 requests 上限で tree 起点の軽量 breadth-first scan を行う。production 前には installation 単位のキュー制御（同時解析1本）を追加する。
 - **GitHub Organization Installation**: 個人Installationは検証済み。OrganizationはGitHub user tokenの安全な暗号化保存・refresh・membership再検証の運用が未設計のため、現時点では安全側に拒否する
 - **File Storage cleanup**: Product / Profile / Product AIの主要画像経路はConvex File Storageへ移行済み。置換・削除時cleanupは実装済みだが、upload後に保存せず画面を離れたobjectの期限付きcleanupは未実装
-- **Product Storage ownership**: 現行`requireProductStorageOwnership`は`productAssets.by_storage`のrelation衝突だけを確認し、uploadしたuser/intentのownershipと`products.logoStorageId`参照は保証しない。挙動不変refactorでは変更せず、upload intent・期限・消費状態を設計する別security taskとして追跡する
+- **Product Storage ownership**: relation衝突、metadata、upload intentを分担して検証。新規attachはcurrent uploader・用途・期限、再利用は同じProduct targetと現在のeditor accessを要求する
 - **Product repository import**: Installationはserverで検証済みresourceから解決するが、repository import自体は現在public Action。永続Run化は残作業
 - **公開一覧検索**: Product / Users一覧はindexと明示的truncation contractを持つが、初回上限外を含む全文検索・複合filterのcursor paginationは未実装
 - **Product AI chat**: scheduled internalAction + 永続Runへの切替、Storage添付、transaction、preload/reload復元まで接続済み。認証済みセッションでのprovider実行browser smokeは未実施

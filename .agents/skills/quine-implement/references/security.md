@@ -128,18 +128,19 @@ GitHub login用OAuth identityとrepository解析用GitHub App Installationは別
 
 ## File ownership
 
-- upload URLはauthenticated mutationで発行する。
-- upload完了後、storage IDをresourceへ付けるmutationでowner/accessを確認する。
-- client指定storage IDが現在userのupload intentまたは許可resourceに属することを確認する。
+- upload URLはauthenticated mutationで用途付きintentと一緒に発行する。
+- finalizeではintent owner、期限、用途別MIME/size、Storage IDの一意claimを確認し、`uploaded`まで進める。
+- storage IDをresourceへ付けるmutationでowner/accessを確認し、intent consumeと関連付けを同じtransactionで行う。
+- 初回consumeはcurrent user、用途、期限を確認する。consumed IDの再利用は同じ用途・同じ消費先に限定し、現在のresource accessを別途確認する。
 - private fileのURLをpublic queryへ無条件に含めない。
 - resource削除・差し替え時のstorage object cleanupを定義する。
 - file size、MIME、用途をclient表示だけでなくserver flowでも検証する。
 
 presigned/upload URLは短命なcapabilityとして扱い、不要にlog・永続化・再利用しない。
 
-現行の`requireProductStorageOwnership`は`productAssets` relationの重複と、別productへのscreenshot関連付けだけを検査する。uploadしたuserのownership、upload intent、`products.logoStorageId`による参照は保証しないため、関数名だけをsecurity保証の根拠にしない。
+`finalizeUpload`はresource ownershipの確定ではなく、intent作成後に生成された未登録Storage IDの一回claimである。upload URLとStorage IDの厳密な発行元証明とは扱わず、resource mutationのconsumeを必須にする。
 
-このgapは挙動不変refactorで暗黙に強化しない。authenticated user、storage ID、用途、期限、消費状態を関連付けるupload intent等を別のsecurity taskとして設計し、既存upload・attach・cleanup flowへの影響を確認して導入する。それまでは既知のsecurity gapとして扱う。
+`requireProductStorageOwnership`は`productAssets` relationの衝突検査であり、upload ownership検査ではない。Product use caseではこれをmetadata検査と`consumeUploadIntent`に組み合わせる。別editorが既存mediaを維持・並べ替える場合、uploader一致ではなく、同じProduct targetのconsumed intentと現在のeditor accessで許可する。
 
 ## Secrets and errors
 

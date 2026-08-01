@@ -68,9 +68,11 @@ applicationへ切り出す場合も同じ`QueryCtx` / `MutationCtx`を渡し、�
 
 ### File Storage ordering and guarantees
 
-Storage refactorでは、既存flowの順序自体をcontractとして確認する。現在のProduct flowでは、request件数検査から重複排除、relation衝突確認からmetadata/MIME/size検証、DB relation削除からunreferenced確認とStorage削除、Product更新から旧logo cleanupの順を無断で変えない。
+Storage refactorでは、既存flowの順序自体をcontractとして確認する。Product screenshotではrequest件数検査、重複排除、relation衝突、metadata/MIME/size、intent consume、DB relation変更、unreferenced確認とStorage削除の順を無断で変えない。Product logoでは新Storageのmetadata/intent確定、Product更新、旧logo cleanupの順を保つ。
 
-helper名をsecurity保証の証拠にしない。現行`requireProductStorageOwnership`は`productAssets.by_storage`のrelation衝突を確認するだけで、userのupload intent ownershipや`products.logoStorageId`参照を保証しない。`deleteProductStorageIfUnreferenced`も`productAssets`上の参照だけを確認する。挙動不変refactorの中で暗黙に強化せず、保証を変える場合は別security taskとしてrelation、schema、migration、error順を設計する。
+helper名をsecurity保証の証拠にしない。`requireProductStorageOwnership`はrelation衝突、`consumeUploadIntent`はupload user・用途・期限・消費先を担当するため、resource access確認と同じtransaction内で組み合わせる。finalize成功だけでconsume済みと判断しない。
+
+legacy Storageがあるcutoverでは、参照件数と`_storage`を先に棚卸しし、backfillまたは明示的削除を選ぶ。migration済みでないIDを暫定bypassする実装を残さない。
 
 ## Commands
 
