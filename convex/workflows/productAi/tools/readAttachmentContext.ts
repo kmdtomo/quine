@@ -11,7 +11,7 @@ import {
 import type {
   ProductAgentAttachmentContext,
   ProductIncomingAttachment,
-} from "../context";
+} from "../productWritingContext";
 
 const MAX_PRODUCT_AI_IMAGE_BYTES = 6 * 1024 * 1024;
 

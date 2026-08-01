@@ -38,7 +38,7 @@
 - [x] `apps/frontend/app/layout.tsx` で provider wrap
 - [x] Convex MCP server を `.mcp.json` に登録（接続可否は利用セッションごとに確認し、未接続時はCLIで代替）
 - [x] `convex/tsconfig.json` + root TypeScript / Node型を追加し、Convex CLIの関数typecheckを有効化
-- [x] root `check` / `verify`でsecret scan、frontend / Convex typecheck、frontend / Convex lint、Convex Cloud確認を集約。2026-07-30に`pnpm run verify`と`pnpm build`成功
+- [x] root `check` / `verify`でsecret scan、frontend / Convex typecheck、frontend / Convex lint、Convex Cloud確認を集約。2026-08-01に`pnpm verify`と`pnpm build`成功（lint error 0、既存`<img>`warning 23件、Next `middleware.ts`非推奨warningあり）
 - [x] `data/tech-stack.ts`（457 件 / 26 カテゴリ）frontend / convex 共有。`data/technologies.ts` は互換 re-export
 - [x] Product Writing Agent: Strands + OpenAI Responses provider をscheduled internal actionで実行。`productAiRuns`をsource of truthとしてqueued / running / succeeded / failed、retry、idempotency、多重実行防止を管理する。`productAiThreads` / `productAiMessages` / `productAiProposals` / `productRepoContexts` / `productAiAttachmentContexts` にrepo context、会話履歴、画像analysis text、Markdown / form proposalを保持し、proposal確定とRun成功は同一transactionでcommitする。画像本体はConvex File Storage、公開mutation/actionにはStorage IDだけを渡す。
 - [x] Product作成・更新はRHF + Zodの単一form contractから`products.saveForm`へ保存。新規Product作成、developer / technology / screenshot関連、Product AI draft関連付けを単一transactionに統合し、`creationKey`で再送時の重複作成を防止する。
@@ -47,9 +47,10 @@
 
 ### docs / skill
 
-- [x] 2026-08-01 [quine-implement](../.agents/skills/quine-implement/SKILL.md)を再設計。独立`domain/`を置かず、`features`をUI/任意Next adapter、Convex rootをregistered adapter、`convex/application`を複雑なtransaction use case、`convex/infra`を外部provider接続とする責務境界へ統一
+- [x] 2026-08-01 [quine-implement](../.agents/skills/quine-implement/SKILL.md)を再設計。独立`domain/`を置かず、`features`をUI/任意Next adapter、Convex rootをregistered adapter、`convex/application`を複雑なquery/mutationのDB use case、`convex/workflows`をAI/Action固有フロー、`convex/infra`を外部provider接続とする責務境界へ統一
 - [x] 実装referenceを[project structure](../.agents/skills/quine-implement/references/project-structure.md)、[frontend](../.agents/skills/quine-implement/references/frontend.md)、[Convex](../.agents/skills/quine-implement/references/convex.md)、[data flows](../.agents/skills/quine-implement/references/data-flows.md)、[external services](../.agents/skills/quine-implement/references/external-services.md)、[security](../.agents/skills/quine-implement/references/security.md)、[code rules](../.agents/skills/quine-implement/references/code-rules.md)、[verification](../.agents/skills/quine-implement/references/verification.md)へ再編
 - [x] 通常更新はConvex mutationを直接呼び、Next Server Actionはnative form/cookie/redirect/revalidate等が必要な場合だけ置く方針を明文化
+- [x] architecture境界を挙動不変でrefactor。Product AI prompt/tool/contextを`convex/workflows/productAi/`、GitHub detection/repository変換を`convex/workflows/githubAnalysis/`、GitHub provider client/typeを`convex/infra/github/`、Product media read/writeを`convex/application/products/`へ移動。registered path/export、validator、query/index/take/fallback、request上限、hash、Storage更新順は維持し、Convex Cloud codegen済み
 - [x] [INDEX.md](INDEX.md) キーワード索引更新
 - [x] 技術スタック key 方針を docs / skill に反映（`data/tech-stack.ts` を canonical catalog、alias / ロゴ / DB / 解析は同じ key に正規化）
 - [x] 技術スタック catalog を再設計（Languages → Runtimes → Frontend/Mobile/Backend → DB/Data → Cloud/AWS/GCP/Azure → AI → Product APIs → DevOps/Observability/Testing/Design の順）
@@ -115,9 +116,9 @@
 - [x] `convex/connections.ts` API実装済み。公開プロフィールの一覧表示と追加操作は接続済み。`listMine` / `listByDeveloper`は`by_from` index + cursor paginationへ移行済み。プロフィール本体は表示上限12件を明示する。承認 / 解除UIは未接続、browser smoke未実施
 - [x] `convex/developerTechnologies.ts`（技術スタック編集 - listMine / saveDetected / add / remove / setYears）
 - [x] `convex/productTechnologies.ts`（Product技術編集 + 公開技術詳細 `getPublicDetail`）
-- [x] `convex/githubAction.ts`（"use node"）— GitHub App 経由でリポ解析（技術検出は AI なし。Product import では README / dependency summary を `productRepoContexts` に保存）。entrypoint / Run調停、`lib/github/client.ts`、`detection.ts`、`types.ts`へ責務分割済み
+- [x] `convex/githubAction.ts`（"use node"）— GitHub App 経由でリポ解析（技術検出は AI なし。Product import では README / dependency summary を `productRepoContexts` に保存）。registered entrypointはroot、provider client/typeは`infra/github/`、detection/repository変換は`workflows/githubAnalysis/`へ分割済み
 - [x] `convex/githubAnalysisLogs.ts` — GitHub App 解析 action の realtime log 表示用 query / internal mutation
-- [x] `convex/productAi.ts` / `convex/productAiAction.ts` / `convex/productRepoContexts.ts` — Product Writing Agent の thread/message/proposal/repo/attachment context API と Strands 実行 action
+- [x] `convex/productAi.ts` / `convex/productAiAction.ts` / `convex/productRepoContexts.ts` — Product Writing Agent の thread/message/proposal/repo/attachment context API と Strands 実行 action。prompt/tool/context/agentは`workflows/productAi/`、Run DB use caseとMarkdown hashは`application/productAi/`へ配置
 - [ ] `convex/aiAction.ts`（"use node"）— **当面使わない**。技術スタック検出は deterministic rule + ユーザー編集を主経路にする。AI は将来、未対応 dependency の分類・README 要約・説明文生成を任意補助として検討。
 
 ### features 実装
@@ -155,6 +156,7 @@
 - **GitHub App rate limit 方針**: 初回解析は精度60〜70%でよく、後でユーザー編集する前提。全 repo 完全解析ではなく、95 requests 上限で tree 起点の軽量 breadth-first scan を行う。production 前には installation 単位のキュー制御（同時解析1本）を追加する。
 - **GitHub Organization Installation**: 個人Installationは検証済み。OrganizationはGitHub user tokenの安全な暗号化保存・refresh・membership再検証の運用が未設計のため、現時点では安全側に拒否する
 - **File Storage cleanup**: Product / Profile / Product AIの主要画像経路はConvex File Storageへ移行済み。置換・削除時cleanupは実装済みだが、upload後に保存せず画面を離れたobjectの期限付きcleanupは未実装
+- **Product Storage ownership**: 現行`requireProductStorageOwnership`は`productAssets.by_storage`のrelation衝突だけを確認し、uploadしたuser/intentのownershipと`products.logoStorageId`参照は保証しない。挙動不変refactorでは変更せず、upload intent・期限・消費状態を設計する別security taskとして追跡する
 - **Product repository import**: Installationはserverで検証済みresourceから解決するが、repository import自体は現在public Action。永続Run化は残作業
 - **公開一覧検索**: Product / Users一覧はindexと明示的truncation contractを持つが、初回上限外を含む全文検索・複合filterのcursor paginationは未実装
 - **Product AI chat**: scheduled internalAction + 永続Runへの切替、Storage添付、transaction、preload/reload復元まで接続済み。認証済みセッションでのprovider実行browser smokeは未実施

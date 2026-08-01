@@ -17,13 +17,13 @@ import {
   normalizeProductSlug,
   normalizeTagline,
 } from "./application/products/productInput";
-import { saveProductForm } from "./application/products/saveProductForm";
-import { deleteProductMedia } from "./application/products/productAssets";
-import { getCurrentUser } from "./lib/auth";
 import {
+  deleteProductMedia,
   resolveProductLogo,
   resolveProductMedia,
-} from "./lib/productAssets";
+} from "./application/products/productAssets";
+import { saveProductForm } from "./application/products/saveProductForm";
+import { getCurrentUser } from "./lib/auth";
 import { getUserByUsername } from "./lib/users";
 
 const projectType = v.union(

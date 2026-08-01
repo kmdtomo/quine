@@ -5,7 +5,7 @@ import { tool } from "@strands-agents/sdk";
 import {
   productMarkdownProposalInputSchema,
   type ProductMarkdownProposal,
-} from "../schemas";
+} from "../toolSchemas";
 
 type CreateProposeMarkdownEditToolArgs = {
   baseContentHash: string;

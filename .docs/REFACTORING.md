@@ -1,8 +1,8 @@
 # Quine リファクタリング事項一覧
 
 監査日: 2026-07-30
-最終更新: 2026-07-30
-対象: `ec7daa67` + 監査時点の未コミット変更
+最終更新: 2026-08-01
+対象: `feature/refactor-architecture-boundaries` の2026-08-01統合差分
 判定基準: [quine-implement](../.agents/skills/quine-implement/SKILL.md) とtask別routing先のreference
 
 > このファイルは「今の実装をどの順で直すか」の作業一覧です。プロダクト仕様の正規ソースではありません。
@@ -49,19 +49,22 @@
 | RF-013 | P2 | 一部完了（互換API整理待ち） | 旧onboarding導線・stub・不要な公開aliasを撤去する | signup routes, Convex aliases |
 | RF-014 | P2 | 一部完了（local gate完成） | frontend/Convexを一括検証するcommandを作る | root scripts, ESLint |
 | RF-015 | P3 | 完了 | STATUSとarchitecture referenceを実装へ同期する | `.docs/STATUS.md`, skill references |
+| RF-016 | P3 | 完了 | feature/application/workflow/infra/libの配置境界を統一する | frontend features, `convex/application`, `convex/workflows`, `convex/infra` |
+| RF-017 | P1 | 未着手 | Product Storageにupload ownership contractを追加する | `files.ts`, Product assets/logo, schema |
 
 ## 今回の実装結果
 
 サブエージェントによる領域別実装と統合監督を行い、P0/P1のコード上の危険経路と主要な責務違反を修正した。`完了`はコード・型・lint・Convex contractまで確認済み、`一部完了`は外部操作、移行cleanup、互換契約の整理が残る項目を示す。
 
-残作業は次の6群に限定される。
+残作業は次の7群に限定される。
 
 1. 漏えい済みSupabase credentialの外部revokeとGit履歴からの除去
 2. Organization Installation向けの安全なGitHub user token更新・再検証設計
-3. 保存前に放棄されたFile Storage objectの期限付きcleanup
-4. Product repository importのRun化、公開Users/Products検索の全件pagination、未使用互換APIのcontract migration
-5. root `check` / `verify`を実行するCI workflowと必要なsecret設定
-6. Next.js 16で非推奨になった`middleware.ts`から`proxy.ts`への移行
+3. Product Storage IDにupload user、用途、期限、消費状態を結び付けるownership contract
+4. 保存前に放棄されたFile Storage objectの期限付きcleanup
+5. Product repository importのRun化、公開Users/Products検索の全件pagination、未使用互換APIのcontract migration
+6. root `check` / `verify`を実行するCI workflowと必要なsecret設定
+7. Next.js 16で非推奨になった`middleware.ts`から`proxy.ts`への移行
 
 ### 統合検証実績
 
@@ -351,7 +354,7 @@ profile画像、banner、product logo、screenshots、Product AI添付をdata UR
 - `convex/lib/auth.ts:15`
 - `convex/lib/products.ts:54`
 - `convex/githubAction.ts:562`
-- `convex/lib/productAi/tools/readAttachmentContext.ts:167`
+- `convex/workflows/productAi/tools/readAttachmentContext.ts`
 - `apps/frontend/features/profile/components/ProfileContent.tsx:358`
 - `apps/frontend/features/products/components/ProductEditContent.tsx:295`
 - `apps/frontend/features/tech-stack/components/TechStackEditContent.tsx:232`
@@ -608,6 +611,54 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 
 ---
 
+## RF-016 feature/application/workflow/infra/libの配置境界を統一する
+
+- 優先度: **P3**
+- 状態: **完了**
+- 種別: Architecture / maintainability
+
+### 対応結果
+
+- frontend feature内は`components/`以外の役割directoryを原則作らず、form contract、error、pure helper、実際のhookを具体名でfeature rootへ配置した。
+- Convex rootのregistered pathを維持し、複雑なquery/mutationのDB use caseを`application/<feature>/`へ配置した。
+- Product AI prompt/tool/contextとGitHub detection/repository変換を`workflows/<feature>/`へ、GitHub/OpenAI provider接続を`infra/<provider>/`へ配置した。
+- feature固有処理が複数callerから使われるだけでは横断`lib`にしない。Product media projectionはowner featureの`application/products/`へ統合した。
+- applicationとworkflowが共有する同featureのruntime非依存ruleはapplicationへ置き、workflowから純粋ruleだけ参照可能とした。DB use caseはregistered internal function経由のままにした。
+- `data/tech-stack.ts`は特殊なcanonical static catalogとして維持し、一般的なshared helper置き場にはしない。
+
+### 検証
+
+- [x] registered functionのmodule path、export、args/returns validatorを維持
+- [x] query/index/take/fallback、request上限、hash、Storage更新順の同等性を確認
+- [x] `pnpm verify`成功（Convex Cloud codegenを含む）
+- [x] `pnpm build`成功
+- [x] mockup変更なし、新規test fileなし
+
+---
+
+## RF-017 Product Storageにupload ownership contractを追加する
+
+- 優先度: **P1**
+- 状態: **未着手**
+- 種別: Security / File Storage
+
+### 問題
+
+現行`requireProductStorageOwnership`が確認するのは`productAssets.by_storage`のrelation衝突だけで、Storage objectをuploadしたuser、upload intent、用途、期限、消費状態を証明しない。`deleteProductStorageIfUnreferenced`も`productAssets`だけを確認し、`products.logoStorageId`による別Productからの参照を保証に含めない。
+
+### 方針
+
+挙動不変refactorの中でerror順や既存upload flowを暗黙に変えない。別taskでauthenticated userとStorage IDを結ぶupload intentを設計し、logo/screenshot attach時の消費、期限切れobject cleanup、既存objectのmigration、全参照を考慮したdelete条件をまとめて導入する。
+
+### 完了条件
+
+- [ ] client由来Storage IDをrelation衝突だけでなくserver上のupload owner/intentから検証する
+- [ ] logoとscreenshotを含む全参照を確認してからStorage objectを削除する
+- [ ] 未消費intentと放棄objectの期限付きcleanupを実装する
+- [ ] migrationと既存error/操作順への影響を確認する
+
+---
+
 ## 推奨する実施単位
 
 大きな一括リファクタリングにはせず、次の単位で設計・実装・検証・commitを分けます。
@@ -622,6 +673,7 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 - RF-003 File Storage用field/table追加
 - RF-004 Run table追加
 - RF-006 query用index追加
+- RF-017 Product Storage upload intent用schema追加
 
 この段階では旧readerを壊さず、新旧schemaを共存させます。
 
@@ -632,6 +684,7 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 - RF-007 validator/public-internal整理
 - RF-008 error contract
 - RF-010 domain invariant
+- RF-017 Storage ownership検証と全参照cleanup
 
 ### Phase 3: Frontend切替
 
@@ -648,6 +701,7 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 - RF-013 legacy cleanup
 - RF-014 verify command
 - RF-015 STATUS/reference同期
+- RF-016 architecture境界統一
 
 ## 各項目の共通完了ゲート
 

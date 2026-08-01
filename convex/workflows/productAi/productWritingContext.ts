@@ -1,7 +1,7 @@
 "use node";
 
 import type { Id } from "../../_generated/dataModel";
-import { createMarkdownContentHash } from "./hash";
+import { createMarkdownContentHash } from "../../application/productAi/markdownContentHash";
 
 export { createMarkdownContentHash };
 

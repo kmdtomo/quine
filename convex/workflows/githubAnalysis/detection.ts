@@ -921,15 +921,6 @@ export function buildDependencySummary(
   return lines.join("\n");
 }
 
-export function trimContextText(value: string, limit: number) {
-  const trimmed = value.trim();
-  if (trimmed.length <= limit) {
-    return trimmed;
-  }
-  return `${trimmed.slice(0, limit)}\n\n[Trimmed for product AI context]`;
-}
-
-
 export function getPrimaryTechnologyFromLanguage(language: string | null) {
   if (!language) {
     return null;

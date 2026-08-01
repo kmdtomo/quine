@@ -2,21 +2,13 @@
 
 import { createSign } from "node:crypto";
 
-import { GitHubIntegrationError } from "../../infra/github/githubError";
-import {
-  compareNullableDates,
-  getPrimaryTechnologyFromLanguage,
-  isRecord,
-  readString,
-  trimContextText,
-} from "./detection";
+import { GitHubIntegrationError } from "./githubError";
 import type {
   DirectoryEntry,
   FileReadResult,
+  GitHubRepository,
   GitHubRequestBudget,
-  ProductRepository,
   RepositoryReadme,
-  RepositorySummary,
 } from "./types";
 
 const GITHUB_API_URL = "https://api.github.com";
@@ -115,8 +107,8 @@ function encodeBase64Url(value: string): string {
 export async function listInstallationRepositories(
   token: string,
   requestBudget: GitHubRequestBudget,
-): Promise<RepositorySummary[]> {
-  const repositories: RepositorySummary[] = [];
+): Promise<GitHubRepository[]> {
+  const repositories: GitHubRepository[] = [];
   let page = 1;
   while (page <= MAX_REPOSITORY_LIST_PAGES && !requestBudget.exhausted) {
     const response = await githubJson(
@@ -299,7 +291,7 @@ export async function readFile(
 
 export async function readRepositoryReadme(
   token: string,
-  repository: RepositorySummary,
+  repository: GitHubRepository,
   requestBudget: GitHubRequestBudget,
 ): Promise<RepositoryReadme | null> {
   for (const path of COMMON_README_PATHS) {
@@ -389,7 +381,7 @@ function getSafeGitHubPathname(url: string): string {
   return pathname;
 }
 
-function parseRepository(value: unknown): RepositorySummary | null {
+function parseRepository(value: unknown): GitHubRepository | null {
   if (!isRecord(value)) {
     return null;
   }
@@ -406,7 +398,6 @@ function parseRepository(value: unknown): RepositorySummary | null {
   const description = readString(value, "description");
   const updatedAt = readString(value, "updated_at");
   const primaryLanguage = readString(value, "language");
-  const primaryTechnology = getPrimaryTechnologyFromLanguage(primaryLanguage);
   const privateValue = value.private;
   const forkValue = value.fork;
   const starsValue = value.stargazers_count;
@@ -419,8 +410,6 @@ function parseRepository(value: unknown): RepositorySummary | null {
     homepage: homepage && homepage.trim().length > 0 ? homepage : null,
     defaultBranch,
     primaryLanguage,
-    primaryTechnologyKey: primaryTechnology?.key ?? null,
-    primaryTechnologyName: primaryTechnology?.name ?? null,
     private: typeof privateValue === "boolean" ? privateValue : false,
     fork: typeof forkValue === "boolean" ? forkValue : false,
     stargazersCount: typeof starsValue === "number" ? starsValue : 0,
@@ -428,34 +417,19 @@ function parseRepository(value: unknown): RepositorySummary | null {
   };
 }
 
-export function sortRepositoriesForSelection(
-  repositories: RepositorySummary[],
-): RepositorySummary[] {
-  return [...repositories].sort((a, b) => {
-    if (a.fork !== b.fork) {
-      return a.fork ? 1 : -1;
-    }
-    const stars = b.stargazersCount - a.stargazersCount;
-    if (stars !== 0) {
-      return stars;
-    }
-    return compareNullableDates(b.updatedAt, a.updatedAt);
-  });
+function trimContextText(value: string, limit: number) {
+  const trimmed = value.trim();
+  if (trimmed.length <= limit) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, limit)}\n\n[Trimmed for product AI context]`;
 }
 
-export function toProductRepository(repository: RepositorySummary): ProductRepository {
-  return {
-    fullName: repository.fullName,
-    name: repository.name,
-    description: repository.description,
-    htmlUrl: repository.htmlUrl,
-    homepage: repository.homepage,
-    primaryLanguage: repository.primaryLanguage,
-    primaryTechnologyKey: repository.primaryTechnologyKey,
-    primaryTechnologyName: repository.primaryTechnologyName,
-    private: repository.private,
-    fork: repository.fork,
-    stargazersCount: repository.stargazersCount,
-    updatedAt: repository.updatedAt,
-  };
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function readString(record: Record<string, unknown>, key: string): string | null {
+  const value = record[key];
+  return typeof value === "string" ? value : null;
 }

@@ -11,9 +11,9 @@ import {
   type ProductAgentRepoContext,
   type ProductAgentSelectionContext,
   type ProductIncomingAttachment,
-} from "./context";
-import { PRODUCT_WRITING_SYSTEM_PROMPT } from "./prompts";
-import type { ProductAiProposal } from "./schemas";
+} from "./productWritingContext";
+import { PRODUCT_WRITING_SYSTEM_PROMPT } from "./productWritingPrompt";
+import type { ProductAiProposal } from "./toolSchemas";
 import { createProductWritingTools } from "./tools";
 
 type RunProductWritingAgentArgs = {

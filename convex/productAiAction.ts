@@ -12,8 +12,8 @@ import type {
   ProductAgentRepoContext,
   ProductAgentSelectionContext,
   ProductIncomingAttachment,
-} from "./lib/productAi/context";
-import { runProductWritingAgent } from "./lib/productAi/productWritingAgent";
+} from "./workflows/productAi/productWritingContext";
+import { runProductWritingAgent } from "./workflows/productAi/productWritingAgent";
 
 const MAX_ASSISTANT_TEXT_LENGTH = 30000;
 const MAX_STOP_REASON_LENGTH = 160;

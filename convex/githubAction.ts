@@ -21,7 +21,7 @@ import {
   inferTechnologiesFromManifest,
   recordTechnology,
   selectRepositoriesForBudget,
-} from "./lib/github/detection";
+} from "./workflows/githubAnalysis/detection";
 import {
   createGitHubRequestBudget,
   createInstallationToken,
@@ -29,19 +29,22 @@ import {
   readFile,
   readRepositoryReadme,
   readRepositoryTree,
+} from "./infra/github/client";
+import type { GitHubRequestBudget } from "./infra/github/types";
+import {
   sortRepositoriesForSelection,
   toProductRepository,
-} from "./lib/github/client";
+  toRepositorySummary,
+} from "./workflows/githubAnalysis/repositories";
 import type {
   AnalysisLogContext,
   DetectedTechnology,
-  GitHubRequestBudget,
   ImportProductRepositoryResult,
   ListProductRepositoriesResult,
   ManifestTarget,
   RepositoryAnalysis,
   RepositorySummary,
-} from "./lib/github/types";
+} from "./workflows/githubAnalysis/types";
 
 const MAX_GITHUB_API_REQUESTS = 95;
 const MAX_MANIFEST_FILES_PER_REPOSITORY = 2;
@@ -84,10 +87,9 @@ export const analyzeRepos = internalAction({
         runId,
       });
 
-      const repositories = await listInstallationRepositories(
-        token,
-        requestBudget,
-      );
+      const repositories = (
+        await listInstallationRepositories(token, requestBudget)
+      ).map(toRepositorySummary);
       await appendAnalysisLog(
         ctx,
         execution.userId,
@@ -298,10 +300,9 @@ export const listProductRepositories = action({
         installation.installationId,
         requestBudget,
       );
-      const repositories = await listInstallationRepositories(
-        token,
-        requestBudget,
-      );
+      const repositories = (
+        await listInstallationRepositories(token, requestBudget)
+      ).map(toRepositorySummary);
 
       return {
         status: "ready",
@@ -366,7 +367,9 @@ export const importProductRepository = action({
       installation.installationId,
       requestBudget,
     );
-    const repositories = await listInstallationRepositories(token, requestBudget);
+    const repositories = (
+      await listInstallationRepositories(token, requestBudget)
+    ).map(toRepositorySummary);
     const repository = repositories.find(
       (item) => item.fullName === normalizedRepositoryFullName,
     );

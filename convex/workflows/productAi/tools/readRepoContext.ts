@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   formatRepoContextForTool,
   type ProductAgentRepoContext,
-} from "../context";
+} from "../productWritingContext";
 
 const readRepoContextInputSchema = z.object({
   includeReadme: z.boolean().optional(),

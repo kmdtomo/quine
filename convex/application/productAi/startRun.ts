@@ -1,7 +1,7 @@
 import { internal } from "../../_generated/api";
 import type { Doc, Id } from "../../_generated/dataModel";
 import type { MutationCtx } from "../../_generated/server";
-import { createMarkdownContentHash } from "../../lib/productAi/hash";
+import { createMarkdownContentHash } from "./markdownContentHash";
 import { MAX_ATTACHMENTS, productAiError } from "./productAiError";
 import { findActiveRun } from "./runState";
 import {

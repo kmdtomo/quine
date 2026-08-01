@@ -5,7 +5,7 @@ import { tool } from "@strands-agents/sdk";
 import {
   productFormProposalInputSchema,
   type ProductFormProposal,
-} from "../schemas";
+} from "../toolSchemas";
 
 type CreateProposeFormUpdateToolArgs = {
   baseContentHash: string;

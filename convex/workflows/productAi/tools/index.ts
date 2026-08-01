@@ -7,8 +7,8 @@ import type {
   ProductAgentAttachmentContext,
   ProductAgentRepoContext,
   ProductIncomingAttachment,
-} from "../context";
-import type { ProductAiProposal } from "../schemas";
+} from "../productWritingContext";
+import type { ProductAiProposal } from "../toolSchemas";
 import { createProposeFormUpdateTool } from "./proposeFormUpdate";
 import { createProposeMarkdownEditTool } from "./proposeMarkdownEdit";
 import { createReadAttachmentContextTool } from "./readAttachmentContext";

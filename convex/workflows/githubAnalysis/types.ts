@@ -1,5 +1,6 @@
 import type { TechnologyKey } from "../../../data/tech-stack";
 import type { Id } from "../../_generated/dataModel";
+import type { GitHubRepository } from "../../infra/github/types";
 
 export type DetectionSource = {
   repository: string;
@@ -16,20 +17,9 @@ export type DetectedTechnology = {
   sources: DetectionSource[];
 };
 
-export type RepositorySummary = {
-  fullName: string;
-  name: string;
-  description: string | null;
-  htmlUrl: string;
-  homepage: string | null;
-  defaultBranch: string;
-  primaryLanguage: string | null;
+export type RepositorySummary = GitHubRepository & {
   primaryTechnologyKey: TechnologyKey | null;
   primaryTechnologyName: string | null;
-  private: boolean;
-  fork: boolean;
-  stargazersCount: number;
-  updatedAt: string | null;
 };
 
 export type ProductRepository = {
@@ -108,22 +98,6 @@ export type ManifestTarget = {
   baselineKeys: TechnologyKey[];
 };
 
-export type DirectoryEntry = {
-  name: string;
-  path: string;
-  type: "file" | "dir" | "other";
-};
-
-export type FileReadResult = {
-  exists: boolean;
-  text: string | null;
-};
-
-export type RepositoryReadme = {
-  path: string;
-  text: string;
-};
-
 export type AnalysisLogContext = {
   runId: Id<"githubAnalysisRuns">;
   userId: Id<"users">;
@@ -145,11 +119,4 @@ export type DetectionMaps = {
   workflowUses: Map<string, TechnologyKey[]>;
   envVars: Map<string, TechnologyKey[]>;
   text: Map<string, TechnologyKey[]>;
-};
-
-export type GitHubRequestBudget = {
-  limit: number;
-  used: number;
-  exhausted: boolean;
-  warnings: string[];
 };

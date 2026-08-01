@@ -12,8 +12,8 @@ import {
   completeProfileOnboarding as completeProfileOnboardingUseCase,
 } from "./application/profile/completeProfileOnboarding";
 import { getSafeStoredSocialLinks } from "./application/profile/socialLinks";
+import { resolveProductLogo } from "./application/products/productAssets";
 import { getCurrentUser, requireUser } from "./lib/auth";
-import { resolveProductLogo } from "./lib/productAssets";
 import { normalizeUsername } from "./lib/username";
 
 const MAX_PROFILE_TECHNOLOGIES = 60;
