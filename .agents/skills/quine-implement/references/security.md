@@ -137,12 +137,18 @@ GitHub login用OAuth identityとrepository解析用GitHub App Installationは別
 
 presigned/upload URLは短命なcapabilityとして扱い、不要にlog・永続化・再利用しない。
 
+現行の`requireProductStorageOwnership`は`productAssets` relationの重複と、別productへのscreenshot関連付けだけを検査する。uploadしたuserのownership、upload intent、`products.logoStorageId`による参照は保証しないため、関数名だけをsecurity保証の根拠にしない。
+
+このgapは挙動不変refactorで暗黙に強化しない。authenticated user、storage ID、用途、期限、消費状態を関連付けるupload intent等を別のsecurity taskとして設計し、既存upload・attach・cleanup flowへの影響を確認して導入する。それまでは既知のsecurity gapとして扱う。
+
 ## Secrets and errors
 
 - secretはConvex/Next server environmentに置き、client bundleへimportしない。
 - `NEXT_PUBLIC_*`へtoken、App private key、OpenAI keyを置かない。
 - error message、toast、redirect URL、query resultへsecretを含めない。
 - providerのraw response bodyを丸ごとlogしない。
+- infraのprovider errorをそのままpublicへ返さず、registered boundaryで安定したpublic errorへ変換する。
+- scheduled Actionのprovider failureはsafe codeへ分類し、secretやraw responseを含めずRunへ保存する。
 - expected auth/access errorは安定codeを返し、内部理由を必要以上に公開しない。
 - unexpected errorは安全なcontextとcorrelation用Run/resource IDだけをserverで記録する。
 - webhookはsignatureとreplay riskをprovider contractに従って検証する。
@@ -157,5 +163,5 @@ presigned/upload URLは短命なcapabilityとして扱い、不要にlog・永�
 - external/AI/legacy値をruntime validationしたか。
 - public queryが公開fieldだけを返すか。
 - scheduled workがRun IDからcontextを復元するか。
-- fileとInstallationのownershipをserverで確認するか。
+- fileのupload intent/ownerとInstallationのownershipをserverで確認するか。helper名だけで保証済みと判断していないか。
 - secret、raw provider data、個人情報がclient/logへ漏れないか。

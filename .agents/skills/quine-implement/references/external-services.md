@@ -27,7 +27,7 @@ infraが知るもの:
 - authentication header/tokenの付与。
 - timeout、rate limit、provider status code。
 - response runtime validation。
-- provider errorから内部error categoryへの変換。
+- provider errorから安全な内部categoryへの変換。
 
 infraが知らないもの:
 
@@ -46,15 +46,15 @@ provider directoryは必要になった責務だけ作る。
 ```text
 convex/infra/github/
 ├── client.ts
-├── installation-token.ts
-├── response-schema.ts
-└── github-error.ts
+├── installationToken.ts
+├── responseSchema.ts
+└── githubError.ts
 
 convex/infra/openai/
 ├── client.ts
-├── product-generation.ts
-├── response-schema.ts
-└── openai-error.ts
+├── productGeneration.ts
+├── responseSchema.ts
+└── openaiError.ts
 ```
 
 - `client.ts`を巨大な全API wrapperにしない。
@@ -62,6 +62,8 @@ convex/infra/openai/
 - provider SDK型をapplicationへ漏らさず、検証済みの小さい結果型を返す。
 - singleton clientを使う場合もrequest-specific stateをmodule globalへ置かない。
 - environment variableは呼び出し前にserver側で検証し、値自体をerrorへ含めない。
+- providerごとにnominal error classを1つだけ定義し、別moduleで同じprovider errorを再定義しない。
+- infraのprovider errorを`ConvexError`にせず、Quineのowner/state errorをinfraへ持ち込まない。
 
 ```ts
 export type RepositorySnapshot = {
@@ -80,7 +82,7 @@ export async function fetchRepositorySnapshot(
 
 ## Action orchestration
 
-Action entrypointはDB context、infra call、result commitを順序づける。
+rootの`convex/<feature>Action.ts`はregistered Action、validator、public/internal境界、認証を維持する。DB context、infra call、result commitを順序づけるAction固有処理は、必要に応じて`convex/workflows/<feature>/`へ分ける。
 
 ```text
 internalAction({ runId })
@@ -97,6 +99,11 @@ internalAction({ runId })
 - success resultとRunの`succeeded`を同じmutationで保存する。
 - failure commitが失敗した場合も元errorを失わない安全なlogを残す。
 - Action fileの`"use node"`はNode APIを本当に必要とする時だけ付ける。
+- workflow moduleはregistered functionをexportせず、DBへはActionCtxの`ctx.runQuery` / `ctx.runMutation`だけで到達する。
+- owner/state確認やresult commitを行う複雑なDB transactionは、rootのregistered adapterから`application/<feature>/`へ委譲する。
+- prompt、tool、detectionはprovider protocolではないためworkflowへ置き、SDK/fetchはinfraへ置く。
+- provider errorはpublic Actionのregistered boundaryで安定したpublic errorへ変換する。
+- scheduled Actionではprovider errorをthrowしてclientへ返さず、安全なcodeへ分類してRun failureとして保存する。
 
 短く純粋な外部lookupでRunが不要な場合も、認証・rate limit・error contractを設計してからpublic Actionを選ぶ。
 
@@ -217,6 +224,8 @@ AI outputをcanonical DB dataへ変換する時は、存在するtechnology key�
 
 UIが判断できる安定したerror codeと、server調査用contextを分ける。
 
+infraのprovider error identity、public `ConvexError`、Runへ保存するsafe error codeは役割が異なる。provider errorをそのままclientやdocumentへ渡さず、registered boundaryまたはscheduled workflowで一度だけ変換する。
+
 Runに保存してよい例:
 
 - `RATE_LIMITED`
@@ -237,8 +246,11 @@ server logにはRun ID、provider operation、安全なcategory、attemptを含�
 ## External-service checklist
 
 - provider detailは`infra/<provider>`へ閉じているか。
+- provider error classがprovider内で単一identityになっているか。
 - infraがowner、DB table、Run遷移を判断していないか。
+- public Actionとscheduled Actionでerrorの変換先を区別しているか。
 - Action argsはRun ID中心か。
+- workflow moduleにregistered functionや直接DB accessがないか。
 - provider responseをruntime validationしたか。
 - Run状態遷移とresult commitがatomicか。
 - duplicate execution、retry、古いattemptを扱えるか。

@@ -33,7 +33,8 @@ convex/
 ├── schema.ts             # 唯一のDB schema entrypoint
 ├── <resource>.ts         # public/internal Convex adapter
 ├── <feature>Action.ts    # Node Action entrypoint
-├── application/<feature>/# 複雑なtransaction use case
+├── application/<feature>/# 複雑なquery/mutationのDB use case
+├── workflows/<feature>/  # AI/Action固有の処理フロー
 ├── infra/<provider>/     # GitHub/OpenAI等の外部接続
 ├── lib/                  # Convex横断基盤
 └── _generated/           # codegen、手動編集禁止
@@ -54,11 +55,13 @@ import aliasは`@/* = apps/frontend/*`、`@convex/* = convex/*`、`@data/* = dat
 - Server Componentに`"use server"`を書かない。これはServer Actionだけに使う。
 - 初期取得は`preloadQuery` / `fetchQuery`を使い、`useEffect + fetch`を使わない。
 - 通常の更新はclientからConvex mutationを直接呼ぶ。`features/<feature>/actions.ts`はNext runtimeが必要な場合だけ作る。
-- Convex root functionを薄いadapterにし、owner確認・状態遷移・複数table更新を含む複雑なtransactionだけ`convex/application/<feature>/`へ置く。
+- Convex root functionを薄いadapterにし、複雑なquery/mutationのDB use caseを`convex/application/<feature>/`へ置く。単純な1 document/index queryはrootに残す。
+- AI prompt、tool、detection、Action固有の処理フローは`convex/workflows/<feature>/`へ置く。
 - public mutation/actionの最初で`requireUser(ctx)`を呼ぶ。
 - client由来の`userId`、`authorId`、GitHub `installationId`を権限の根拠にしない。DB relationから導出する。
 - 長時間外部処理はpublic mutationでRunを作り、scheduled internalActionを起動する。
 - GitHub/OpenAIのSDK、request/response、provider errorだけを`convex/infra/<provider>/`へ置く。
+- `convex/`配下のmodule pathはcamelCaseにし、hyphenを含めない。
 - 画像・添付はConvex File Storageを使い、data URLや巨大stringをdocument/Action argsへ保存しない。
 - `any`、non-null assertion、unsafe cast、理由のないTypeScript抑制を使わない。
 - mockupを直接編集しない。

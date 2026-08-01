@@ -6,6 +6,7 @@
 
 - [Choose the verification scope](#choose-the-verification-scope)
 - [Diff review](#diff-review)
+- [Behavior-preserving refactor](#behavior-preserving-refactor)
 - [Commands](#commands)
 - [Convex checks](#convex-checks)
 - [Browser smoke](#browser-smoke)
@@ -50,6 +51,27 @@ security/Convex変更ではさらに確認する:
 - schema変更にexpand/backfill/contractの順序がある。
 - Action/Runにsecret、binary、巨大payloadを渡していない。
 
+## Behavior-preserving refactor
+
+挙動を変えないrefactorでは、移動後に型が通るだけで同等と判断しない。変更前後を機械比較できる単位へ分け、次を維持する。
+
+- registered functionのmodule path、export名、public/internal区分。
+- args / returns validatorと返却payload。
+- auth、owner確認、validationの順序。
+- error code、message、error payload、`null` / `undefined`の扱い。
+- `Date.now()`の呼び出し位置と回数。
+- queryのindex、order、`first` / `take` / `collect`、上限値、fallback。
+- scheduler target、retry/idempotency条件、hash algorithm。
+- insert / patch / deleteとStorage操作の順序。
+
+applicationへ切り出す場合も同じ`QueryCtx` / `MutationCtx`を渡し、別registered function呼び出しでtransactionを分断しない。adapterへvalidatorと認証を残し、認証済みidentityとraw argsをuse caseへ渡す。import pathや同値helper名以外の差分は、本文・validator block・registered export一覧を個別に比較して説明する。
+
+### File Storage ordering and guarantees
+
+Storage refactorでは、既存flowの順序自体をcontractとして確認する。現在のProduct flowでは、request件数検査から重複排除、relation衝突確認からmetadata/MIME/size検証、DB relation削除からunreferenced確認とStorage削除、Product更新から旧logo cleanupの順を無断で変えない。
+
+helper名をsecurity保証の証拠にしない。現行`requireProductStorageOwnership`は`productAssets.by_storage`のrelation衝突を確認するだけで、userのupload intent ownershipや`products.logoStorageId`参照を保証しない。`deleteProductStorageIfUnreferenced`も`productAssets`上の参照だけを確認する。挙動不変refactorの中で暗黙に強化せず、保証を変える場合は別security taskとしてrelation、schema、migration、error順を設計する。
+
 ## Commands
 
 Frontend変更:
@@ -63,6 +85,7 @@ Convex変更:
 
 ```bash
 pnpm typecheck
+pnpm run typecheck:convex
 pnpm run lint:convex
 pnpm exec convex dev --once --typecheck enable
 ```
@@ -78,11 +101,13 @@ pnpm build
 
 `pnpm verify`はsecret scan、frontend/Convex typecheck、frontend/Convex lint、Convex Cloud確認をまとめて行う。
 
+並列refactor packetでは各agentが`pnpm typecheck`、`pnpm run typecheck:convex`、対象lint、diff同等性をlocalで確認し、Cloud pushやcodegenを同時実行しない。supervisorが差分を統合した後、`pnpm exec convex dev --once --typecheck enable`または`pnpm verify`を一度実行してCloudを最終確認する。taskがCloud操作を明示的に禁止する場合は従い、未実施理由と統合後のverification ownerを報告する。
+
 lint errorを無関係な一括formatで直さない。task対象でない既存errorがある場合は、対象changeによるものかを切り分けて報告する。
 
 ## Convex checks
 
-`pnpm exec convex dev --once --typecheck enable`でpush、codegen、Convex function typecheckを行う。
+`pnpm exec convex dev --once --typecheck enable`でpush、codegen、Convex function typecheckを行う。これはlocal-only checkではないため、並列packetではなく統合後のsupervisorが実行する。`convex/_generated/`はこのcodegen以外で手動編集しない。
 
 変更に応じて確認する:
 

@@ -31,10 +31,10 @@ browser request
 
 責務:
 
-- page: URLを読みViewを配置する。
+- page: route params / searchParamsとmetadataを扱い、Viewを配置する。
 - View: token、preload、redirect/not-found。
 - public query: access確認、index read、明示的return shape。
-- Content: subscription結果をUIへ反映する。
+- Content: reactive query / mutationとinteractionを扱う。
 
 初期取得のためだけにRoute Handlerや`useEffect + fetch`を挟まない。Server Componentに`"use server"`は不要である。
 
@@ -80,7 +80,7 @@ Next runtimeの機能が必要な時だけServer Actionを追加する。
 
 ```text
 native form
-  -> feature/actions.ts
+  -> features/<feature>/actions.ts
      -> parse FormData
      -> read server cookie/token
      -> fetchMutation(api.products.create)
