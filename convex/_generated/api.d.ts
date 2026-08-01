@@ -8,7 +8,10 @@
  * @module
  */
 
+import type * as application_productAi_attachDraftToProduct from "../application/productAi/attachDraftToProduct.js";
 import type * as application_products_productAccess from "../application/products/productAccess.js";
+import type * as application_profile_completeProfileOnboarding from "../application/profile/completeProfileOnboarding.js";
+import type * as application_profile_socialLinks from "../application/profile/socialLinks.js";
 import type * as auth from "../auth.js";
 import type * as connections from "../connections.js";
 import type * as developerTechnologies from "../developerTechnologies.js";
@@ -20,6 +23,7 @@ import type * as githubInstallations from "../githubInstallations.js";
 import type * as githubOAuthAction from "../githubOAuthAction.js";
 import type * as http from "../http.js";
 import type * as infra_github_githubError from "../infra/github/githubError.js";
+import type * as infra_github_oauth from "../infra/github/oauth.js";
 import type * as infra_openai_client from "../infra/openai/client.js";
 import type * as infra_openai_strandsRuntime from "../infra/openai/strandsRuntime.js";
 import type * as lib_auth from "../lib/auth.js";
@@ -27,7 +31,6 @@ import type * as lib_github_client from "../lib/github/client.js";
 import type * as lib_github_detection from "../lib/github/detection.js";
 import type * as lib_github_types from "../lib/github/types.js";
 import type * as lib_githubErrors from "../lib/githubErrors.js";
-import type * as lib_productAi_attachDraftToProduct from "../lib/productAi/attachDraftToProduct.js";
 import type * as lib_productAi_context from "../lib/productAi/context.js";
 import type * as lib_productAi_hash from "../lib/productAi/hash.js";
 import type * as lib_productAi_productWritingAgent from "../lib/productAi/productWritingAgent.js";
@@ -39,7 +42,6 @@ import type * as lib_productAi_tools_proposeMarkdownEdit from "../lib/productAi/
 import type * as lib_productAi_tools_readAttachmentContext from "../lib/productAi/tools/readAttachmentContext.js";
 import type * as lib_productAi_tools_readRepoContext from "../lib/productAi/tools/readRepoContext.js";
 import type * as lib_productAssets from "../lib/productAssets.js";
-import type * as lib_profileStorage from "../lib/profileStorage.js";
 import type * as lib_technologyKeys from "../lib/technologyKeys.js";
 import type * as lib_username from "../lib/username.js";
 import type * as lib_users from "../lib/users.js";
@@ -58,7 +60,10 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "application/productAi/attachDraftToProduct": typeof application_productAi_attachDraftToProduct;
   "application/products/productAccess": typeof application_products_productAccess;
+  "application/profile/completeProfileOnboarding": typeof application_profile_completeProfileOnboarding;
+  "application/profile/socialLinks": typeof application_profile_socialLinks;
   auth: typeof auth;
   connections: typeof connections;
   developerTechnologies: typeof developerTechnologies;
@@ -70,6 +75,7 @@ declare const fullApi: ApiFromModules<{
   githubOAuthAction: typeof githubOAuthAction;
   http: typeof http;
   "infra/github/githubError": typeof infra_github_githubError;
+  "infra/github/oauth": typeof infra_github_oauth;
   "infra/openai/client": typeof infra_openai_client;
   "infra/openai/strandsRuntime": typeof infra_openai_strandsRuntime;
   "lib/auth": typeof lib_auth;
@@ -77,7 +83,6 @@ declare const fullApi: ApiFromModules<{
   "lib/github/detection": typeof lib_github_detection;
   "lib/github/types": typeof lib_github_types;
   "lib/githubErrors": typeof lib_githubErrors;
-  "lib/productAi/attachDraftToProduct": typeof lib_productAi_attachDraftToProduct;
   "lib/productAi/context": typeof lib_productAi_context;
   "lib/productAi/hash": typeof lib_productAi_hash;
   "lib/productAi/productWritingAgent": typeof lib_productAi_productWritingAgent;
@@ -89,7 +94,6 @@ declare const fullApi: ApiFromModules<{
   "lib/productAi/tools/readAttachmentContext": typeof lib_productAi_tools_readAttachmentContext;
   "lib/productAi/tools/readRepoContext": typeof lib_productAi_tools_readRepoContext;
   "lib/productAssets": typeof lib_productAssets;
-  "lib/profileStorage": typeof lib_profileStorage;
   "lib/technologyKeys": typeof lib_technologyKeys;
   "lib/username": typeof lib_username;
   "lib/users": typeof lib_users;

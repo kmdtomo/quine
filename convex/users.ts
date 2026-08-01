@@ -1,15 +1,19 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 
 import { getTechnologyByKey } from "../data/tech-stack";
-import type { Id } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
+import type { Doc, Id } from "./_generated/dataModel";
+import {
+  mutation,
+  query,
+  type MutationCtx,
+  type QueryCtx,
+} from "./_generated/server";
+import {
+  completeProfileOnboarding as completeProfileOnboardingUseCase,
+} from "./application/profile/completeProfileOnboarding";
+import { getSafeStoredSocialLinks } from "./application/profile/socialLinks";
 import { getCurrentUser, requireUser } from "./lib/auth";
 import { resolveProductLogo } from "./lib/productAssets";
-import {
-  deleteReplacedProfileStorage,
-  requireProfileImageStorage,
-  resolveProfileMedia,
-} from "./lib/profileStorage";
 import { normalizeUsername } from "./lib/username";
 
 const MAX_PROFILE_TECHNOLOGIES = 60;
@@ -19,29 +23,6 @@ const MAX_PRODUCT_TECHNOLOGIES = 6;
 const MAX_CONNECTION_TECHNOLOGIES = 6;
 const MAX_PUBLIC_USERS = 60;
 const MAX_PUBLIC_USER_TECHNOLOGIES = 60;
-const MAX_BIO_LENGTH = 120;
-const MAX_COMPANY_LENGTH = 100;
-const MAX_NAME_LENGTH = 80;
-const MAX_ROLE_LENGTH = 80;
-const MAX_PROFILE_SOCIAL_LINKS = 4;
-const MAX_SOCIAL_URL_LENGTH = 2_048;
-const ALLOWED_SOCIAL_PLATFORMS = new Set([
-  "facebook",
-  "github",
-  "instagram",
-  "linkedin",
-  "website",
-  "x",
-  "youtube",
-]);
-const ALLOWED_GALLERY_BANNERS = new Set([
-  "/background/drew-beamer-pek8uLQauMk-unsplash.jpg",
-  "/background/ivan-bandura-WhIff5iuW-E-unsplash.jpg",
-  "/lp/tech_stack_bg.jpg",
-  "/profile/banner-aurora.jpg",
-  "/profile/banner-city.jpg",
-  "/profile/banner-field.jpg",
-]);
 
 const socialLinkValidator = v.object({
   platform: v.string(),
@@ -466,168 +447,27 @@ export const completeProfileOnboarding = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-    const name = args.name.trim();
-    const role = args.role.trim();
-    const company = args.company.trim();
-    const bio = args.bio.trim();
-    const banner = normalizeGalleryBanner(args.banner);
-    const socialLinks =
-      args.socialLinks === undefined
-        ? user.socialLinks
-        : normalizeSocialLinks(args.socialLinks);
-
-    if (!name) {
-      throw new ConvexError({ code: "PROFILE_NAME_REQUIRED" });
-    }
-    if (name.length > MAX_NAME_LENGTH) {
-      throw new ConvexError({ code: "PROFILE_NAME_TOO_LONG" });
-    }
-    if (!role) {
-      throw new ConvexError({ code: "PROFILE_ROLE_REQUIRED" });
-    }
-    if (role.length > MAX_ROLE_LENGTH) {
-      throw new ConvexError({ code: "PROFILE_ROLE_TOO_LONG" });
-    }
-    if (!company) {
-      throw new ConvexError({ code: "PROFILE_COMPANY_REQUIRED" });
-    }
-    if (company.length > MAX_COMPANY_LENGTH) {
-      throw new ConvexError({ code: "PROFILE_COMPANY_TOO_LONG" });
-    }
-    if (bio.length > MAX_BIO_LENGTH) {
-      throw new ConvexError({ code: "PROFILE_BIO_TOO_LONG" });
-    }
-
-    const profileImageStorageId =
-      args.profileImageStorageId === undefined
-        ? user.profileImageStorageId
-        : (args.profileImageStorageId ?? undefined);
-    const bannerStorageId =
-      args.bannerStorageId === undefined
-        ? user.bannerStorageId
-        : (args.bannerStorageId ?? undefined);
-    if (
-      profileImageStorageId !== undefined &&
-      profileImageStorageId !== user.profileImageStorageId
-    ) {
-      await requireProfileImageStorage(ctx, profileImageStorageId);
-    }
-    if (
-      bannerStorageId !== undefined &&
-      bannerStorageId !== user.bannerStorageId
-    ) {
-      await requireProfileImageStorage(ctx, bannerStorageId);
-    }
-
-    await ctx.db.patch("users", user._id, {
-      ...(args.banner === undefined ? {} : { banner }),
-      bannerStorageId,
-      bio: bio.length > 0 ? bio : undefined,
-      company,
-      isPublic: true,
-      name,
-      profileImageStorageId,
-      profileOnboardingCompletedAt:
-        user.profileOnboardingCompletedAt ?? Date.now(),
-      role,
-      socialLinks,
-    });
-    await deleteReplacedProfileStorage(
-      ctx,
-      [user.profileImageStorageId, user.bannerStorageId],
-      [profileImageStorageId, bannerStorageId],
-    );
-    return null;
+    return await completeProfileOnboardingUseCase(ctx, args, user);
   },
 });
 
-function normalizeGalleryBanner(
-  value: string | null | undefined,
-): string | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-  if (value === null || value.trim().length === 0) {
-    return undefined;
-  }
-  const banner = value.trim();
-  if (!ALLOWED_GALLERY_BANNERS.has(banner)) {
-    throw new ConvexError({ code: "PROFILE_INVALID_BANNER" });
-  }
-  return banner;
-}
+type ProfileMediaCtx = MutationCtx | QueryCtx;
 
-function normalizeSocialLinks(
-  socialLinks: Array<{ platform: string; url: string }>,
+async function resolveProfileMedia(
+  ctx: ProfileMediaCtx,
+  user: Doc<"users">,
 ) {
-  const populatedLinks = socialLinks.filter(
-    (link) => link.url.trim().length > 0,
-  );
-  if (populatedLinks.length > MAX_PROFILE_SOCIAL_LINKS) {
-    throw new ConvexError({ code: "PROFILE_TOO_MANY_SOCIAL_LINKS" });
-  }
+  const [bannerUrl, profileImageUrl] = await Promise.all([
+    user.bannerStorageId === undefined
+      ? null
+      : ctx.storage.getUrl(user.bannerStorageId),
+    user.profileImageStorageId === undefined
+      ? null
+      : ctx.storage.getUrl(user.profileImageStorageId),
+  ]);
 
-  const normalizedLinks: Array<{ platform: string; url: string }> = [];
-  const seenPlatforms = new Set<string>();
-  for (const link of populatedLinks) {
-    const platform =
-      link.platform.trim().toLowerCase() === "twitter"
-        ? "x"
-        : link.platform.trim().toLowerCase();
-    if (
-      !ALLOWED_SOCIAL_PLATFORMS.has(platform) ||
-      seenPlatforms.has(platform)
-    ) {
-      throw new ConvexError({ code: "PROFILE_INVALID_SOCIAL_PLATFORM" });
-    }
-
-    const url = link.url.trim();
-    if (url.length > MAX_SOCIAL_URL_LENGTH || !isSafeHttpUrl(url)) {
-      throw new ConvexError({ code: "PROFILE_INVALID_SOCIAL_URL" });
-    }
-    normalizedLinks.push({ platform, url });
-    seenPlatforms.add(platform);
-  }
-  return normalizedLinks;
-}
-
-function getSafeStoredSocialLinks(
-  socialLinks: Array<{ platform: string; url: string }>,
-) {
-  const safeLinks: Array<{ platform: string; url: string }> = [];
-  const seenPlatforms = new Set<string>();
-  for (const link of socialLinks) {
-    if (safeLinks.length >= MAX_PROFILE_SOCIAL_LINKS) {
-      break;
-    }
-    const platform =
-      link.platform.trim().toLowerCase() === "twitter"
-        ? "x"
-        : link.platform.trim().toLowerCase();
-    const url = link.url.trim();
-    if (
-      !ALLOWED_SOCIAL_PLATFORMS.has(platform) ||
-      seenPlatforms.has(platform) ||
-      url.length > MAX_SOCIAL_URL_LENGTH ||
-      !isSafeHttpUrl(url)
-    ) {
-      continue;
-    }
-    safeLinks.push({ platform, url });
-    seenPlatforms.add(platform);
-  }
-  return safeLinks;
-}
-
-function isSafeHttpUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return (
-      (url.protocol === "http:" || url.protocol === "https:") &&
-      url.username.length === 0 &&
-      url.password.length === 0
-    );
-  } catch {
-    return false;
-  }
+  return {
+    banner: bannerUrl ?? user.banner,
+    image: profileImageUrl ?? user.image,
+  };
 }

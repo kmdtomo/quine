@@ -21,7 +21,7 @@ import {
 import {
   assertProductAiDraftIsUnsaved,
   attachProductAiDraftToProduct,
-} from "./lib/productAi/attachDraftToProduct";
+} from "./application/productAi/attachDraftToProduct";
 import { uniqueValidTechnologyKeys } from "./lib/technologyKeys";
 import { getUserByUsername } from "./lib/users";
 
