@@ -4,6 +4,10 @@ import { getTechnologyByKey } from "../data/tech-stack";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import {
+  canEditProduct,
+  canViewProduct,
+} from "./application/products/productAccess";
 import { getCurrentUser } from "./lib/auth";
 import {
   deleteProductMedia,
@@ -15,17 +19,29 @@ import {
   syncProductScreenshots,
 } from "./lib/productAssets";
 import {
-  canEditProduct,
-  canViewProduct,
-  normalizeOptionalText,
-  normalizeProductSlug,
-} from "./lib/products";
-import {
   assertProductAiDraftIsUnsaved,
   attachProductAiDraftToProduct,
 } from "./lib/productAi/attachDraftToProduct";
 import { uniqueValidTechnologyKeys } from "./lib/technologyKeys";
 import { getUserByUsername } from "./lib/users";
+
+function normalizeProductSlug(value: string) {
+  const slug = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug.length > 0 ? slug : null;
+}
+
+function normalizeOptionalText(value: string | undefined) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  const text = value.trim();
+  return text.length > 0 ? text : undefined;
+}
 
 const projectType = v.union(
   v.literal("personal"),

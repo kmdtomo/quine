@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as application_products_productAccess from "../application/products/productAccess.js";
 import type * as auth from "../auth.js";
 import type * as connections from "../connections.js";
 import type * as developerTechnologies from "../developerTechnologies.js";
@@ -18,8 +19,9 @@ import type * as githubAnalysisRuns from "../githubAnalysisRuns.js";
 import type * as githubInstallations from "../githubInstallations.js";
 import type * as githubOAuthAction from "../githubOAuthAction.js";
 import type * as http from "../http.js";
-import type * as lib_ai_openaiResponses from "../lib/ai/openaiResponses.js";
-import type * as lib_ai_strandsRuntime from "../lib/ai/strandsRuntime.js";
+import type * as infra_github_githubError from "../infra/github/githubError.js";
+import type * as infra_openai_client from "../infra/openai/client.js";
+import type * as infra_openai_strandsRuntime from "../infra/openai/strandsRuntime.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_github_client from "../lib/github/client.js";
 import type * as lib_github_detection from "../lib/github/detection.js";
@@ -37,7 +39,6 @@ import type * as lib_productAi_tools_proposeMarkdownEdit from "../lib/productAi/
 import type * as lib_productAi_tools_readAttachmentContext from "../lib/productAi/tools/readAttachmentContext.js";
 import type * as lib_productAi_tools_readRepoContext from "../lib/productAi/tools/readRepoContext.js";
 import type * as lib_productAssets from "../lib/productAssets.js";
-import type * as lib_products from "../lib/products.js";
 import type * as lib_profileStorage from "../lib/profileStorage.js";
 import type * as lib_technologyKeys from "../lib/technologyKeys.js";
 import type * as lib_username from "../lib/username.js";
@@ -57,6 +58,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "application/products/productAccess": typeof application_products_productAccess;
   auth: typeof auth;
   connections: typeof connections;
   developerTechnologies: typeof developerTechnologies;
@@ -67,8 +69,9 @@ declare const fullApi: ApiFromModules<{
   githubInstallations: typeof githubInstallations;
   githubOAuthAction: typeof githubOAuthAction;
   http: typeof http;
-  "lib/ai/openaiResponses": typeof lib_ai_openaiResponses;
-  "lib/ai/strandsRuntime": typeof lib_ai_strandsRuntime;
+  "infra/github/githubError": typeof infra_github_githubError;
+  "infra/openai/client": typeof infra_openai_client;
+  "infra/openai/strandsRuntime": typeof infra_openai_strandsRuntime;
   "lib/auth": typeof lib_auth;
   "lib/github/client": typeof lib_github_client;
   "lib/github/detection": typeof lib_github_detection;
@@ -86,7 +89,6 @@ declare const fullApi: ApiFromModules<{
   "lib/productAi/tools/readAttachmentContext": typeof lib_productAi_tools_readAttachmentContext;
   "lib/productAi/tools/readRepoContext": typeof lib_productAi_tools_readRepoContext;
   "lib/productAssets": typeof lib_productAssets;
-  "lib/products": typeof lib_products;
   "lib/profileStorage": typeof lib_profileStorage;
   "lib/technologyKeys": typeof lib_technologyKeys;
   "lib/username": typeof lib_username;

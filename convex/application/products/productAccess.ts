@@ -1,25 +1,7 @@
 import { ConvexError } from "convex/values";
 
-import type { Doc } from "../_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "../_generated/server";
-
-export function normalizeProductSlug(value: string) {
-  const slug = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug.length > 0 ? slug : null;
-}
-
-export function normalizeOptionalText(value: string | undefined) {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  const text = value.trim();
-  return text.length > 0 ? text : undefined;
-}
+import type { Doc } from "../../_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "../../_generated/server";
 
 export async function canEditProduct(
   ctx: QueryCtx | MutationCtx,

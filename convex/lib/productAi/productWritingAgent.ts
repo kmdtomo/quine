@@ -1,7 +1,7 @@
 "use node";
 
 import type { ActionCtx } from "../../_generated/server";
-import { runStrandsAgent } from "../ai/strandsRuntime";
+import { runStrandsAgent } from "../../infra/openai/strandsRuntime";
 import {
   createMarkdownContentHash,
   formatProductWritingInput,

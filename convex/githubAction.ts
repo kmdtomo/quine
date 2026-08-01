@@ -11,6 +11,7 @@ import {
   internalAction,
 } from "./_generated/server";
 import { auth } from "./auth";
+import { githubErrorCodeFromUnknown } from "./infra/github/githubError";
 import {
   buildDependencySummary,
   addTreePathTarget,
@@ -41,7 +42,6 @@ import type {
   RepositoryAnalysis,
   RepositorySummary,
 } from "./lib/github/types";
-import { githubErrorCodeFromUnknown } from "./lib/githubErrors";
 
 const MAX_GITHUB_API_REQUESTS = 95;
 const MAX_MANIFEST_FILES_PER_REPOSITORY = 2;

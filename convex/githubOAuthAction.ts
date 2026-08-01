@@ -6,7 +6,8 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action } from "./_generated/server";
 import { auth } from "./auth";
-import { githubError, GitHubIntegrationError } from "./lib/githubErrors";
+import { GitHubIntegrationError } from "./infra/github/githubError";
+import { githubError } from "./lib/githubErrors";
 
 const GITHUB_API_VERSION = "2022-11-28";
 const MAX_INSTALLATION_PAGES = 20;

@@ -7,7 +7,7 @@ import {
   type ToolList,
 } from "@strands-agents/sdk";
 
-import { createOpenAiResponsesModel } from "./openaiResponses";
+import { createOpenAiResponsesModel } from "./client";
 
 type RunStrandsAgentArgs = {
   input: string;

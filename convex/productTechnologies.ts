@@ -7,8 +7,11 @@ import {
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import {
+  canEditProduct,
+  canViewProduct,
+} from "./application/products/productAccess";
 import { getCurrentUser } from "./lib/auth";
-import { canEditProduct, canViewProduct } from "./lib/products";
 import { uniqueValidTechnologyKeys } from "./lib/technologyKeys";
 import { normalizeUsername } from "./lib/username";
 

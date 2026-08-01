@@ -7,7 +7,7 @@ import type { ActionCtx } from "../../../_generated/server";
 import {
   createOpenAiClient,
   getOpenAiVisionModelId,
-} from "../../ai/openaiResponses";
+} from "../../../infra/openai/client";
 import type {
   ProductAgentAttachmentContext,
   ProductIncomingAttachment,

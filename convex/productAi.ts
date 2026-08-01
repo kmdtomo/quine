@@ -10,9 +10,9 @@ import {
   query,
   type QueryCtx,
 } from "./_generated/server";
+import { canEditProduct } from "./application/products/productAccess";
 import { requireUser } from "./lib/auth";
 import { createMarkdownContentHash } from "./lib/productAi/hash";
-import { canEditProduct } from "./lib/products";
 
 const MAX_AGENT_MESSAGES = 24;
 const MAX_ATTACHMENTS = 4;

@@ -2,7 +2,7 @@
 
 import { createSign } from "node:crypto";
 
-import { GitHubIntegrationError } from "../githubErrors";
+import { GitHubIntegrationError } from "../../infra/github/githubError";
 import {
   compareNullableDates,
   getPrimaryTechnologyFromLanguage,

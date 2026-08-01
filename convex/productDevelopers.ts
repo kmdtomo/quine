@@ -3,8 +3,11 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import {
+  canEditProduct,
+  canViewProduct,
+} from "./application/products/productAccess";
 import { getCurrentUser } from "./lib/auth";
-import { canEditProduct, canViewProduct } from "./lib/products";
 import { getUserByUsername } from "./lib/users";
 
 const MAX_PRODUCT_DEVELOPERS = 100;
