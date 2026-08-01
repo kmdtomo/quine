@@ -3,7 +3,7 @@ import { CheckIcon, XIcon } from "lucide-react";
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 import { cn } from "@/lib/utils";
 
-import type { SelectedTechnology, ToastState } from "./types";
+import type { SelectedTechnology, ToastState } from "../tech-stack-types";
 
 type TechStackEditToastProps = {
   onApplyYears: () => void;

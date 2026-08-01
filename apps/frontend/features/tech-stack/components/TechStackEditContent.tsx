@@ -18,7 +18,13 @@ import { allTechnologies, techStackCategories } from "@data/tech-stack";
 import {
   getAnalysisErrorMessage,
   getTechStackErrorMessage,
-} from "../lib/tech-stack-error";
+} from "../tech-stack-error";
+import type {
+  FilterMode,
+  SelectedTechnology,
+  SelectedTechnologyGroup,
+  ToastState,
+} from "../tech-stack-types";
 import { TechEditHero } from "./TechEditHero";
 import { TechStackBrowsePanel } from "./TechStackBrowsePanel";
 import { TechStackEditToast } from "./TechStackEditToast";
@@ -27,12 +33,6 @@ import {
   type AnalysisResult,
   type ModalPhase,
 } from "./TechStackOnboardingModal";
-import type {
-  FilterMode,
-  SelectedTechnology,
-  SelectedTechnologyGroup,
-  ToastState,
-} from "./types";
 
 type TechStackEditContentProps = {
   githubAppConnected: boolean;
