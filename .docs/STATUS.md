@@ -33,12 +33,13 @@
 - [x] frontend `.env.local`: `NEXT_PUBLIC_CONVEX_URL`
 - [x] `convex/schema.ts`（auth 6 + Quine 17 = 23 テーブル）Cloud devへpush・Convex typecheck済み（GitHub Installation / Analysis Run、Product asset / AI系テーブル含む）
 - [x] `convex/auth.ts`, `convex/auth.config.ts`
-- [x] `apps/frontend/middleware.ts`（`/signin` redirect, `/(app)` `/settings` 保護）
+- [x] `apps/frontend/proxy.ts`（Next.js 16 Node Proxy。`/signin` redirect、`/(app)` `/settings`保護、GitHub App OAuth callback例外）
 - [x] `apps/frontend/app/providers.tsx`（`ConvexAuthNextjsProvider`）
 - [x] `apps/frontend/app/layout.tsx` で provider wrap
 - [x] Convex MCP server を `.mcp.json` に登録（接続可否は利用セッションごとに確認し、未接続時はCLIで代替）
 - [x] `convex/tsconfig.json` + root TypeScript / Node型を追加し、Convex CLIの関数typecheckを有効化
-- [x] root `check` / `verify`でsecret scan、frontend / Convex typecheck、frontend / Convex lint、Convex Cloud確認を集約。2026-08-01に`pnpm verify`と`pnpm build`成功（lint error 0、既存`<img>`warning 23件、Next `middleware.ts`非推奨warningあり）
+- [x] root `check` / `verify`でsecret scan、frontend / Convex typecheck、frontend / Convex lint、Convex Cloud確認を集約。2026-08-01に`pnpm verify`と`pnpm build`成功（lint error 0、既存`<img>`warning 23件）
+- [x] `.github/workflows/ci.yml`でPR/main pushのsecretless CIを接続。Node 22 / pnpm 11.18.0 / frozen lockfileで`pnpm check`を実行し、Cloud pushを伴う`verify:convex`は保護された別jobまで保留
 - [x] `data/tech-stack.ts`（457 件 / 26 カテゴリ）frontend / convex 共有。`data/technologies.ts` は互換 re-export
 - [x] Product Writing Agent: Strands + OpenAI Responses provider をscheduled internal actionで実行。`productAiRuns`をsource of truthとしてqueued / running / succeeded / failed、retry、idempotency、多重実行防止を管理する。`productAiThreads` / `productAiMessages` / `productAiProposals` / `productRepoContexts` / `productAiAttachmentContexts` にrepo context、会話履歴、画像analysis text、Markdown / form proposalを保持し、proposal確定とRun成功は同一transactionでcommitする。画像本体はConvex File Storage、公開mutation/actionにはStorage IDだけを渡す。
 - [x] Product作成・更新はRHF + Zodの単一form contractから`products.saveForm`へ保存。新規Product作成、developer / technology / screenshot関連、Product AI draft関連付けを単一transactionに統合し、`creationKey`で再送時の重複作成を防止する。
@@ -51,6 +52,7 @@
 - [x] 実装referenceを[project structure](../.agents/skills/quine-implement/references/project-structure.md)、[frontend](../.agents/skills/quine-implement/references/frontend.md)、[Convex](../.agents/skills/quine-implement/references/convex.md)、[data flows](../.agents/skills/quine-implement/references/data-flows.md)、[external services](../.agents/skills/quine-implement/references/external-services.md)、[security](../.agents/skills/quine-implement/references/security.md)、[code rules](../.agents/skills/quine-implement/references/code-rules.md)、[verification](../.agents/skills/quine-implement/references/verification.md)へ再編
 - [x] 通常更新はConvex mutationを直接呼び、Next Server Actionはnative form/cookie/redirect/revalidate等が必要な場合だけ置く方針を明文化
 - [x] architecture境界を挙動不変でrefactor。Product AI prompt/tool/contextを`convex/workflows/productAi/`、GitHub detection/repository変換を`convex/workflows/githubAnalysis/`、GitHub provider client/typeを`convex/infra/github/`、Product media read/writeを`convex/application/products/`へ移動。registered path/export、validator、query/index/take/fallback、request上限、hash、Storage更新順は維持し、Convex Cloud codegen済み
+- [x] Next.js 16のroute auth境界をbyte-identicalな`middleware.ts`→`proxy.ts`移行で更新。ProxyはNode runtime固定、Convex Auth API名とmatcher/callback例外は維持。実装referenceも`proxy.ts`とlocal/Cloud verification境界へ同期
 - [x] [INDEX.md](INDEX.md) キーワード索引更新
 - [x] 技術スタック key 方針を docs / skill に反映（`data/tech-stack.ts` を canonical catalog、alias / ロゴ / DB / 解析は同じ key に正規化）
 - [x] 技術スタック catalog を再設計（Languages → Runtimes → Frontend/Mobile/Backend → DB/Data → Cloud/AWS/GCP/Azure → AI → Product APIs → DevOps/Observability/Testing/Design の順）
@@ -147,8 +149,7 @@
 
 ## 既知の課題 / メモ
 
-- **Next.js 16 対応**: Convex Auth の middleware が Next 16 で動くか実機確認していない（書いてはいる）
-- **Next.js proxy移行**: production buildは成功するが、`middleware.ts` conventionはNext.js 16で非推奨warning。Convex Auth互換を確認して`proxy.ts`へ移行する
+- **Next.js 16 Proxy**: `proxy.ts`移行、production build、未認証redirect、公開route、静的assetのsmokeは成功。認証済みsessionの`/signin` redirect、cookie refresh、実GitHub OAuth callbackは未実施
 - **`form.tsx`**: shadcn の `base-nova` style に form primitive がなく、標準テンプレートを手動配置
 - **Supabase credential**: `.cursor/mcp.json`はcurrent treeから削除・ignore済み。漏えい済みcredentialの外部revokeとGit履歴からの除去は未実施
 - **Convex MCP**: `.mcp.json`の設定は存在する。利用セッションで接続できない場合はConvex CLIで代替する

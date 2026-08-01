@@ -27,7 +27,8 @@ apps/frontend/
 ├── components/           # 複数featureで使う純UI
 ├── lib/                  # frontend横断基盤
 ├── hooks/
-└── contexts/
+├── contexts/
+└── proxy.ts              # route auth境界
 
 convex/
 ├── schema.ts             # 唯一のDB schema entrypoint
@@ -93,7 +94,7 @@ pnpm exec convex dev --once --typecheck enable
 pnpm verify
 ```
 
-実装コード変更後は最低限`pnpm typecheck`を成功させる。Convex変更時は`pnpm exec convex dev --once --typecheck enable`も必須。UI変更時は対象flowをbrowser smokeする。詳細は[verification](.agents/skills/quine-implement/references/verification.md)を正にする。
+実装コード変更後は最低限`pnpm typecheck`を成功させる。Convex変更の統合確認では`pnpm exec convex dev --once --typecheck enable`も必須。ただしfork PR CIはsecretlessな`pnpm check`までとし、Cloud確認は保護されたbranch / Environmentのjobで行う。`pnpm verify`は共有Convex dev deploymentへのpushを含むため、read-only/local-only commandとして扱わない。UI変更時は対象flowをbrowser smokeする。詳細は[verification](.agents/skills/quine-implement/references/verification.md)を正にする。
 
 ## Out of scope
 

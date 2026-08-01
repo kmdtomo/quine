@@ -95,13 +95,18 @@ root `pnpm typecheck`はfrontend TypeScriptの検査であり、root `convex/*.t
 広範囲またはrelease前:
 
 ```bash
+pnpm check
 pnpm verify
 pnpm build
 ```
 
-`pnpm verify`はsecret scan、frontend/Convex typecheck、frontend/Convex lint、Convex Cloud確認をまとめて行う。
+`pnpm check`はsecret scan、frontend/Convex typecheck、frontend/Convex lintだけを行うlocal gateで、secretなしのPR CIに使う。
+
+`pnpm verify`は`pnpm check`に加えて`convex dev --once --typecheck enable`を実行し、共有Convex dev deploymentへcodeをpushしてcodegenする。read-only/local-only commandとして扱わず、untrusted PRやfork codeへCloud secretを渡して実行しない。
 
 並列refactor packetでは各agentが`pnpm typecheck`、`pnpm run typecheck:convex`、対象lint、diff同等性をlocalで確認し、Cloud pushやcodegenを同時実行しない。supervisorが差分を統合した後、`pnpm exec convex dev --once --typecheck enable`または`pnpm verify`を一度実行してCloudを最終確認する。taskがCloud操作を明示的に禁止する場合は従い、未実施理由と統合後のverification ownerを報告する。
+
+CIではPR/fork向けの`pnpm check`と、保護されたbranch/environmentだけが実行する`verify:convex`を分離する。`pull_request_target`や、untrusted checkoutをsecret付きjobへ渡す`workflow_run`で代用しない。共有deploymentを更新するCloud jobは同時実行させない。
 
 lint errorを無関係な一括formatで直さない。task対象でない既存errorがある場合は、対象changeによるものかを切り分けて報告する。
 

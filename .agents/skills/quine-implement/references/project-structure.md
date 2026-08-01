@@ -40,7 +40,7 @@ quine/
 │       ├── hooks/                       # 複数 feature で使う hook
 │       ├── contexts/                    # 複数 feature で使う Context
 │       ├── public/                      # 静的 asset
-│       └── middleware.ts                # route auth境界
+│       └── proxy.ts                     # route auth境界
 ├── convex/
 │   ├── schema.ts                        # DB schema の単一 entrypoint
 │   ├── auth.ts
@@ -116,9 +116,9 @@ HTTP method、cookie、header、redirect、webhook、streaming が必要な入�
 
 Route Handler は request を検証し、認証を確定して Convex 関数を呼ぶ薄い adapter にする。GitHub OAuth callback のような HTTP protocol helper は該当 feature の server-only module または明確な共通基盤へ置く。
 
-### `apps/frontend/middleware.ts`
+### `apps/frontend/proxy.ts`
 
-route単位の認証有無、session更新、早いredirectだけを扱う。resource owner、onboarding完了状態、DB上のroleをmiddlewareだけで確定しない。Next.js/Convex Authのversion依存があるため、既存contractを確認せず独自middlewareへ置き換えない。
+Next.js 16のProxyとして、route単位の認証有無、session更新、早いredirectだけを扱う。resource owner、onboarding完了状態、DB上のroleをProxyだけで確定しない。ProxyはNode.js runtime固定であるため`runtime` configを追加しない。Next.js/Convex Authのversion依存があるので、matcher、callback例外、cookie処理を確認せず独自実装へ置き換えない。
 
 ### `apps/frontend/features/<feature>/`
 

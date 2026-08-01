@@ -280,7 +280,9 @@ modal open等をtriggerにeffectからrequestを始める場合、renderごと�
 
 - Next.js 16のlintは`next lint`ではなくprojectの`eslint` scriptを使う。
 - Turbopackは`next dev`のdefaultであり、専用flagを前提にしない。
-- middleware/proxy等version依存APIは、既存実装とinstalled packageのdocsを確認してから変更する。
+- route auth境界はNext app rootの`apps/frontend/proxy.ts`を使う。ProxyはNode.js runtime固定なので`runtime` configを追加しない。
+- `convexAuthNextjsMiddleware`等のlibrary API名はNext.jsのfile conventionではないため、`proxy`へ機械的にrenameしない。
+- Proxy等version依存APIは、既存実装、installed package、公式Next.js docsを確認してから変更する。
 
 ## Frontend checklist
 

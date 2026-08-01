@@ -46,8 +46,8 @@
 | RF-010 | P2 | 完了 | domain invariantとURL検証をserverで統一する | technologies, Product AI, users |
 | RF-011 | P2 | 完了 | Product/Profile formをRHF + Zodへ統一する | products, profile |
 | RF-012 | P2 | 完了 | Contentの責務、View境界、初期preloadを整理する | profile, products, LP, tech-stack |
-| RF-013 | P2 | 一部完了（互換API整理待ち） | 旧onboarding導線・stub・不要な公開aliasを撤去する | signup routes, Convex aliases |
-| RF-014 | P2 | 一部完了（local gate完成） | frontend/Convexを一括検証するcommandを作る | root scripts, ESLint |
+| RF-013 | P2 | 完了 | 旧onboarding導線・stub・不要な公開aliasを撤去する | signup routes, Convex aliases |
+| RF-014 | P2 | 一部完了（PR CI接続済み） | frontend/Convexを一括検証するcommandを作る | root scripts, ESLint, GitHub Actions |
 | RF-015 | P3 | 完了 | STATUSとarchitecture referenceを実装へ同期する | `.docs/STATUS.md`, skill references |
 | RF-016 | P3 | 完了 | feature/application/workflow/infra/libの配置境界を統一する | frontend features, `convex/application`, `convex/workflows`, `convex/infra` |
 | RF-017 | P1 | 未着手 | Product Storageにupload ownership contractを追加する | `files.ts`, Product assets/logo, schema |
@@ -56,21 +56,20 @@
 
 サブエージェントによる領域別実装と統合監督を行い、P0/P1のコード上の危険経路と主要な責務違反を修正した。`完了`はコード・型・lint・Convex contractまで確認済み、`一部完了`は外部操作、移行cleanup、互換契約の整理が残る項目を示す。
 
-残作業は次の7群に限定される。
+残作業は次の6群に限定される。
 
 1. 漏えい済みSupabase credentialの外部revokeとGit履歴からの除去
 2. Organization Installation向けの安全なGitHub user token更新・再検証設計
 3. Product Storage IDにupload user、用途、期限、消費状態を結び付けるownership contract
 4. 保存前に放棄されたFile Storage objectの期限付きcleanup
-5. Product repository importのRun化、公開Users/Products検索の全件pagination、未使用互換APIのcontract migration
-6. root `check` / `verify`を実行するCI workflowと必要なsecret設定
-7. Next.js 16で非推奨になった`middleware.ts`から`proxy.ts`への移行
+5. Product repository importのRun化、公開Users/Products検索の全件pagination、外部contract未確認public APIのdeprecation設計
+6. 保護されたConvex Cloud CI jobと必要なsecret / Environment設定
 
 ### 統合検証実績
 
 - `pnpm run verify`: 成功（secret scan、frontend / Convex typecheck、frontend / Convex lint、Convex Cloud functions確認）
-- `pnpm build`: 成功（Next.js production build、18 static page生成。`middleware.ts`非推奨warningあり）
-- Browser smoke: `/`、`/products`、`/@smoke-profile`がconsole errorなし。未認証`/products/new`は`/signin`へredirect
+- `pnpm build`: 成功（Next.js 16.2.4 production build、19 static page生成、`proxy.ts`を認識、middleware非推奨warningなし）
+- Proxy smoke: `/`と`/signin`は200、未認証`/products/new`は`/signin`へ307、`/file.svg`は200。認証済みsession/cookie refreshと実GitHub OAuth callbackは未実施
 - frontend ESLint: error 0、既存を含む`<img>`最適化warning 23件
 - mockup変更なし、新規test fileなし
 - 未実施: 認証済みGitHub OAuth / Installation、Product AI provider実行、Product/Profile保存のbrowser E2E
@@ -512,44 +511,45 @@ profile画像、banner、product logo、screenshots、Product AI添付をdata UR
 ## RF-013 旧onboarding導線・stub・不要な公開aliasを撤去する
 
 - 優先度: **P2**
-- 状態: **一部完了（旧route・stub・alias撤去済み、互換API整理待ち）**
+- 状態: **完了**
 - 種別: Routing / Public API cleanup
 
 ### 問題
 
-現行導線へ統合済みの旧route、未実装stub、動作しない主要UI、未使用のpublic mutation aliasが残っています。到達可能な経路と保守対象を不必要に増やしています。
+旧onboarding page、未接続Notifications、`deleteProduct` / `follow` / `unfollow` public aliasがcanonical導線・APIと重複していた。現在はstubとaliasを撤去し、旧signup routeは既存URLを壊さないcompat redirectへ限定している。
 
 ### 根拠
 
-- `apps/frontend/app/(public)/signup/detecting/page.tsx:13`
-- `apps/frontend/app/(public)/signup/tech-stack/page.tsx:7`
-- `apps/frontend/app/(public)/signup/profile/page.tsx:12` — page内でauth/query/分岐を直接実行
-- `apps/frontend/components/app/AppHeader.tsx:177` — 未接続Notifications
-- `convex/products.ts:525` — `deleteProduct` alias
-- `convex/connections.ts:56`、`convex/connections.ts:116` — `follow`/`unfollow` alias
+- `/home`と`HomeRedirectView`をonboarding state解決のcanonical実装に統一した。`/onboarding`は現行signin / LPから利用する同Viewの入口である。
+- `/signup/detecting`、`/signup/tech-stack`、`/signup/profile`は現行画面へのredirectだけを持つ意図的な互換routeであり、削除対象ではない。
+- 未接続Notificationsと`deleteProduct` / `follow` / `unfollow` registered aliasは現行codeに存在しない。
+- repo内consumerがない他のpublic Convex APIは存在するが、外部client contractを確認できないため、挙動不変refactorでは削除しない。
+- `/settings`へのlinkは残る一方でrouteは未実装であり、legacy cleanupではなく別のproduct課題として扱う。
 
 ### 対応
 
-1. canonical onboarding導線を`/home`から現行画面へ統一する
-2. 旧routeはredirectまたは削除する
-3. route pageの処理をserver `*View`へ移す
-4. 実装されていない通知操作とbadgeは非表示にする
-5. 未使用public aliasを削除してConvex codegenを更新する
+1. onboarding分岐をserver `HomeRedirectView`へ集約する
+2. 旧signup routeはcompat redirectとして処理を持たせない
+3. 実装されていない通知操作とbadgeを撤去する
+4. 重複public aliasを削除する
+5. consumerなしpublic APIは外部contract確認とdeprecationを別taskで行う
+6. `/settings`の実装またはlink変更は別product taskで決める
 
 ### 完了条件
 
 - [x] onboardingのsource of truthが1つ
 - [x] 到達可能なstub pageがない
 - [x] `app/**/page.tsx`が直接Convex処理と業務分岐を抱えない
-- [x] 動作しない操作可能UIがない
-- [ ] 未使用public aliasがない
+- [x] 未接続Notificationsの操作可能UIがない
+- [x] 重複public aliasがない
+- [x] 互換routeと外部contract未確認APIを無断で削除していない
 
 ---
 
 ## RF-014 frontend/Convexを一括検証するcommandを作る
 
 - 優先度: **P2**
-- 状態: **一部完了（local gate完成、CI未接続）**
+- 状態: **一部完了（local/PR gate完成、Cloud CI未接続）**
 - 種別: Tooling / 再発防止
 
 ### 問題
@@ -564,17 +564,18 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 
 ### 対応
 
-1. `check:frontend`、`check:convex`、集約`check`または`verify`を追加する
-2. Convex typecheck commandをscript化する
-3. rootから`convex/`と`data/`へ適用するESLint設定を追加する
-4. Convex公式recommended rulesと型安全・floating promise検出を有効化する
-5. secret scanを検証手順へ追加する
+1. secretなしのlocal gateを`pnpm check`へ集約する
+2. Cloud pushを含む`verify:convex` / `verify`をlocal gateと区別する
+3. PRとmain pushで`pnpm check`を実行するleast-privilege CIを追加する
+4. fork codeへsecretを渡さず、Cloud verificationは保護Environmentの別jobへ分ける
 
 ### 完了条件
 
 - [x] 1 commandでfrontend typecheck/lintとConvex typecheck/lintを実行できる
 - [x] Convex未検証を成功扱いにしない
-- [ ] localとCIの完了手順が一致する（CI workflowは未作成）
+- [x] localとPR CIが同じ`pnpm check`を実行する
+- [x] CIのNode/pnpm、frozen lockfile、権限、同時実行方針が固定されている
+- [ ] 保護されたmain/manual jobで`verify:convex`を直列実行する（GitHub secret / Environment設定が必要）
 - [x] **新規test fileは作成・追記しない**
 
 ---
