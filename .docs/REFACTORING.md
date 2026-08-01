@@ -50,7 +50,7 @@
 | RF-014 | P2 | 一部完了（PR CI接続済み） | frontend/Convexを一括検証するcommandを作る | root scripts, ESLint, GitHub Actions |
 | RF-015 | P3 | 完了 | STATUSとarchitecture referenceを実装へ同期する | `.docs/STATUS.md`, skill references |
 | RF-016 | P3 | 完了 | feature/application/workflow/infra/libの配置境界を統一する | frontend features, `convex/application`, `convex/workflows`, `convex/infra` |
-| RF-017 | P1 | 未着手 | Product Storageにupload ownership contractを追加する | `files.ts`, Product assets/logo, schema |
+| RF-017 | P1 | 一部完了（schema/API expand済み） | Product Storageにupload ownership contractを追加する | `files.ts`, Product assets/logo, schema |
 
 ## 今回の実装結果
 
@@ -640,7 +640,7 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 ## RF-017 Product Storageにupload ownership contractを追加する
 
 - 優先度: **P1**
-- 状態: **未着手**
+- 状態: **一部完了（schema/API expand済み、consumer切替・backfill・cleanup未実施）**
 - 種別: Security / File Storage
 
 ### 問題
@@ -651,8 +651,18 @@ rootの`pnpm typecheck`はworkspace内のfrontendを主に検証し、root `conv
 
 挙動不変refactorの中でerror順や既存upload flowを暗黙に変えない。別taskでauthenticated userとStorage IDを結ぶupload intentを設計し、logo/screenshot attach時の消費、期限切れobject cleanup、既存objectのmigration、全参照を考慮したdelete条件をまとめて導入する。
 
+### Schema / API expand結果
+
+- `uploadIntents`を追加し、authenticated user、用途、`pending / uploaded / consumed`、Storage ID、期限、消費先resourceを表現した。
+- `files.createUploadIntent`と`files.finalizeUpload`をadditiveに追加した。両mutationは入口で認証し、finalizeはintent owner、期限、状態、Storage ID重複、metadata、用途別MIME、6MB上限を確認する。
+- upload URLとStorage IDの厳密な発行元証明ではなく、intent作成後に生成された未登録Storage IDの一回claimである。旧API廃止、backfill、resource attach時のconsumeが完了するまで、最終ownership保証とは扱わない。
+- 未完了intentはuserあたり20件にbounded。pendingは1時間、uploadedは24時間の期限を持つ。
+- 既存`files.generateUploadUrl`、Profile / Product / Product AI consumer、resource mutationのargsとerror順は変更していない。現行UIは新APIをまだ使用しない。
+
 ### 完了条件
 
+- [x] upload intent用schema / indexとadditive public APIを追加する
+- [x] 既存upload API / consumerのcontractをexpand phaseで変更しない
 - [ ] client由来Storage IDをrelation衝突だけでなくserver上のupload owner/intentから検証する
 - [ ] logoとscreenshotを含む全参照を確認してからStorage objectを削除する
 - [ ] 未消費intentと放棄objectの期限付きcleanupを実装する

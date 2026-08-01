@@ -15,6 +15,8 @@ import type * as application_developerTechnologies_reorder from "../application/
 import type * as application_developerTechnologies_saveDetected from "../application/developerTechnologies/saveDetected.js";
 import type * as application_developerTechnologies_setManyYears from "../application/developerTechnologies/setManyYears.js";
 import type * as application_developerTechnologies_technologyRules from "../application/developerTechnologies/technologyRules.js";
+import type * as application_files_createUploadIntent from "../application/files/createUploadIntent.js";
+import type * as application_files_finalizeUpload from "../application/files/finalizeUpload.js";
 import type * as application_githubAnalysis_beginExecution from "../application/githubAnalysis/beginExecution.js";
 import type * as application_githubAnalysis_commitTechnologyAnalysis from "../application/githubAnalysis/commitTechnologyAnalysis.js";
 import type * as application_githubAnalysis_retryTechnologyAnalysis from "../application/githubAnalysis/retryTechnologyAnalysis.js";
@@ -71,6 +73,7 @@ import type * as infra_openai_strandsRuntime from "../infra/openai/strandsRuntim
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_githubErrors from "../lib/githubErrors.js";
 import type * as lib_technologyKeys from "../lib/technologyKeys.js";
+import type * as lib_uploadIntents from "../lib/uploadIntents.js";
 import type * as lib_username from "../lib/username.js";
 import type * as lib_users from "../lib/users.js";
 import type * as productAi from "../productAi.js";
@@ -107,6 +110,8 @@ declare const fullApi: ApiFromModules<{
   "application/developerTechnologies/saveDetected": typeof application_developerTechnologies_saveDetected;
   "application/developerTechnologies/setManyYears": typeof application_developerTechnologies_setManyYears;
   "application/developerTechnologies/technologyRules": typeof application_developerTechnologies_technologyRules;
+  "application/files/createUploadIntent": typeof application_files_createUploadIntent;
+  "application/files/finalizeUpload": typeof application_files_finalizeUpload;
   "application/githubAnalysis/beginExecution": typeof application_githubAnalysis_beginExecution;
   "application/githubAnalysis/commitTechnologyAnalysis": typeof application_githubAnalysis_commitTechnologyAnalysis;
   "application/githubAnalysis/retryTechnologyAnalysis": typeof application_githubAnalysis_retryTechnologyAnalysis;
@@ -163,6 +168,7 @@ declare const fullApi: ApiFromModules<{
   "lib/auth": typeof lib_auth;
   "lib/githubErrors": typeof lib_githubErrors;
   "lib/technologyKeys": typeof lib_technologyKeys;
+  "lib/uploadIntents": typeof lib_uploadIntents;
   "lib/username": typeof lib_username;
   "lib/users": typeof lib_users;
   productAi: typeof productAi;

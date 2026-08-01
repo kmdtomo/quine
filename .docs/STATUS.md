@@ -31,7 +31,7 @@
 - [x] Convex Cloud dev deployment（`colorful-meerkat-738`）作成
 - [x] root `.env.local`: `CONVEX_DEPLOYMENT` / `CONVEX_URL` / `CONVEX_SITE_URL` / `CONVEX_DEPLOY_KEY`
 - [x] frontend `.env.local`: `NEXT_PUBLIC_CONVEX_URL`
-- [x] `convex/schema.ts`（auth 6 + Quine 17 = 23 テーブル）Cloud devへpush・Convex typecheck済み（GitHub Installation / Analysis Run、Product asset / AI系テーブル含む）
+- [x] `convex/schema.ts`（auth 6 + Quine 18 = 24 テーブル）Cloud devへpush・Convex typecheck済み（GitHub Installation / Analysis Run、Product asset / AI、Upload Intent系テーブル含む）
 - [x] `convex/auth.ts`, `convex/auth.config.ts`
 - [x] `apps/frontend/proxy.ts`（Next.js 16 Node Proxy。`/signin` redirect、`/(app)` `/settings`保護、GitHub App OAuth callback例外）
 - [x] `apps/frontend/app/providers.tsx`（`ConvexAuthNextjsProvider`）
@@ -43,6 +43,7 @@
 - [x] `data/tech-stack.ts`（457 件 / 26 カテゴリ）frontend / convex 共有。`data/technologies.ts` は互換 re-export
 - [x] Product Writing Agent: Strands + OpenAI Responses provider をscheduled internal actionで実行。`productAiRuns`をsource of truthとしてqueued / running / succeeded / failed、retry、idempotency、多重実行防止を管理する。`productAiThreads` / `productAiMessages` / `productAiProposals` / `productRepoContexts` / `productAiAttachmentContexts` にrepo context、会話履歴、画像analysis text、Markdown / form proposalを保持し、proposal確定とRun成功は同一transactionでcommitする。画像本体はConvex File Storage、公開mutation/actionにはStorage IDだけを渡す。
 - [x] Product作成・更新はRHF + Zodの単一form contractから`products.saveForm`へ保存。新規Product作成、developer / technology / screenshot関連、Product AI draft関連付けを単一transactionに統合し、`creationKey`で再送時の重複作成を防止する。
+- [x] RF-017 expand: `uploadIntents`と`files.createUploadIntent` / `files.finalizeUpload`をadditiveに導入。owner・用途・期限・未完了数・Storage metadataを検査するが、既存`generateUploadUrl`とProfile / Product / Product AI consumerは未切替のため、まだresource ownershipの最終根拠とは扱わない。Cloud schema/index/function typecheck済み
 - [x] Product AI editor初期状態をboundedな`getEditorState` queryへ統合し、Server `ProductEditView`でpreload。新規draft keyはServer生成のURL queryへ固定し、既存・新規ともreload後に履歴とRunを復元する。
 - [x] 2026-07-30 browser smoke: `/`、`/products`、`/@smoke-profile`はconsole errorなし。未認証`/products/new`は`/signin`へredirect。認証済みGitHub / Product AI / 保存操作のE2Eは未実施
 
@@ -153,6 +154,7 @@
 - **`form.tsx`**: shadcn の `base-nova` style に form primitive がなく、標準テンプレートを手動配置
 - **Supabase credential**: `.cursor/mcp.json`はcurrent treeから削除・ignore済み。漏えい済みcredentialの外部revokeとGit履歴からの除去は未実施
 - **Convex MCP**: `.mcp.json`の設定は存在する。利用セッションで接続できない場合はConvex CLIで代替する
+- **Storage ownership**: upload intent schema/APIのexpandは完了。consumer切替、既存Storage参照のbackfill、attach時consume、全参照cleanup、旧`generateUploadUrl`廃止は未実施
 - **GitHub App 解析方針**: 現時点では AI を使わない。package / language / manifest / config / workflow / IaC resource type 由来の確定情報を `data/tech-stack.ts` の key にマッピングし、残りはユーザー編集で補う。AI による長いローディングや推測混入は避ける。
 - **GitHub App rate limit 方針**: 初回解析は精度60〜70%でよく、後でユーザー編集する前提。全 repo 完全解析ではなく、95 requests 上限で tree 起点の軽量 breadth-first scan を行う。production 前には installation 単位のキュー制御（同時解析1本）を追加する。
 - **GitHub Organization Installation**: 個人Installationは検証済み。OrganizationはGitHub user tokenの安全な暗号化保存・refresh・membership再検証の運用が未設計のため、現時点では安全側に拒否する
