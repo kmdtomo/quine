@@ -1,60 +1,49 @@
 ---
 name: quine-implement
-description: Quine の実装・リファクタリング全般を行う。Next.js の page/View/Content、Convex の schema/query/mutation/action、認証・権限、GitHub App、AI、ファイルアップロード、長時間処理、データ移行を、Quine 固有の責務境界と Convex の設計原則に沿って設計・実装・検証する時に使う。
+description: Quine の実装・修正・リファクタリング・コードレビューを、Next.js 16、Convex、Convex Auth、GitHub App、OpenAI、File Storage の責務境界に沿って進める。page/View/Content、フォーム、query/mutation/action、認証・所有権、外部API、長時間Run、schema/index/migration、配置判断、完了前検証が必要な時に使う。
 ---
 
 # quine-implement
 
-Quine の実装を、既存コードの偶然の形ではなく、プロジェクトで合意した責務境界とデータフローに揃えて完成させる。
+Quine の実装を、feature と Convex transaction を中心に一貫した構造で完成させる。
 
-mockup の HTML 1 ページを移植する場合は、本スキルではなく [`migrate-page-from-mockup`](../migrate-page-from-mockup/SKILL.md) を使う。
+## Workflow
 
-$ARGUMENTS が空、または対象・成功条件が不明確で、安全な仮定では結果が大きく変わる場合だけ、実装前にユーザーへ確認する。
+1. 新しいセッションでは最初に [`.docs/STATUS.md`](../../../.docs/STATUS.md) を読む。
+2. 下の routing から必要な reference をすべて読む。要件の意味が不足する時だけ `.docs/INDEX.md` から product docs を読む。
+3. 同じ責務の既存実装を複数確認し、単一ファイルの癖を標準化しない。
+4. 変更ファイル、各責務、auth/owner 境界、データフロー、schema/index/storage 変更を設計する。
+5. ユーザーへ設計を提示し、承認後に最小単位で実装する。
+6. [verification](references/verification.md) に従って diff、型、lint、Convex、対象フローを確認する。
+7. 完了した実装・接続・検証を `.docs/STATUS.md` へ反映する。
 
-## ゴール
+安全な仮定で結果が変わらない場合は質問せず進める。権限、公開API、破壊的schema変更、外部状態を変える判断が分かれる場合は実装前に確認する。
 
-実データで動作し、権限境界が守られ、Cloud dev に反映でき、静的検証と対象フローの smoke check が通る状態にする。動かない雛形、未接続のモック、先送りの TODO は残さない。
+## Core rules
 
-## 進め方
+- `app/` は route と composition、`features/` は feature UI と任意の Next adapter に限定する。
+- `*View` は Server Component、`*Content` は Client Component にする。`"use server"` は Server Action にだけ使う。
+- 初期取得は `preloadQuery` / `fetchQuery` を使い、`useEffect + fetch` を使わない。
+- Convex root の登録関数を public adapter とし、複雑な transaction logic だけ `convex/application/<feature>/` へ切り出す。
+- `convex/schema.ts` を唯一の DB schema entrypoint とする。独立した `domain/` 層は作らない。
+- GitHub、OpenAI など Convex 外部との接続だけを `convex/infra/<provider>/` へ置く。Convex DB を repository で包まない。
+- public mutation/action の入口で認証を確定し、owner/Installation は DB の関係から導出する。
+- 長時間処理は public mutation で Run を作り、scheduled internalAction を起動する。
+- feature 固有コードを汎用 `lib/` へ置かない。`lib/` は複数領域が依存する基盤だけにする。
+- `any`、unsafe cast、non-null assertion、理由のない TypeScript 抑制を使わない。
+- mockup は read-only とし、テストファイルは作成・追記しない。
 
-1. [`references/index.md`](references/index.md) と [`references/core-rules.md`](references/core-rules.md) を読む。
-2. `references/index.md` のルーティングに従い、今回必要な reference と `.docs/` だけを読む。
-3. 新規セッションでは [`.docs/STATUS.md`](../../../.docs/STATUS.md) を最初に読み、実装前に [`references/gotchas.md`](references/gotchas.md) を確認する。
-4. 同じ責務の既存実装を複数確認する。単一ファイルの局所的な癖や古い歪みを新規実装へ広げない。
-5. 変更ファイル、各ファイルの責務、auth/owner 境界、データフロー、schema 変更と移行方法を設計する。
-6. 設計をユーザーへ提示し、承認後に最小スコープで実装する。
-7. [`references/verification.md`](references/verification.md) に従い、diff、型、lint、Convex、実機フローを確認する。
-8. 完了した項目を`.docs/STATUS.md`に反映し、新しい罠だけを`references/gotchas.md`に追記する。
+## Reference routing
 
-## 絶対ルール
+| Task | Read |
+|---|---|
+| ファイル追加、移動、責務判断 | [project structure](references/project-structure.md) |
+| page、View、Content、Section、フォーム、Server Action、Route Handler | [frontend](references/frontend.md), [code rules](references/code-rules.md) |
+| schema、query、mutation、internal function、index、migration | [Convex](references/convex.md), [security](references/security.md) |
+| 複数層をまたぐ処理、SSR、mutation、upload、OAuth | [data flows](references/data-flows.md) |
+| GitHub、OpenAI、外部API、長時間Run、retry | [external services](references/external-services.md), [security](references/security.md) |
+| auth、owner、公開field、client由来ID、Storage所有権 | [security](references/security.md) |
+| TypeScript、命名、import、error、Tailwind、RHF | [code rules](references/code-rules.md) |
+| 完了前確認 | [verification](references/verification.md) |
 
-- `as any`、`as unknown as`、non-null assertion、理由のない `@ts-ignore` / `@ts-expect-error` を使わない。
-- `*View` は Server、`*Content` は Client とし、初期取得に `useEffect + fetch` を使わない。
-- public mutation/action の入口で `requireUser(ctx)` を呼び、所有者限定操作はDB上の所有関係を検証する。
-- client 由来の `userId`、`authorId`、`installationId`、tenant相当IDを権限の根拠にしない。
-- server-only 処理は `internalQuery` / `internalMutation` / `internalAction` に閉じる。
-- schema は `convex/schema.ts` に集約し、登録関数は責務単位で分ける。複雑な純粋ロジックは `convex/lib/<feature>/` に置く。
-- 技術スタックのDB値、検出結果、ロゴは `data/tech-stack.ts` の canonical keyに統一する。
-- バイナリをdata URLや巨大なstringとしてDB・Action引数へ流さず、Convex File StorageのIDを使う。
-- mockup はread-onlyとし、未接続モックや主要導線のTODOを残さない。
-- テストファイルは新規作成も追記もしない。検証は静的検証、Convex実行確認、ブラウザsmokeで行う。
-
-## 優先順位
-
-1. auth、owner、GitHub Installationなどの権限境界
-2. schema、validator、公開API、Run状態などのデータ契約
-3. transaction、index、pagination、storageなどの正確性
-4. View/Contentとfeature境界
-5. UIと局所的な実装詳細
-
-既存コードがreferenceと異なる場合、既存の外部契約は壊さず、古い危険なパターンを新規実装へ増やさない。
-
-## References
-
-- [`references/index.md`](references/index.md): タスク別に読む資料を選ぶ
-- [`references/core-rules.md`](references/core-rules.md): 全実装共通の責務境界、identity、validation
-- [`references/architecture.md`](references/architecture.md): ディレクトリ、依存方向、View / Content
-- [`references/frontend-rules.md`](references/frontend-rules.md): 型、命名、import、Tailwind、フォーム
-- [`references/convex-design.md`](references/convex-design.md): Convexのauth、Action、Run、index、storage、migration
-- [`references/gotchas.md`](references/gotchas.md): 実際に踏んだ罠と対処
-- [`references/verification.md`](references/verification.md): テストファイルを使わない完了前検証
+複合タスクでは該当 reference を足し合わせる。情報は正規の reference にだけ置き、別ファイルへ同じ説明を複製しない。

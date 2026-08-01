@@ -7,7 +7,7 @@
 1. [`AGENTS.md`](AGENTS.md)
 2. [`.docs/STATUS.md`](.docs/STATUS.md)
 3. 該当する[canonical skill](.agents/skills/)
-4. skillのreference indexが指定するreference
+4. skillのroutingが指定するreference
 5. 要件確認が必要な場合だけ[product docs](.docs/INDEX.md)
 
-`.claude/skills/`は互換入口であり、実装ルールを複製しない。
+実装ルールは`.agents/skills/`だけに置き、別の互換directoryへ複製しない。

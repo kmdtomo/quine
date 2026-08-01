@@ -3,7 +3,7 @@
 > セッションを跨いでの進捗追跡。**新しいセッション開始時はこのファイルを最初に読む**。  
 > 区切りごとに更新。チェック済みはコードの実装・接続を示し、実機検証まで済んだとは限らない。
 
-最終更新: 2026-07-30
+最終更新: 2026-08-01
 
 ## 状態の読み方
 
@@ -47,13 +47,10 @@
 
 ### docs / skill
 
-- [x] [architecture reference](../.agents/skills/quine-implement/references/architecture.md) `data/`追加 + 依存方向更新
-- [x] [Convex design reference](../.agents/skills/quine-implement/references/convex-design.md) schema単一ファイル、Cloud接続、auth / Run / Storage設計を集約
+- [x] 2026-08-01 [quine-implement](../.agents/skills/quine-implement/SKILL.md)を再設計。独立`domain/`を置かず、`features`をUI/任意Next adapter、Convex rootをregistered adapter、`convex/application`を複雑なtransaction use case、`convex/infra`を外部provider接続とする責務境界へ統一
+- [x] 実装referenceを[project structure](../.agents/skills/quine-implement/references/project-structure.md)、[frontend](../.agents/skills/quine-implement/references/frontend.md)、[Convex](../.agents/skills/quine-implement/references/convex.md)、[data flows](../.agents/skills/quine-implement/references/data-flows.md)、[external services](../.agents/skills/quine-implement/references/external-services.md)、[security](../.agents/skills/quine-implement/references/security.md)、[code rules](../.agents/skills/quine-implement/references/code-rules.md)、[verification](../.agents/skills/quine-implement/references/verification.md)へ再編
+- [x] 通常更新はConvex mutationを直接呼び、Next Server Actionはnative form/cookie/redirect/revalidate等が必要な場合だけ置く方針を明文化
 - [x] [INDEX.md](INDEX.md) キーワード索引更新
-- [x] [gotchas reference](../.agents/skills/quine-implement/references/gotchas.md) 新設（Next 16 / Convex / Convex Auth / shadcn / Routingの罠）
-- [x] [quine-init/SKILL.md](../.claude/skills/quine-init/SKILL.md) Cloud 前提 + Deploy Key + MCP 設定にスリム化
-- [x] [quine-implement/SKILL.md](../.claude/skills/quine-implement/SKILL.md) MCP 利用 + STATUS 更新 step 追加にリライト
-- [x] [migrate-page-from-mockup/SKILL.md](../.claude/skills/migrate-page-from-mockup/SKILL.md) what 中心にスリム化、DB 連携必須を明文化
 - [x] 技術スタック key 方針を docs / skill に反映（`data/tech-stack.ts` を canonical catalog、alias / ロゴ / DB / 解析は同じ key に正規化）
 - [x] 技術スタック catalog を再設計（Languages → Runtimes → Frontend/Mobile/Backend → DB/Data → Cloud/AWS/GCP/Azure → AI → Product APIs → DevOps/Observability/Testing/Design の順）
 - [x] AWS / Google Cloud / Azure の主要リソースを追加（AWS 42件 / Google Cloud 31件 / Azure 29件）
@@ -82,7 +79,7 @@
 
 - [x] `/signin` ページ実装（GitHub ログインボタン、`@/features/auth/components/SigninContent`）
 - [x] Tailwind theme を mockup から `app/globals.css` へ移植（dark palette、accent gradient、radius、surface variants）
-- [x] mockup `lp.html` を `app/(public)/page.tsx` に移植（`migrate-page-from-mockup` skill）
+- [x] mockup `lp.html` を `app/(public)/page.tsx` に移植
 - [x] mockup `signup-github-app.html` を `/signup/github-app` に移植（`features/auth/auth.module.css` にauth系CSSを移植。旧detecting / tech-stack / profile routeは現在canonical導線へredirect）
 - [x] **GitHub App 登録**（`quine-app`、callback: `http://localhost:3000/signup/github-app/callback`、Permissions: Contents Read-only + Metadata Read-only、Webhook OFF）→ Convex env に `GITHUB_APP_ID=3701030` / `GITHUB_APP_CLIENT_ID=Iv23lidP6p9FmGzLnm5x` / `GITHUB_APP_CLIENT_SECRET` / `GITHUB_APP_PRIVATE_KEY`（**base64 エンコード済み**、デコードは Action 側で `Buffer.from(..., "base64").toString("utf8")`）、frontend `.env.local` に `NEXT_PUBLIC_GITHUB_APP_SLUG=quine-app` 投入済み
 - [x] GitHub App 解析をRun化: 検証済みInstallation → `githubAnalysisRuns.startTechnologyAnalysis` → scheduled `internalAction` → 永続Run / repository結果 / 技術スタック保存 → `/tech-stack/edit`のmodalで購読。`git tree`起点のallowlist manifestとIaC resource typeを`data/tech-stack.ts`のkeyへルールベースで紐付ける。**AI APIは使わない方針**。Cloud typecheck済み、GitHub接続を含むbrowser E2E smokeは未実施

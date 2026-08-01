@@ -18,6 +18,8 @@ const ERROR_MESSAGES: Record<string, string> = {
     "GitHub の本人確認結果を検証できませんでした。もう一度試してください。",
   authorization_failed:
     "GitHub アカウントまたはインストールを確認できませんでした。",
+  installation_not_found:
+    "この個人アカウントに Quine の GitHub App が見つかりませんでした。先にインストールしてください。",
   organization_not_supported:
     "Organization 連携は安全な継続認可を準備中です。現在は個人アカウントへのインストールを選択してください。",
 };
