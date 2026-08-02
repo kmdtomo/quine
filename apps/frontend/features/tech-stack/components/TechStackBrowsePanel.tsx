@@ -7,15 +7,15 @@ import type { TechnologyCategory } from "@data/tech-stack";
 
 import { cn } from "@/lib/utils";
 
-import { TechStackCategoryList } from "./TechStackCategoryList";
-import { TechStackGrid } from "./TechStackGrid";
-import { TechStackSortSection } from "./TechStackSortSection";
 import type {
   FilterMode,
   SelectedTechnology,
   SelectedTechnologyGroup,
   TechnologyGridItem,
-} from "./types";
+} from "../tech-stack-types";
+import { TechStackCategoryList } from "./TechStackCategoryList";
+import { TechStackGrid } from "./TechStackGrid";
+import { TechStackSortSection } from "./TechStackSortSection";
 
 type TechStackBrowsePanelProps = {
   activeCategoryKey: string;

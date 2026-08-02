@@ -3,13 +3,19 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
+import {
+  canEditProduct,
+  canViewProduct,
+} from "./application/products/productAccess";
+import { approveDeveloper } from "./application/productDevelopers/approveDeveloper";
+import { declineInvitation } from "./application/productDevelopers/declineInvitation";
+import { inviteDeveloper } from "./application/productDevelopers/inviteDeveloper";
+import { normalizeProductDeveloperRoles } from "./application/productDevelopers/productDeveloperRoles";
+import { removeDeveloper } from "./application/productDevelopers/removeDeveloper";
+import { requestToJoinProduct } from "./application/productDevelopers/requestToJoinProduct";
 import { getCurrentUser } from "./lib/auth";
-import { canEditProduct, canViewProduct } from "./lib/products";
-import { getUserByUsername } from "./lib/users";
 
 const MAX_PRODUCT_DEVELOPERS = 100;
-const MAX_ROLE_LENGTH = 48;
-const MAX_ROLES = 8;
 
 const developerStatusValue = v.union(
   v.literal("invited"),
@@ -59,40 +65,9 @@ export const invite = mutation({
     username: v.string(),
   },
   returns: v.id("productDevelopers"),
-  handler: async (ctx, { productId, roles, username }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductDeveloperUser(ctx);
-    await requireProductAuthorWithCode(ctx, productId, user._id);
-    const developer = await getUserByUsername(ctx, username);
-    if (!developer) {
-      throw new ConvexError({
-        code: "DEVELOPER_NOT_FOUND",
-        message: "Developer not found.",
-      });
-    }
-
-    const normalizedRoles = normalizeRoles(roles);
-    const current = await ctx.db
-      .query("productDevelopers")
-      .withIndex("by_product_developer", (q) =>
-        q.eq("productId", productId).eq("developerId", developer._id),
-      )
-      .first();
-    if (current) {
-      await ctx.db.patch("productDevelopers", current._id, {
-        invitedBy: user._id,
-        roles: normalizedRoles,
-        status: current.status === "active" ? "active" : "invited",
-      });
-      return current._id;
-    }
-
-    return await ctx.db.insert("productDevelopers", {
-      developerId: developer._id,
-      invitedBy: user._id,
-      productId,
-      roles: normalizedRoles,
-      status: "invited",
-    });
+    return await inviteDeveloper(ctx, user._id, args);
   },
 });
 
@@ -102,32 +77,9 @@ export const requestToJoin = mutation({
     roles: v.array(v.string()),
   },
   returns: v.id("productDevelopers"),
-  handler: async (ctx, { productId, roles }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductDeveloperUser(ctx);
-    const product = await ctx.db.get("products", productId);
-    if (!product || !product.isPublic) {
-      throw new ConvexError({
-        code: "PRODUCT_NOT_FOUND",
-        message: "Product not found.",
-      });
-    }
-
-    const current = await ctx.db
-      .query("productDevelopers")
-      .withIndex("by_product_developer", (q) =>
-        q.eq("productId", productId).eq("developerId", user._id),
-      )
-      .first();
-    if (current) {
-      return current._id;
-    }
-
-    return await ctx.db.insert("productDevelopers", {
-      developerId: user._id,
-      productId,
-      roles: normalizeRoles(roles),
-      status: "invited",
-    });
+    return await requestToJoinProduct(ctx, user._id, args);
   },
 });
 
@@ -137,27 +89,9 @@ export const approve = mutation({
     productId: v.id("products"),
   },
   returns: v.null(),
-  handler: async (ctx, { developerId, productId }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductDeveloperUser(ctx);
-    await requireProductAuthorWithCode(ctx, productId, user._id);
-    const current = await ctx.db
-      .query("productDevelopers")
-      .withIndex("by_product_developer", (q) =>
-        q.eq("productId", productId).eq("developerId", developerId),
-      )
-      .first();
-    if (!current) {
-      throw new ConvexError({
-        code: "DEVELOPER_INVITE_NOT_FOUND",
-        message: "Developer invite not found.",
-      });
-    }
-
-    await ctx.db.patch("productDevelopers", current._id, {
-      joinedAt: current.joinedAt ?? Date.now(),
-      status: "active",
-    });
-    return null;
+    return await approveDeveloper(ctx, user._id, args);
   },
 });
 
@@ -166,28 +100,9 @@ export const decline = mutation({
     productId: v.id("products"),
   },
   returns: v.null(),
-  handler: async (ctx, { productId }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductDeveloperUser(ctx);
-    const current = await ctx.db
-      .query("productDevelopers")
-      .withIndex("by_product_developer", (q) =>
-        q.eq("productId", productId).eq("developerId", user._id),
-      )
-      .first();
-    if (!current) {
-      return null;
-    }
-    if (current.status === "active") {
-      throw new ConvexError({
-        code: "ACTIVE_DEVELOPER_CANNOT_DECLINE",
-        message: "Active developers must be removed by the product owner.",
-      });
-    }
-
-    await ctx.db.patch("productDevelopers", current._id, {
-      status: "declined",
-    });
-    return null;
+    return await declineInvitation(ctx, user._id, args);
   },
 });
 
@@ -213,7 +128,7 @@ export const updateMine = mutation({
     }
 
     await ctx.db.patch("productDevelopers", current._id, {
-      roles: normalizeRoles(roles),
+      roles: normalizeProductDeveloperRoles(roles),
     });
     return null;
   },
@@ -225,40 +140,9 @@ export const remove = mutation({
     productId: v.id("products"),
   },
   returns: v.null(),
-  handler: async (ctx, { developerId, productId }) => {
+  handler: async (ctx, args) => {
     const user = await requireProductDeveloperUser(ctx);
-    const product = await ctx.db.get("products", productId);
-    if (!product) {
-      throw new ConvexError({
-        code: "PRODUCT_NOT_FOUND",
-        message: "Product not found.",
-      });
-    }
-    if (product.authorId !== user._id && developerId !== user._id) {
-      throw new ConvexError({
-        code: "FORBIDDEN",
-        message: "You do not have permission to remove this developer.",
-      });
-    }
-    if (developerId === product.authorId) {
-      throw new ConvexError({
-        code: "PRODUCT_AUTHOR_CANNOT_BE_REMOVED",
-        message: "Product owner cannot be removed.",
-      });
-    }
-
-    const current = await ctx.db
-      .query("productDevelopers")
-      .withIndex("by_product_developer", (q) =>
-        q.eq("productId", productId).eq("developerId", developerId),
-      )
-      .first();
-    if (!current) {
-      return null;
-    }
-
-    await ctx.db.delete("productDevelopers", current._id);
-    return null;
+    return await removeDeveloper(ctx, user._id, args);
   },
 });
 
@@ -315,47 +199,4 @@ async function requireProductDeveloperUser(ctx: QueryCtx | MutationCtx) {
   }
 
   return user;
-}
-
-async function requireProductAuthorWithCode(
-  ctx: MutationCtx,
-  productId: Id<"products">,
-  userId: Id<"users">,
-) {
-  const product = await ctx.db.get("products", productId);
-  if (product === null) {
-    throw new ConvexError({
-      code: "PRODUCT_NOT_FOUND",
-      message: "Product not found.",
-    });
-  }
-  if (product.authorId !== userId) {
-    throw new ConvexError({
-      code: "FORBIDDEN",
-      message: "Only the product author can manage developers.",
-    });
-  }
-
-  return product;
-}
-
-function normalizeRoles(roles: string[]) {
-  const uniqueRoles = [];
-  const seen = new Set<string>();
-
-  for (const role of roles) {
-    const normalizedRole = role.trim();
-    if (
-      normalizedRole.length === 0 ||
-      normalizedRole.length > MAX_ROLE_LENGTH ||
-      seen.has(normalizedRole)
-    ) {
-      continue;
-    }
-
-    seen.add(normalizedRole);
-    uniqueRoles.push(normalizedRole);
-  }
-
-  return uniqueRoles.slice(0, MAX_ROLES);
 }

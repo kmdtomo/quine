@@ -5,7 +5,7 @@ description: Quine の実装・修正・リファクタリング・コードレ�
 
 # quine-implement
 
-Quine の実装を、feature と Convex transaction を中心に一貫した構造で完成させる。
+Quine の実装を、frontend feature、Convex DB use case、Action workflowを中心に一貫した構造で完成させる。
 
 ## Workflow
 
@@ -24,8 +24,9 @@ Quine の実装を、feature と Convex transaction を中心に一貫した構�
 - `app/` は route と composition、`features/` は feature UI と任意の Next adapter に限定する。
 - `*View` は Server Component、`*Content` は Client Component にする。`"use server"` は Server Action にだけ使う。
 - 初期取得は `preloadQuery` / `fetchQuery` を使い、`useEffect + fetch` を使わない。
-- Convex root の登録関数を public adapter とし、複雑な transaction logic だけ `convex/application/<feature>/` へ切り出す。
+- Convex root の登録関数をpublic adapterとし、複雑なquery/mutationのDB use caseを`convex/application/<feature>/`へ切り出す。
 - `convex/schema.ts` を唯一の DB schema entrypoint とする。独立した `domain/` 層は作らない。
+- AI prompt、tool、detection、Action固有の処理フローは`convex/workflows/<feature>/`へ置く。
 - GitHub、OpenAI など Convex 外部との接続だけを `convex/infra/<provider>/` へ置く。Convex DB を repository で包まない。
 - public mutation/action の入口で認証を確定し、owner/Installation は DB の関係から導出する。
 - 長時間処理は public mutation で Run を作り、scheduled internalAction を起動する。
@@ -41,7 +42,7 @@ Quine の実装を、feature と Convex transaction を中心に一貫した構�
 | page、View、Content、Section、フォーム、Server Action、Route Handler | [frontend](references/frontend.md), [code rules](references/code-rules.md) |
 | schema、query、mutation、internal function、index、migration | [Convex](references/convex.md), [security](references/security.md) |
 | 複数層をまたぐ処理、SSR、mutation、upload、OAuth | [data flows](references/data-flows.md) |
-| GitHub、OpenAI、外部API、長時間Run、retry | [external services](references/external-services.md), [security](references/security.md) |
+| GitHub、OpenAI、Action workflow、外部API、長時間Run、retry | [external services](references/external-services.md), [security](references/security.md) |
 | auth、owner、公開field、client由来ID、Storage所有権 | [security](references/security.md) |
 | TypeScript、命名、import、error、Tailwind、RHF | [code rules](references/code-rules.md) |
 | 完了前確認 | [verification](references/verification.md) |

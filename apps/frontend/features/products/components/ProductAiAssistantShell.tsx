@@ -27,18 +27,18 @@ import type {
   MarkdownEditKind,
   MarkdownProposal,
   MarkdownSelection,
-} from "../lib/markdown-edit";
+} from "../markdown-edit";
 import type {
   ApplyProductFormProposalResult,
   ProductFormEdit,
   ProductFormProposal,
-} from "../lib/product-form-edit";
-import { getProductErrorMessage } from "../lib/product-error";
+} from "../product-form-edit";
+import { getProductErrorMessage } from "../product-error";
 import {
   formatProductFormValue,
   getProductFormFieldLabel,
-} from "../lib/product-form-edit";
-import { uploadProductImage } from "../lib/upload-product-image";
+} from "../product-form-edit";
+import { uploadProductImage } from "../upload-product-image";
 import {
   ArrowUpIcon,
   ExpandIcon,
@@ -123,7 +123,8 @@ export function ProductAiAssistantShell({
     new Set<Id<"productAiProposals">>(),
   );
   const pendingIdempotencyKeyRef = useRef<string | null>(null);
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const createUploadIntent = useMutation(api.files.createUploadIntent);
+  const finalizeUpload = useMutation(api.files.finalizeUpload);
   const startRun = useMutation(api.productAi.startRun);
   const retryRun = useMutation(api.productAi.retryRun);
   const setProposalStatus = useMutation(api.productAi.setProposalStatus);
@@ -271,8 +272,10 @@ export function ProductAiAssistantShell({
 
     setUploading(true);
     try {
-      const storageId = await uploadProductImage(file, () =>
-        generateUploadUrl({}),
+      const storageId = await uploadProductImage(
+        file,
+        () => createUploadIntent({ purpose: "product_ai_attachment" }),
+        finalizeUpload,
       );
       setAttachments((current) => [
         ...current,

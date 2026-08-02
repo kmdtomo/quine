@@ -9,7 +9,7 @@ import {
   GITHUB_APP_RETURN_TO_COOKIE,
   GITHUB_APP_SETUP_STATE_COOKIE,
   withGithubAppError,
-} from "@/features/auth/lib/githubAppFlow";
+} from "@/features/auth/github-app-flow";
 
 export async function GET(request: NextRequest) {
   const token = await convexAuthNextjsToken();

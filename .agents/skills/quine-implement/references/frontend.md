@@ -9,6 +9,7 @@ Next.js の request、Server Component、Client Component、Server Action の境
 - [View](#view)
 - [Content](#content)
 - [Section and shared UI](#section-and-shared-ui)
+- [Feature-local files](#feature-local-files)
 - [Data loading](#data-loading)
 - [Mutations and Server Actions](#mutations-and-server-actions)
 - [Forms](#forms)
@@ -55,10 +56,10 @@ pageに置いてよいもの:
 
 - `params` / `searchParams`の取得。
 - URL segmentのdecodeとrouteとしての形式確認。
-- metadata、not-found、route単位のredirect。
+- metadata。
 - 1つ以上のfeature Viewのcomposition。
 
-フォーム、Convex hook、業務状態遷移、外部API接続は置かない。
+認証、queryのpreload、redirect / not-found、フォーム、Convex hook、業務状態遷移、外部API接続は置かない。
 
 ## View
 
@@ -88,7 +89,7 @@ Viewの責務:
 
 - 認証tokenを取得する。
 - 初期queryをpreloadする。
-- serverで確定できるredirect / not-foundを処理する。
+- 認証・取得結果からserverで確定できるredirect / not-foundを処理する。
 - Client Componentへserializableなpropsを渡す。
 
 Viewでmutationや外部副作用を起こさない。renderは再実行されうるため、副作用の入口にしない。
@@ -138,6 +139,12 @@ Contentに置かないもの:
 - client親から渡される表示だけのcomponentに、機械的に`"use client"`を書かない。
 - 複数featureで使う純UIだけを`apps/frontend/components/`へ昇格する。
 - Convex API、feature error、業務語彙を持つcomponentはfeature内に残す。
+
+## Feature-local files
+
+feature内のdirectoryは原則`components/`だけにし、form contract、error、型、helper、feature固有React Hookはfeature rootへ具体名で置く。`lib/`、`hooks/`、`types/`、`schema/`のような役割directoryを増やさない。
+
+React Hookが必要な場合は`use-*.ts`としてfeature rootへ置く。Reactのstate、effect、context、他hookのcompositionを持たない純粋helperを、再利用目的だけでhookにしない。
 
 ## Data loading
 
@@ -200,7 +207,7 @@ Server Actionは薄いNext adapterであり、次を最終決定しない:
 
 ## Forms
 
-UI入力contractはfeature固有の`<feature>-form-schema.ts`へ置く。
+共有するUI入力contractが必要な場合だけ、feature rootのpurpose-specificな`<purpose>-form-schema.ts`へ置く。form schema fileは全feature必須のtemplateではない。
 
 - React Hook FormとZod resolverを標準にする。
 - 空文字、checkbox、入力途中の値などUI表現を扱う。
@@ -273,7 +280,9 @@ modal open等をtriggerにeffectからrequestを始める場合、renderごと�
 
 - Next.js 16のlintは`next lint`ではなくprojectの`eslint` scriptを使う。
 - Turbopackは`next dev`のdefaultであり、専用flagを前提にしない。
-- middleware/proxy等version依存APIは、既存実装とinstalled packageのdocsを確認してから変更する。
+- route auth境界はNext app rootの`apps/frontend/proxy.ts`を使う。ProxyはNode.js runtime固定なので`runtime` configを追加しない。
+- `convexAuthNextjsMiddleware`等のlibrary API名はNext.jsのfile conventionではないため、`proxy`へ機械的にrenameしない。
+- Proxy等version依存APIは、既存実装、installed package、公式Next.js docsを確認してから変更する。
 
 ## Frontend checklist
 

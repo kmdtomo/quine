@@ -3,4 +3,4 @@ export type {
   FilterMode,
   SelectedTechnology,
   SelectedTechnologyGroup,
-} from "./components/types";
+} from "./tech-stack-types";

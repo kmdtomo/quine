@@ -15,7 +15,7 @@ import {
   hashFlowSecret,
   withGithubAppConnected,
   withGithubAppError,
-} from "@/features/auth/lib/githubAppFlow";
+} from "@/features/auth/github-app-flow";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");

@@ -2,6 +2,12 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
+import {
+  uploadIntentConsumptionTarget,
+  uploadIntentPurpose,
+  uploadIntentStatus,
+} from "./lib/uploadIntents";
+
 const projectType = v.union(
   v.literal("personal"),
   v.literal("work"),
@@ -220,6 +226,20 @@ export default defineSchema({
     .index("by_github_id", ["githubId"])
     .index("by_username", ["username"])
     .index("by_public_username", ["isPublic", "username"]),
+
+  uploadIntents: defineTable({
+    userId: v.id("users"),
+    purpose: uploadIntentPurpose,
+    status: uploadIntentStatus,
+    storageId: v.optional(v.id("_storage")),
+    expiresAt: v.number(),
+    uploadedAt: v.optional(v.number()),
+    consumedAt: v.optional(v.number()),
+    consumptionTarget: v.optional(uploadIntentConsumptionTarget),
+  })
+    .index("by_storage", ["storageId"])
+    .index("by_user_status_expiry", ["userId", "status", "expiresAt"])
+    .index("by_status_expiry", ["status", "expiresAt"]),
 
   githubInstallations: defineTable({
     userId: v.id("users"),

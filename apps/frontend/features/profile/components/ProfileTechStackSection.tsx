@@ -11,7 +11,7 @@ import {
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 import { cn } from "@/lib/utils";
 
-import type { ProfileTechnology, StackSummary } from "../types";
+import type { ProfileTechnology, StackSummary } from "../profile-types";
 import { EmptyState } from "./profile-ui";
 
 export function ProfileTechStackSection({

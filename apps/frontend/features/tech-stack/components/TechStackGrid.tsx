@@ -3,7 +3,7 @@ import { CheckIcon, SearchIcon } from "lucide-react";
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 import { cn } from "@/lib/utils";
 
-import type { TechnologyGridItem } from "./types";
+import type { TechnologyGridItem } from "../tech-stack-types";
 
 type TechStackGridProps = {
   emptyText: string;

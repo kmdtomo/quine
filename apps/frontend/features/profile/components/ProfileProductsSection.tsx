@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { PlusIcon } from "lucide-react";
 
-import { getProductHref } from "../lib/profile-links";
-import type { ProfileProduct } from "../types";
+import { getProductHref } from "../profile-links";
+import type { ProfileProduct } from "../profile-types";
 import {
   EmptyState,
   ProductLogo,

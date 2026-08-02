@@ -8,8 +8,8 @@ import { useMutation } from "convex/react";
 import { GlassModal } from "@/components/glass-modal";
 import { Button } from "@/components/ui/button";
 
-import { getConnectionErrorMessage } from "../lib/profile-errors";
-import { normalizeUsername } from "../lib/profile-links";
+import { getConnectionErrorMessage } from "../profile-error";
+import { normalizeUsername } from "../profile-links";
 
 export function ConnectionAddDialog({
   onClose,

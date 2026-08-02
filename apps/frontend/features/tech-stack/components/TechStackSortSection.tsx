@@ -14,7 +14,10 @@ import {
 import { TechStackItemCard } from "@/components/tech-stack/TechStackItemCard";
 import { cn } from "@/lib/utils";
 
-import type { SelectedTechnology, SelectedTechnologyGroup } from "./types";
+import type {
+  SelectedTechnology,
+  SelectedTechnologyGroup,
+} from "../tech-stack-types";
 
 type TechStackSortSectionProps = {
   groupedSelected: SelectedTechnologyGroup[];

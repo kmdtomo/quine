@@ -4,27 +4,26 @@ import { getTechnologyByKey } from "../data/tech-stack";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
-import { getCurrentUser } from "./lib/auth";
-import {
-  deleteProductMedia,
-  deleteProductStorageIfUnreferenced,
-  requireProductImageStorage,
-  requireProductStorageOwnership,
-  resolveProductLogo,
-  resolveProductMedia,
-  syncProductScreenshots,
-} from "./lib/productAssets";
 import {
   canEditProduct,
   canViewProduct,
+  requireProductEditor,
+} from "./application/products/productAccess";
+import {
+  MAX_PRODUCT_TECHNOLOGIES,
+  normalizeContent,
+  normalizeName,
   normalizeOptionalText,
   normalizeProductSlug,
-} from "./lib/products";
+  normalizeTagline,
+} from "./application/products/productInput";
 import {
-  assertProductAiDraftIsUnsaved,
-  attachProductAiDraftToProduct,
-} from "./lib/productAi/attachDraftToProduct";
-import { uniqueValidTechnologyKeys } from "./lib/technologyKeys";
+  deleteProductMedia,
+  resolveProductLogo,
+  resolveProductMedia,
+} from "./application/products/productAssets";
+import { saveProductForm } from "./application/products/saveProductForm";
+import { getCurrentUser } from "./lib/auth";
 import { getUserByUsername } from "./lib/users";
 
 const projectType = v.union(
@@ -41,18 +40,12 @@ const teamSize = v.union(
   v.literal("31+"),
 );
 
-const MAX_PRODUCT_NAME_LENGTH = 80;
-const MAX_PRODUCT_TAGLINE_LENGTH = 140;
-const MAX_PRODUCT_CONTENT_LENGTH = 4000;
 const MAX_PRODUCT_IMAGE_DATA_URL_LENGTH = 900_000;
 const MAX_PRODUCT_SCREENSHOTS = 8;
 const MAX_PRODUCT_SCREENSHOT_DATA_URL_LENGTH = 900_000;
 const MAX_LIST_PRODUCTS = 50;
 const MAX_LIST_PUBLIC_PRODUCTS = 120;
-const MAX_PRODUCT_TECHNOLOGIES = 40;
 const MAX_PRODUCT_DEVELOPERS = 30;
-const MAX_PRODUCT_ROLE_LENGTH = 48;
-const MAX_PRODUCT_ROLES = 8;
 
 const publicTechnologyValue = v.object({
   categoryName: v.string(),
@@ -496,7 +489,7 @@ export const update = mutation({
   returns: v.null(),
   handler: async (ctx, args) => {
     const user = await requireProductUser(ctx);
-    const product = await requireProductEditorWithCode(
+    const product = await requireProductEditor(
       ctx,
       args.productId,
       user,
@@ -579,189 +572,7 @@ export const saveForm = mutation({
   }),
   handler: async (ctx, args) => {
     const user = await requireProductUser(ctx);
-    if (args.productId !== undefined && args.draftKey !== undefined) {
-      throw new ConvexError({
-        code: "INVALID_INPUT",
-        message: "A draft key can only be used when creating a product.",
-      });
-    }
-    const input = normalizeProductTextInput(args);
-    const roles = normalizeProductRoles(args.roles);
-    const technologyKeys = uniqueValidTechnologyKeys(args.technologyKeys).slice(
-      0,
-      MAX_PRODUCT_TECHNOLOGIES,
-    );
-
-    if (args.productId === undefined) {
-      const draftKey =
-        args.draftKey === undefined
-          ? undefined
-          : await assertProductAiDraftIsUnsaved(ctx, user._id, args.draftKey);
-      if (draftKey !== undefined) {
-        const existingDraftProduct = await ctx.db
-          .query("products")
-          .withIndex("by_author_creation_key", (q) =>
-            q.eq("authorId", user._id).eq("creationKey", draftKey),
-          )
-          .first();
-        if (existingDraftProduct !== null) {
-          throw new ConvexError({
-            code: "DRAFT_ALREADY_SAVED",
-            message: "This draft has already been saved as a product.",
-          });
-        }
-      }
-      const slug = normalizeProductSlug(input.name);
-      if (!slug) {
-        throw new ConvexError({
-          code: "INVALID_INPUT",
-          message: "Product slug is required.",
-        });
-      }
-
-      const existing = await ctx.db
-        .query("products")
-        .withIndex("by_author_slug", (q) =>
-          q.eq("authorId", user._id).eq("slug", slug),
-        )
-        .first();
-      if (existing) {
-        throw new ConvexError({
-          code: "SLUG_CONFLICT",
-          message: "You already have a product with that slug.",
-        });
-      }
-      if (args.logoStorageId !== undefined && args.logoStorageId !== null) {
-        await requireProductImageStorage(ctx, args.logoStorageId);
-      }
-
-      const productId = await ctx.db.insert("products", {
-        authorId: user._id,
-        content: input.content,
-        ...(draftKey === undefined ? {} : { creationKey: draftKey }),
-        githubUrl: input.githubUrl,
-        isPublic: args.isPublic,
-        ...(args.logoStorageId === undefined || args.logoStorageId === null
-          ? {}
-          : { logoStorageId: args.logoStorageId }),
-        name: input.name,
-        productUrl: input.productUrl,
-        projectType: args.projectType,
-        screenshots: [],
-        slug,
-        tagline: input.tagline,
-        teamSize: args.teamSize,
-      });
-      if (args.logoStorageId !== undefined && args.logoStorageId !== null) {
-        await requireProductStorageOwnership(
-          ctx,
-          productId,
-          args.logoStorageId,
-        );
-      }
-
-      await ctx.db.insert("productDevelopers", {
-        developerId: user._id,
-        joinedAt: Date.now(),
-        productId,
-        roles: roles.length > 0 ? roles : ["Creator"],
-        status: "active",
-      });
-      await syncProductTechnologies(ctx, productId, technologyKeys);
-      if (args.screenshotStorageIds !== undefined) {
-        await syncProductScreenshots(
-          ctx,
-          productId,
-          user._id,
-          args.screenshotStorageIds,
-        );
-      }
-      if (draftKey !== undefined) {
-        await attachProductAiDraftToProduct(
-          ctx,
-          user._id,
-          draftKey,
-          productId,
-        );
-      }
-
-      return {
-        productId,
-        slug,
-      };
-    }
-
-    const product = await requireProductEditorWithCode(
-      ctx,
-      args.productId,
-      user,
-    );
-    if (args.logoStorageId !== undefined && args.logoStorageId !== null) {
-      await requireProductImageStorage(ctx, args.logoStorageId);
-      await requireProductStorageOwnership(
-        ctx,
-        product._id,
-        args.logoStorageId,
-      );
-    }
-    await ctx.db.patch("products", product._id, {
-      content: input.content,
-      githubUrl: input.githubUrl,
-      isPublic: args.isPublic,
-      ...(args.logoStorageId === undefined
-        ? {}
-        : args.logoStorageId === null
-          ? { logo: undefined, logoStorageId: undefined }
-          : { logoStorageId: args.logoStorageId }),
-      name: input.name,
-      productUrl: input.productUrl,
-      projectType: args.projectType,
-      ...(args.screenshotStorageIds === undefined ? {} : { screenshots: [] }),
-      tagline: input.tagline,
-      teamSize: args.teamSize,
-    });
-    if (args.screenshotStorageIds !== undefined) {
-      await syncProductScreenshots(
-        ctx,
-        product._id,
-        user._id,
-        args.screenshotStorageIds,
-      );
-    }
-    if (
-      args.logoStorageId !== undefined &&
-      product.logoStorageId !== undefined &&
-      args.logoStorageId !== product.logoStorageId
-    ) {
-      await deleteProductStorageIfUnreferenced(ctx, product.logoStorageId);
-    }
-
-    const developer = await ctx.db
-      .query("productDevelopers")
-      .withIndex("by_product_developer", (q) =>
-        q.eq("productId", product._id).eq("developerId", user._id),
-      )
-      .first();
-    if (developer) {
-      await ctx.db.patch("productDevelopers", developer._id, {
-        roles: roles.length > 0 ? roles : developer.roles,
-      });
-    } else {
-      await ctx.db.insert("productDevelopers", {
-        developerId: user._id,
-        joinedAt: Date.now(),
-        productId: product._id,
-        roles: roles.length > 0 ? roles : ["Contributor"],
-        status: "active",
-      });
-    }
-
-    await syncProductTechnologies(ctx, product._id, technologyKeys);
-
-    return {
-      productId: product._id,
-      slug: product.slug,
-    };
+    return await saveProductForm(ctx, user, args);
   },
 });
 
@@ -810,28 +621,6 @@ async function requireProductUser(ctx: QueryCtx | MutationCtx) {
   }
 
   return user;
-}
-
-async function requireProductEditorWithCode(
-  ctx: MutationCtx,
-  productId: Id<"products">,
-  user: Doc<"users">,
-) {
-  const product = await ctx.db.get("products", productId);
-  if (product === null) {
-    throw new ConvexError({
-      code: "PRODUCT_NOT_FOUND",
-      message: "Product not found.",
-    });
-  }
-  if (!(await canEditProduct(ctx, product, user))) {
-    throw new ConvexError({
-      code: "FORBIDDEN",
-      message: "You do not have permission to edit this product.",
-    });
-  }
-
-  return product;
 }
 
 async function requireProductAuthorWithCode(
@@ -956,67 +745,6 @@ function normalizeProductInput(args: {
   };
 }
 
-function normalizeProductTextInput(args: {
-  content: string;
-  githubUrl?: string;
-  name: string;
-  productUrl?: string;
-  tagline: string;
-}) {
-  return {
-    content: normalizeContent(args.content),
-    githubUrl: normalizeOptionalText(args.githubUrl),
-    name: normalizeName(args.name),
-    productUrl: normalizeOptionalText(args.productUrl),
-    tagline: normalizeTagline(args.tagline),
-  };
-}
-
-function normalizeName(value: string) {
-  const name = value.trim();
-  if (!name) {
-    throw new ConvexError({
-      code: "INVALID_INPUT",
-      message: "Product name is required.",
-    });
-  }
-  if (name.length > MAX_PRODUCT_NAME_LENGTH) {
-    throw new ConvexError({
-      code: "INVALID_INPUT",
-      message: `Product name must be ${MAX_PRODUCT_NAME_LENGTH} characters or fewer.`,
-    });
-  }
-  return name;
-}
-
-function normalizeTagline(value: string) {
-  const tagline = value.trim();
-  if (!tagline) {
-    throw new ConvexError({
-      code: "INVALID_INPUT",
-      message: "Product tagline is required.",
-    });
-  }
-  if (tagline.length > MAX_PRODUCT_TAGLINE_LENGTH) {
-    throw new ConvexError({
-      code: "INVALID_INPUT",
-      message: `Product tagline must be ${MAX_PRODUCT_TAGLINE_LENGTH} characters or fewer.`,
-    });
-  }
-  return tagline;
-}
-
-function normalizeContent(value: string) {
-  const content = value.trim();
-  if (content.length > MAX_PRODUCT_CONTENT_LENGTH) {
-    throw new ConvexError({
-      code: "INVALID_INPUT",
-      message: `Product content must be ${MAX_PRODUCT_CONTENT_LENGTH} characters or fewer.`,
-    });
-  }
-  return content;
-}
-
 function normalizeLogo(value: string | undefined) {
   const logo = normalizeOptionalText(value);
   if (logo !== undefined && logo.length > MAX_PRODUCT_IMAGE_DATA_URL_LENGTH) {
@@ -1039,59 +767,4 @@ function normalizeScreenshots(values: string[]) {
     }
     return screenshot;
   }).filter((value) => value.length > 0);
-}
-
-function normalizeProductRoles(roles: string[]) {
-  const uniqueRoles = [];
-  const seen = new Set<string>();
-
-  for (const role of roles) {
-    const normalizedRole = role.trim();
-    if (
-      normalizedRole.length === 0 ||
-      normalizedRole.length > MAX_PRODUCT_ROLE_LENGTH ||
-      seen.has(normalizedRole)
-    ) {
-      continue;
-    }
-
-    seen.add(normalizedRole);
-    uniqueRoles.push(normalizedRole);
-  }
-
-  return uniqueRoles.slice(0, MAX_PRODUCT_ROLES);
-}
-
-async function syncProductTechnologies(
-  ctx: MutationCtx,
-  productId: Id<"products">,
-  technologyKeys: string[],
-) {
-  const rows = await ctx.db
-    .query("productTechnologies")
-    .withIndex("by_product", (q) => q.eq("productId", productId))
-    .collect();
-  const rowsByKey = new Map(rows.map((row) => [row.technologyKey, row]));
-  const requestedKeys = new Set<string>(technologyKeys);
-
-  let order = 1;
-  for (const technologyKey of technologyKeys) {
-    const current = rowsByKey.get(technologyKey);
-    if (current) {
-      await ctx.db.patch("productTechnologies", current._id, { order });
-    } else {
-      await ctx.db.insert("productTechnologies", {
-        order,
-        productId,
-        technologyKey,
-      });
-    }
-    order += 1;
-  }
-
-  for (const row of rows) {
-    if (!requestedKeys.has(row.technologyKey)) {
-      await ctx.db.delete("productTechnologies", row._id);
-    }
-  }
 }

@@ -12,6 +12,7 @@ Convexのschema、registered function、transaction、query、migration、File S
 - [Mutations and invariants](#mutations-and-invariants)
 - [Internal functions](#internal-functions)
 - [Actions](#actions)
+- [Action workflows](#action-workflows)
 - [File Storage](#file-storage)
 - [Migrations](#migrations)
 - [Environment and generated API](#environment-and-generated-api)
@@ -57,7 +58,7 @@ adapterの責務:
 
 - `args` / `returns` validator。
 - publicかinternalかの公開範囲。
-- public mutation/actionの認証。
+- public mutation/actionのhandler先頭で行う認証。
 - 短い単一resource read/write。
 - 複雑なuse caseへの型付きinput作成。
 
@@ -67,7 +68,7 @@ root fileをresource単位に保つと、`api.products.save`のようなAPI名�
 
 ## Application use case
 
-`convex/application/<feature>/<verb-object>.ts`は、1つのmutation transaction内で守る複雑なuse caseを置く。
+`convex/application/<feature>/<verbObject>.ts`は、複雑なmutation transactionと、featureとして意味のある複雑なquery use caseを置く。Convex moduleとdirectoryの名前はcamelCaseにし、hyphenを使わない。
 
 切り出す基準:
 
@@ -76,6 +77,7 @@ root fileをresource単位に保つと、`api.products.save`のようなAPI名�
 - 複数tableを整合的に更新する。
 - idempotencyやactive Runとの競合を扱う。
 - 同じtransaction use caseを複数adapterから使う。
+- access確認、複数のbounded read、明示的な公開shapeの組み立てを一体で行う。
 
 ```ts
 type SaveProductInput = {
@@ -101,11 +103,14 @@ export async function saveProduct(
 }
 ```
 
-- `ctx.db`を直接使い、transactionを維持する。
-- `QueryCtx` / `MutationCtx`とadapterで確定したidentityを受け取る。
+- `MutationCtx`では`ctx.db`を直接使い、1つのtransactionを維持する。
+- query use caseは`QueryCtx`を受け取り、indexで絞ったbounded readから公開fieldだけを組み立てる。
+- adapterで確定したidentityを受け取り、client由来IDをidentityとして使わない。
 - Next、React、HTTP、外部SDKをimportしない。
 - Convex DBをrepository interfaceで包まない。
 - 純粋な業務ruleが複数use caseで共有された時だけ、同じfeature directoryへ具体名で切り出す。
+
+単純query、1 documentのread/write、単なる再利用だけを理由とするwrapperはroot adapterに残す。read projection専用のtop-level directoryは作らず、複雑なread use caseもowner featureのapplicationへ置く。
 
 独立したdomain層は作らない。型とruleがConvex use caseから独立して安定するまでは、use caseの近くに置く方が変更理由が明確である。
 
@@ -186,20 +191,45 @@ Actionは外部I/OまたはNode runtimeが必要な処理だけにする。
 
 短時間でclientが結果を即時必要とする処理だけpublic Actionを検討する。GitHub解析、AI生成、複数repository importはRun方式を使う。
 
+## Action workflows
+
+registered Actionのentrypointはrootの`convex/<feature>Action.ts`に置き、generated path、validator、public/internal境界、認証を安定させる。prompt、tool、detection、Action固有のorchestrationが大きくなった時だけ`convex/workflows/<feature>/`へ分ける。
+
+```text
+convex/
+├── productAiAction.ts
+└── workflows/
+    └── productAi/
+        ├── runProductWriting.ts
+        ├── prompt.ts
+        └── tools/
+```
+
+- workflow moduleはregistered functionをexportしない。
+- workflowからDBへ触る時はActionCtxの`ctx.runQuery` / `ctx.runMutation`を使い、rootのregistered query/mutationを呼ぶ。複雑なtransactionはそのadapterからapplication use caseへ委譲する。
+- 同じfeatureのapplicationにあるruntime非依存の純粋ruleはworkflowからimportしてよい。`QueryCtx` / `MutationCtx`を受けるDB use caseを直接呼ばない。
+- provider SDK、fetch、request/response protocolは`convex/infra/<provider>/`へ置く。
+- DB transaction、owner/state確認、result commitは`convex/application/<feature>/`へ置く。
+- mutation/queryからNode専用workflowをimportしない。
+- workflowを汎用service layerやrepository layerにしない。
+
 ## File Storage
 
 画像、screenshot、attachment、生成物はConvex File Storageへ置く。
 
 標準flow:
 
-1. 認証済みmutationがupload URLを発行する。
+1. 認証済みmutationが用途付きupload intentとupload URLを発行する。
 2. clientがbinaryをuploadする。
-3. owner確認付きmutationが`Id<"_storage">`をresourceへ関連付ける。
-4. 表示またはActionがstorage IDからURL/blobを得る。
-5. 置換・削除時に旧objectを削除するか、orphan cleanup方針を持つ。
+3. finalize mutationがStorage metadataとintentを検証し、storage IDを一回claimする。
+4. owner/access確認付きresource mutationが、用途・期限・消費先を検証してintent消費とresource関連付けを同じtransactionで行う。
+5. 表示またはActionがstorage IDからURL/blobを得る。
+6. 置換・削除時に旧objectを削除し、未消費objectには期限付きcleanup方針を持つ。
 
 - data URLやbase64巨大stringをdocument、Action args、Runへ保存しない。
 - client指定storage IDをowner確認なしで他resourceへ関連付けない。
+- finalizeはupload完了の登録であり、resourceへの関連付けやconsumeの代わりではない。
+- consumed storage IDの再利用は、同じ用途・同じ消費先で、呼び出し元がそのresourceへ現在もaccess可能な場合だけ許可する。
 - GitHub avatar等の外部URLとQuine管理storage IDはfieldを分ける。
 - upload完了とresource確定の間に残るorphanを想定する。
 
@@ -248,9 +278,11 @@ frontendの型検査だけ成功してもCloud function bundleは更新されな
 - argsとreturns validatorがあるか。
 - 複雑さのない処理までapplication wrapperにしていないか。
 - 複雑なowner/transition/複数table更新が1 transactionか。
+- applicationへ移したqueryがaccess、bounded read、公開shapeを一体で扱う意味のあるuse caseか。
 - queryはindexで正しい集合を先に絞っているか。
 - list、history、Runはboundedか。
 - ActionからDBを直接触っていないか。
+- Action固有workflowにregistered functionやprovider protocolを混ぜていないか。
 - binaryはFile Storageを通るか。
 - schema変更にmigration順序があるか。
 - generated fileを手動編集していないか。

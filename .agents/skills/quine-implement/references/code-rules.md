@@ -6,6 +6,7 @@ QuineのTypeScript、命名、validation、error、UI実装の共通ルールを
 
 - [Type safety](#type-safety)
 - [Naming](#naming)
+- [Cross-runtime data and shared code](#cross-runtime-data-and-shared-code)
 - [Validation boundaries](#validation-boundaries)
 - [Imports and dependencies](#imports-and-dependencies)
 - [Errors](#errors)
@@ -31,26 +32,32 @@ QuineのTypeScript、命名、validation、error、UI実装の共通ルールを
 
 | Target | Rule | Example |
 |---|---|---|
-| React component/file | PascalCase | `ProductCard.tsx` |
+| React component file | exportと同じPascalCase | `ProductCard.tsx` |
 | View / Content / Section | role suffix | `ProductEditView.tsx` |
-| helper/schema file | kebab-case、責務を含める | `product-form-schema.ts` |
+| frontend非component file | kebab-case、責務を含める | `product-form-schema.ts`, `product-error.ts`, `use-product-draft.ts` |
+| Next.js予約file | framework規定名 | `page.tsx`, `layout.tsx`, `route.ts`, `loading.tsx` |
+| `convex/`配下のfile/directory | camelCase、hyphen禁止 | `saveProduct.ts`, `productAi/`, `responseSchema.ts` |
 | Convex registered function | camelCase verb | `getEditable`, `save`, `remove` |
-| application use case | verb-object | `save-product.ts` |
+| application use case/function | camelCase verb-object | `saveProduct` |
 | hook | `use*` | `useProductDraft` |
 | Zod schema | `*Schema` | `productFormSchema` |
 | type | PascalCase | `ProductFormValues` |
 | constant | SCREAMING_SNAKE_CASE | `MAX_SCREENSHOTS` |
 | DB table | plural camelCase | `productAiRuns` |
 
-`utils.ts`、`helpers.ts`、`validators.ts`、`services.ts`のような範囲不明の名前を新設しない。何を扱うかを名前に含める。
+`utils.ts`、`helpers.ts`、`validators.ts`、`services.ts`、曖昧な`schema.ts`や`types.ts`のような範囲不明の名前を新設しない。何を扱うかを名前に含める。plainな`schema.ts`はDB schemaのentrypointである`convex/schema.ts`だけに使う。
+
+`convex/`配下はregistered functionだけでなく、`application/`、`infra/`、Action companionを含むすべてのmodule path componentでcamelCaseを使う。Convexが認識しないhyphenをfile名やdirectory名へ含めない。`_generated/`、`auth.config.ts`などframeworkが規定する名前は例外とする。
 
 よい例:
 
 ```text
 product-error.ts
 markdown-edit.ts
-github/response-schema.ts
-application/products/save-product.ts
+infra/github/responseSchema.ts
+lib/githubErrors.ts
+application/products/saveProduct.ts
+workflows/productAi/toolSchemas.ts
 ```
 
 1ファイルの主目的が変わったら名前も変える。単なる内部実装detailのためにdirectoryを増やさない。
@@ -64,6 +71,23 @@ application/products/save-product.ts
 - 外部aliasは境界でcanonical keyへ変換する。
 - featureやConvexへ生の対応表を複製しない。
 
+`data/tech-stack.ts`はcross-runtimeで使うcanonical static catalogであり、同fileのhelperはcatalogだけを読むdeterministicな処理に限定する。I/O、environment、時刻、random、mutable state、feature固有DB判断を持ち込まない。
+
+## Cross-runtime data and shared code
+
+`data/`にはstatic data、そのdataの型、そのdataだけを読むdeterministic helperを置く。一般的な業務algorithmや、単にfrontendとConvexで似ているhelperを`data/`へ置かない。
+
+`shared/`は標準directoryとして先に作らない。次の条件をすべて満たす実際のcontractが生じた時だけ、`shared/<feature>/<specific-file>.ts`を検討する。
+
+- frontendとConvexの両runtimeが同じ意味で同じ実装を必要とする。
+- featureの片側だけをownerにするとcontract driftが起きる。
+- React、Next、Convex、Node固有APIへ依存しない純粋な実装にできる。
+- I/O、environment、時刻、random、mutable stateを持たない。
+
+`shared/`を第二の`lib/`、共通type置き場、早期抽象化の置き場にしない。導入時だけ必要なimport aliasとfrontend/Convex双方の検証を追加する。`shared/`は`convex/`配下ではないため、非component fileと同じkebab-caseを使う。
+
+同じConvex featureのapplicationとAction workflowだけが共有するruntime非依存の純粋ruleは、`shared/`ではなく`convex/application/<feature>/<specificRule>.ts`へ置く。workflowからそのruleはimportしてよいが、`QueryCtx` / `MutationCtx`を受けるDB use caseはroot/internal adapter経由で呼ぶ。
+
 ## Validation boundaries
 
 「schema」という名前は対象contractが明確な場所で使う。
@@ -73,11 +97,14 @@ application/products/save-product.ts
 | DB document、index、relation | Convex DB | `convex/schema.ts` |
 | public Convex args / returns | registered adapter | `convex/products.ts` |
 | form入力、default values | frontend feature | `product-form-schema.ts` |
-| GitHub/OpenAI response | provider infra | `infra/<provider>/response-schema.ts` |
+| GitHub/OpenAI response | provider infra | `infra/<provider>/responseSchema.ts` |
+| Action tool input/output | Action workflow owner | `workflows/productAi/toolSchemas.ts`等の具体名 |
 | URL param / webhook body | HTTP/route boundary | 対象routeまたは固有schema |
 | application internal input | TypeScript type + caller contract | use case file |
 
-`validators.ts`という箱に異なる境界を集めない。DB schema、form schema、外部response schemaは目的も変更理由も異なる。
+`validators.ts`という箱に異なる境界を集めない。DB schema、form schema、外部response schema、Action tool schemaは目的も変更理由も異なる。
+
+業務rule、正規化、状態遷移を`schema`と呼ばない。applicationでは責務に応じて`productInput.ts`、`productRules.ts`、`runState.ts`のように命名し、曖昧な`schema.ts`や`types.ts`へ集約しない。型は原則として所有fileへ置き、複数fileで同じ概念を共有する場合だけ`productEditorTypes.ts`のような具体名へ切り出す。
 
 外部値は入口でparseし、内部では検証済み型として扱う。castしただけの値を保存しない。既存DBにlegacy値がありうる場合は、migrationまたは境界の互換parserで扱う。
 

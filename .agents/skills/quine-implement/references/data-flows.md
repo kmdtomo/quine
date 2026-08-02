@@ -31,10 +31,10 @@ browser request
 
 責務:
 
-- page: URLを読みViewを配置する。
+- page: route params / searchParamsとmetadataを扱い、Viewを配置する。
 - View: token、preload、redirect/not-found。
 - public query: access確認、index read、明示的return shape。
-- Content: subscription結果をUIへ反映する。
+- Content: reactive query / mutationとinteractionを扱う。
 
 初期取得のためだけにRoute Handlerや`useEffect + fetch`を挟まない。Server Componentに`"use server"`は不要である。
 
@@ -80,7 +80,7 @@ Next runtimeの機能が必要な時だけServer Actionを追加する。
 
 ```text
 native form
-  -> feature/actions.ts
+  -> features/<feature>/actions.ts
      -> parse FormData
      -> read server cookie/token
      -> fetchMutation(api.products.create)
@@ -151,17 +151,21 @@ binaryはbrowserからConvex File Storageへuploadし、storage IDだけをresou
 
 ```text
 Content
-  -> mutation generateUploadUrl
+  -> mutation createUploadIntent({ purpose })
   -> POST binary to upload URL
   -> receive storageId
-  -> mutation attachScreenshot({ productId, storageId })
-     -> auth + product owner + upload intent
-     -> save storage relation
+  -> mutation finalizeUpload({ uploadIntentId, storageId })
+     -> owner + expiry + purpose/MIME/size + unique claim
+  -> resource mutation({ productId, storageId })
+     -> auth + product access
+     -> consume intent + save storage relation in one transaction
   -> query returns display URL
 ```
 
 - form schemaではfile size/typeの早いfeedbackを行う。
 - server側でも用途、owner、relationを確認する。
+- finalize成功だけでresource ownership確定と扱わない。resource mutationでconsumeして初めて関連付けを確定する。
+- 同じresource targetへのretryやProduct editorによる並べ替えは、consumed intentのtarget一致と現在のaccessで許可する。
 - base64/data URLをmutation argsやdocumentへ入れない。
 - upload成功後にattachが失敗するorphanをcleanup対象にする。
 - 置換時は新fileの確定後に旧fileを削除するなど、消失しない順序を選ぶ。

@@ -128,14 +128,19 @@ GitHub login用OAuth identityとrepository解析用GitHub App Installationは別
 
 ## File ownership
 
-- upload URLはauthenticated mutationで発行する。
-- upload完了後、storage IDをresourceへ付けるmutationでowner/accessを確認する。
-- client指定storage IDが現在userのupload intentまたは許可resourceに属することを確認する。
+- upload URLはauthenticated mutationで用途付きintentと一緒に発行する。
+- finalizeではintent owner、期限、用途別MIME/size、Storage IDの一意claimを確認し、`uploaded`まで進める。
+- storage IDをresourceへ付けるmutationでowner/accessを確認し、intent consumeと関連付けを同じtransactionで行う。
+- 初回consumeはcurrent user、用途、期限を確認する。consumed IDの再利用は同じ用途・同じ消費先に限定し、現在のresource accessを別途確認する。
 - private fileのURLをpublic queryへ無条件に含めない。
 - resource削除・差し替え時のstorage object cleanupを定義する。
 - file size、MIME、用途をclient表示だけでなくserver flowでも検証する。
 
 presigned/upload URLは短命なcapabilityとして扱い、不要にlog・永続化・再利用しない。
+
+`finalizeUpload`はresource ownershipの確定ではなく、intent作成後に生成された未登録Storage IDの一回claimである。upload URLとStorage IDの厳密な発行元証明とは扱わず、resource mutationのconsumeを必須にする。
+
+`requireProductStorageOwnership`は`productAssets` relationの衝突検査であり、upload ownership検査ではない。Product use caseではこれをmetadata検査と`consumeUploadIntent`に組み合わせる。別editorが既存mediaを維持・並べ替える場合、uploader一致ではなく、同じProduct targetのconsumed intentと現在のeditor accessで許可する。
 
 ## Secrets and errors
 
@@ -143,6 +148,8 @@ presigned/upload URLは短命なcapabilityとして扱い、不要にlog・永�
 - `NEXT_PUBLIC_*`へtoken、App private key、OpenAI keyを置かない。
 - error message、toast、redirect URL、query resultへsecretを含めない。
 - providerのraw response bodyを丸ごとlogしない。
+- infraのprovider errorをそのままpublicへ返さず、registered boundaryで安定したpublic errorへ変換する。
+- scheduled Actionのprovider failureはsafe codeへ分類し、secretやraw responseを含めずRunへ保存する。
 - expected auth/access errorは安定codeを返し、内部理由を必要以上に公開しない。
 - unexpected errorは安全なcontextとcorrelation用Run/resource IDだけをserverで記録する。
 - webhookはsignatureとreplay riskをprovider contractに従って検証する。
@@ -157,5 +164,5 @@ presigned/upload URLは短命なcapabilityとして扱い、不要にlog・永�
 - external/AI/legacy値をruntime validationしたか。
 - public queryが公開fieldだけを返すか。
 - scheduled workがRun IDからcontextを復元するか。
-- fileとInstallationのownershipをserverで確認するか。
+- fileのupload intent/ownerとInstallationのownershipをserverで確認するか。helper名だけで保証済みと判断していないか。
 - secret、raw provider data、個人情報がclient/logへ漏れないか。

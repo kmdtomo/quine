@@ -37,18 +37,18 @@ import {
   applyMarkdownProposal,
   type MarkdownProposal,
   type MarkdownSelection,
-} from "../lib/markdown-edit";
+} from "../markdown-edit";
 import {
   applyProductFormProposal,
   type ProductFormProposal,
-} from "../lib/product-form-edit";
-import type { ProductScreenshotDraft } from "../lib/product-screenshot-draft";
-import { getProductErrorMessage } from "../lib/product-error";
-import { uploadProductImage } from "../lib/upload-product-image";
+} from "../product-form-edit";
+import type { ProductScreenshotDraft } from "../product-screenshot-draft";
+import { getProductErrorMessage } from "../product-error";
+import { uploadProductImage } from "../upload-product-image";
 import {
   productEditFormSchema,
   type ProductEditFormValues,
-} from "../schema";
+} from "../product-form-schema";
 
 type ProductEditContentProps = {
   draftKey?: string;
@@ -68,7 +68,8 @@ export function ProductEditContent({
   const editData = usePreloadedQuery(preloadedProduct);
   const listProductRepositories = useAction(api.githubAction.listProductRepositories);
   const importProductRepository = useAction(api.githubAction.importProductRepository);
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const createUploadIntent = useMutation(api.files.createUploadIntent);
+  const finalizeUpload = useMutation(api.files.finalizeUpload);
   const saveProduct = useMutation(api.products.saveForm);
   const product = editData?.product ?? null;
   const isCreating = editData !== null && product === null;
@@ -326,7 +327,11 @@ export function ProductEditContent({
 
     setUploadingImages((count) => count + 1);
     try {
-      const storageId = await uploadProductImage(file, () => generateUploadUrl({}));
+      const storageId = await uploadProductImage(
+        file,
+        () => createUploadIntent({ purpose: "product_logo" }),
+        finalizeUpload,
+      );
       const previewUrl = URL.createObjectURL(file);
       localObjectUrlsRef.current.add(previewUrl);
       releaseLocalObjectUrl(logo);
@@ -374,7 +379,11 @@ export function ProductEditContent({
     let uploadedCount = 0;
     try {
       for (const file of files) {
-        const storageId = await uploadProductImage(file, () => generateUploadUrl({}));
+        const storageId = await uploadProductImage(
+          file,
+          () => createUploadIntent({ purpose: "product_screenshot" }),
+          finalizeUpload,
+        );
         const previewUrl = URL.createObjectURL(file);
         localObjectUrlsRef.current.add(previewUrl);
         setScreenshots((current) => [...current, { previewUrl, storageId }]);

@@ -23,7 +23,7 @@ import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { getProductErrorMessage } from "../lib/product-error";
+import { getProductErrorMessage } from "../product-error";
 import {
   AuthorLink,
   getProjectTypeLabel,

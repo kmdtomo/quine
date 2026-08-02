@@ -17,18 +17,18 @@ import {
 import { AppHeader } from "@/components/app/AppHeader";
 import { cn } from "@/lib/utils";
 
-import { getProfileErrorMessage } from "../lib/profile-errors";
+import { getProfileErrorMessage } from "../profile-error";
 import {
   getProfileHref,
   normalizeUsername,
-} from "../lib/profile-links";
+} from "../profile-links";
 import {
   profileBannerGallerySchema,
   profileFormSchema,
   profileSocialLinkSchema,
   type ProfileFormValues,
   type ProfileSocialLink,
-} from "../schema";
+} from "../profile-form-schema";
 import { BannerGalleryDialog } from "./BannerGalleryDialog";
 import { ConnectionAddDialog } from "./ConnectionAddDialog";
 import { ProfileConnectionsSection } from "./ProfileConnectionsSection";
@@ -47,6 +47,8 @@ type ProfileContentProps = {
   onboarding: boolean;
   preloadedProfile: Preloaded<typeof api.users.getProfile>;
 };
+
+type ProfileUploadPurpose = "profile_avatar" | "profile_banner";
 
 const DEFAULT_BANNER_SRC =
   "/background/drew-beamer-pek8uLQauMk-unsplash.jpg";
@@ -68,7 +70,8 @@ export function ProfileContent({
   const completeProfileOnboarding = useMutation(
     api.users.completeProfileOnboarding,
   );
-  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
+  const createUploadIntent = useMutation(api.files.createUploadIntent);
+  const finalizeUpload = useMutation(api.files.finalizeUpload);
   const initialUsername = normalizeUsername(profile?.user.username);
   const initialSocialLinks = useMemo(
     () =>
@@ -223,10 +226,10 @@ export function ProfileContent({
         await Promise.all([
           avatarFile === undefined
             ? undefined
-            : uploadProfileImage(avatarFile),
+            : uploadProfileImage(avatarFile, "profile_avatar"),
           bannerFile === undefined
             ? undefined
-            : uploadProfileImage(bannerFile),
+            : uploadProfileImage(bannerFile, "profile_banner"),
         ]);
       const selectedGalleryBanner =
         bannerFile === undefined ? values.banner : undefined;
@@ -269,8 +272,11 @@ export function ProfileContent({
 
   async function uploadProfileImage(
     file: File,
+    purpose: ProfileUploadPurpose,
   ): Promise<Id<"_storage">> {
-    const uploadUrl = await generateUploadUrl({});
+    const { uploadIntentId, uploadUrl } = await createUploadIntent({
+      purpose,
+    });
     const response = await fetch(uploadUrl, {
       body: file,
       headers: {
@@ -286,7 +292,9 @@ export function ProfileContent({
     ) {
       throw new Error("PROFILE_UPLOAD_FAILED");
     }
-    return payload.storageId as Id<"_storage">;
+    const storageId = payload.storageId as Id<"_storage">;
+    await finalizeUpload({ storageId, uploadIntentId });
+    return storageId;
   }
 
   function openSocialDialog(index: number | null) {

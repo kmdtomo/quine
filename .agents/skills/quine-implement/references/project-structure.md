@@ -31,7 +31,8 @@ quine/
 │       │       │   ├── <Feature>Content.tsx
 │       │       │   └── <Feature>Section.tsx
 │       │       ├── actions.ts           # 必要な場合だけ
-│       │       ├── <feature>-form-schema.ts
+│       │       ├── <purpose>-form-schema.ts # 必要な場合だけ
+│       │       ├── use-<purpose>.ts      # feature固有hookが必要な場合だけ
 │       │       └── <specific-helper>.ts
 │       ├── components/                  # 複数 feature で使う純 UI
 │       │   └── ui/                      # shadcn primitive
@@ -39,7 +40,7 @@ quine/
 │       ├── hooks/                       # 複数 feature で使う hook
 │       ├── contexts/                    # 複数 feature で使う Context
 │       ├── public/                      # 静的 asset
-│       └── middleware.ts                # route auth境界
+│       └── proxy.ts                     # route auth境界
 ├── convex/
 │   ├── schema.ts                        # DB schema の単一 entrypoint
 │   ├── auth.ts
@@ -49,7 +50,9 @@ quine/
 │   ├── <feature>Action.ts               # Node action entrypoint
 │   ├── application/
 │   │   └── <feature>/
-│   │       └── <verb-object>.ts         # 複雑な transaction use case
+│   │       └── <verbObject>.ts          # 複雑なDB use case
+│   ├── workflows/
+│   │   └── <feature>/                   # Action/AI固有の処理フロー
 │   ├── infra/
 │   │   └── <provider>/                  # GitHub/OpenAI 等の外部接続
 │   ├── lib/                             # Convex 横断基盤
@@ -113,9 +116,9 @@ HTTP method、cookie、header、redirect、webhook、streaming が必要な入�
 
 Route Handler は request を検証し、認証を確定して Convex 関数を呼ぶ薄い adapter にする。GitHub OAuth callback のような HTTP protocol helper は該当 feature の server-only module または明確な共通基盤へ置く。
 
-### `apps/frontend/middleware.ts`
+### `apps/frontend/proxy.ts`
 
-route単位の認証有無、session更新、早いredirectだけを扱う。resource owner、onboarding完了状態、DB上のroleをmiddlewareだけで確定しない。Next.js/Convex Authのversion依存があるため、既存contractを確認せず独自middlewareへ置き換えない。
+Next.js 16のProxyとして、route単位の認証有無、session更新、早いredirectだけを扱う。resource owner、onboarding完了状態、DB上のroleをProxyだけで確定しない。ProxyはNode.js runtime固定であるため`runtime` configを追加しない。Next.js/Convex Authのversion依存があるので、matcher、callback例外、cookie処理を確認せず独自実装へ置き換えない。
 
 ### `apps/frontend/features/<feature>/`
 
@@ -164,9 +167,15 @@ Server Component の画面集約。認証済みtokenの取得、`preloadQuery` /
 - owner/state transition/DB整合性をここだけで守らない。
 - async function 以外を export しない。
 
-### `features/<feature>/<feature>-form-schema.ts`
+### `features/<feature>/<purpose>-form-schema.ts`
 
 React Hook Form が扱う入力schema、default value、UI固有の変換を置く。DB document schemaやConvex public validatorを置かない。
+
+formを持つfeatureすべてに機械的に作るのではなく、複数componentが共有するform contractがある場合だけ置く。`product-form-schema.ts`のように用途を名前へ含める。
+
+### `features/<feature>/use-<purpose>.ts`
+
+React hookを実際に使うfeature固有hookが必要な場合だけfeature rootへ置く。純粋関数を再利用する目的でhook化したり、feature内に`hooks/`directoryを作ったりしない。
 
 ### `apps/frontend/components/`
 
@@ -219,20 +228,21 @@ Convexが公開・登録する query / mutation / internal function の adapter�
 
 **Move to application when**
 
+- access/public条件と複数のbounded readを組み合わせ、公開shapeへ集約する。
 - owner/access確認と更新を組み合わせる。
 - 状態遷移を検証する。
 - 複数tableを1 transactionで更新する。
 - retry/idempotency/競合制御を行う。
 - 同じuse caseを複数entrypointから呼ぶ。
 
-public adapterを別directoryへ移すと generated API path が変わるため、root resource fileは薄い入口として維持する。
+単純な1 document readや1回のindex queryはrootに残す。public adapterを別directoryへ移すとgenerated API pathが変わるため、root resource fileは薄い入口として維持する。
 
-### `convex/application/<feature>/<verb-object>.ts`
+### `convex/application/<feature>/<verbObject>.ts`
 
-複雑なtransaction use caseを置く。原則1 exported use case / fileとする。
+複雑なDB use caseを置く。mutationだけでなく、access条件、複数のbounded read、公開shapeへの集約を含むqueryも対象になる。原則1 exported use case / fileとする。
 
 - adapterで確定済みのuser/resource IDと `QueryCtx` / `MutationCtx` を受け取る。
-- current state、owner、状態遷移、複数table更新を扱う。
+- current state、owner、状態遷移、複数table更新、複雑なread projectionを扱う。
 - `ctx.db` を直接使い、同一transactionを維持する。
 - `requireUser`、HTTP、React、Next API、外部SDKを持たない。
 - applicationを単純なDB helperのwrapperにしない。
@@ -248,15 +258,33 @@ export async function saveProduct(
 }
 ```
 
+### `convex/workflows/<feature>/`
+
+Node Actionで動くfeature固有の処理フローを置く。AI prompt、tool、context整形、deterministic detection、外部呼び出しの順序制御など、provider接続そのものでもDB transactionでもない処理が対象になる。
+
+```text
+workflows/productAi/prompts.ts
+workflows/productAi/productWritingAgent.ts
+workflows/productAi/tools/proposeMarkdownEdit.ts
+workflows/githubAnalysis/detection.ts
+```
+
+- rootの`<feature>Action.ts`はregistered boundaryとして維持する。
+- provider SDK、HTTP request/response、provider固有errorは`infra/<provider>/`へ置く。
+- DB read/writeはroot/internal Convex functionを`ctx.runQuery` / `ctx.runMutation`で呼び、workflowからDBを直接操作しない。
+- 同じfeatureのapplicationにあるruntime非依存の純粋ruleはimportしてよい。`QueryCtx` / `MutationCtx`を受けるDB use caseは直接呼ばない。
+- application、frontend、別featureのworkflowから依存しない。
+
 ### `convex/infra/<provider>/`
 
 Convexの外側にあるGitHub、OpenAIなどとの接続だけを置く。
 
 ```text
 infra/github/client.ts
-infra/github/response-schema.ts
+infra/github/responseSchema.ts
+infra/github/githubError.ts
 infra/openai/client.ts
-infra/openai/response-schema.ts
+infra/openai/responseSchema.ts
 ```
 
 - SDK/fetch、provider request/response、timeout、provider error変換を置く。
@@ -269,7 +297,6 @@ infra/openai/response-schema.ts
 
 ```text
 lib/auth.ts
-lib/github-errors.ts       # 複数GitHub flowが共有する場合
 lib/storage.ts             # 複数resourceが共有する場合
 ```
 
@@ -277,7 +304,9 @@ feature固有use case、外部client、表示変換を置かない。
 
 ### `convex/<feature>Action.ts`
 
-`"use node"` が必要な外部I/Oの登録entrypoint。Node action fileにはaction/internalActionだけを置く。DBは `ctx.runQuery` / `ctx.runMutation` 経由で触り、外部接続の詳細は `infra/` へ移す。
+`"use node"` が必要な外部I/Oの登録entrypoint。Node action fileにはaction/internalActionとvalidatorを置き、auth・公開errorへの変換・workflow呼び出しだけを行う。DBは `ctx.runQuery` / `ctx.runMutation` 経由で触り、処理フローは`workflows/`、外部接続の詳細は`infra/`へ移す。
+
+`convex/`配下のmodule pathはConvexの制約に合わせてcamelCaseにする。`saveProduct.ts`、`productAi/`、`responseSchema.ts`のように命名し、hyphenを含めない。`schema.ts`、`auth.config.ts`などframework所定名は例外とする。
 
 ### `convex/_generated/`
 
@@ -328,7 +357,10 @@ convex/application
   -> convex lib, data, _generated types
 
 convex/*Action.ts
-  -> infra, convex lib, data, _generated/internal API
+  -> workflows, convex lib, data, _generated/internal API
+
+convex/workflows
+  -> same-feature application pure rules, infra, convex lib, data, _generated/internal API
 
 convex/infra
   -> convex lib, data, external SDK
@@ -341,7 +373,8 @@ data
 
 - `convex/` から `apps/frontend/`。
 - `application/` から Next/React/UI。
-- `infra/` から application/feature。
+- `application/` から `workflows/` / `infra/`。
+- `infra/` から application/workflow/feature。
 - shared `components/` から feature。
 - feature A から feature B のprivate module。共通責務ならsharedへ昇格する。
 
@@ -359,7 +392,8 @@ frontendからroot Convex実装をimportせず、`@convex/_generated/*` だけ�
 | frontend全体の基盤か | `apps/frontend/lib/` |
 | DB table/indexか | `convex/schema.ts` |
 | public Convex APIか | `convex/<resource>.ts` |
-| 複雑なtransaction use caseか | `convex/application/<feature>/` |
+| 複雑なquery/mutationのDB use caseか | `convex/application/<feature>/` |
+| AI prompt/tool/detection/Action固有の処理フローか | `convex/workflows/<feature>/` |
 | GitHub/OpenAIなど外部接続か | `convex/infra/<provider>/` |
 | Convex横断の基盤か | `convex/lib/` |
 | frontend/Convex共有の静的正規データか | `data/` |
