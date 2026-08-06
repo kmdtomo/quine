@@ -117,7 +117,7 @@ export function ProductListContent({
 
   return (
     <div className="min-h-svh bg-[#1A1A1A] text-white">
-      <AppHeader activeItem="products" homeHref="/" />
+      <AppHeader />
 
       <main className="mx-auto flex min-h-svh w-full max-w-7xl flex-col px-6 pt-[92px] pb-10">
         <section className="mb-8">

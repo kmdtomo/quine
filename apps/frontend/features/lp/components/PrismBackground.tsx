@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "motion/react";
 
 import { loadCreatePrism } from "@/lib/prism-loader";
 
@@ -8,11 +9,12 @@ import styles from "../lp.module.css";
 
 export function PrismBackground() {
   const ref = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reducedMotion === true) return;
 
     let cleanup: (() => void) | null = null;
     let cancelled = false;
@@ -41,7 +43,7 @@ export function PrismBackground() {
       cancelled = true;
       if (cleanup) cleanup();
     };
-  }, []);
+  }, [reducedMotion]);
 
   return <div ref={ref} className={styles.stageBg} aria-hidden="true" />;
 }

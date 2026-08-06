@@ -5,6 +5,10 @@ import type { ReactNode } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 
+import {
+  PRESENCE_FADE_MOTION,
+  PRESENCE_ZOOM_MOTION,
+} from "@/lib/motion/presence";
 import { cn } from "@/lib/utils";
 
 type GlassModalProps = {
@@ -31,11 +35,18 @@ export function GlassModal({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-100 bg-black/55 backdrop-blur-2xl duration-200 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
+        <Dialog.Backdrop
+          className={cn(
+            "fixed inset-0 z-100 bg-black/55 backdrop-blur-2xl duration-200",
+            PRESENCE_FADE_MOTION,
+          )}
+        />
         <Dialog.Popup
           aria-labelledby={titleId}
           className={cn(
-            "fixed top-1/2 left-1/2 z-100 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/70 p-8 text-center shadow-2xl backdrop-blur-3xl duration-200 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-open:slide-in-from-bottom-2 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "fixed top-1/2 left-1/2 z-100 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/70 p-8 text-center shadow-2xl backdrop-blur-3xl duration-200 outline-none data-open:slide-in-from-bottom-2",
+            PRESENCE_FADE_MOTION,
+            PRESENCE_ZOOM_MOTION,
             className,
           )}
         >

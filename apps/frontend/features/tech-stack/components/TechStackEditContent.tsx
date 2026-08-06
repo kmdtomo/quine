@@ -245,7 +245,6 @@ export function TechStackEditContent({
   const emptyText = normalizedSearch
     ? `Nothing matched "${search.trim()}". Try a different keyword.`
     : "This category has no registered technologies.";
-  const homeHref = getUserHomeHref(stack?.user.username);
   const profileOnboardingHref = getProfileOnboardingHref(stack?.user.username);
 
   const showToast = useCallback((nextToast: ToastState, duration: number) => {
@@ -566,13 +565,11 @@ export function TechStackEditContent({
   return (
     <div className="h-svh overflow-hidden bg-[#1A1A1A] text-white">
       <AppHeader
-        activeItem="create"
         guided={
           needsProfileOnboarding &&
           profileOnboardingHref !== TECH_STACK_EDIT_HREF
         }
         guideHref={profileOnboardingHref}
-        homeHref={homeHref}
       />
 
       <main className="relative flex h-svh flex-col overflow-hidden pt-[68px]">

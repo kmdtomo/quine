@@ -191,7 +191,7 @@ error mappingはfeature固有ならfeature root、複数flowで同じprovider co
 
 ## Tailwind and UI
 
-- mockupをdesignの真理値として参照し、mockup自体は編集しない。
+- 既存UIを変更する時は、product requirement、現在の実装、accessibility contractを確認する。
 - 固有UIはTailwindで実装し、shadcn/uiはprimitiveとして使う。
 - Tailwind v4のthemeは`tailwind.config.ts`ではなく`app/globals.css`のCSS-first設定へ置く。
 - 条件classは`cn()`を使い、外から受ける`className`は最後に置く。
@@ -233,5 +233,5 @@ Quineのshadcn `base-nova`でform primitiveのregistry追加が成立しない�
 - provider errorやsecretがclient/logへ漏れないか。
 - server stateをclient stateへ不要に複製していないか。
 - formのsubmit、success、expected errorが扱われているか。
-- mockupとaccessibilityを保っているか。
+- product requirementとaccessibilityを保っているか。
 - unrelated cleanupを混ぜていないか。

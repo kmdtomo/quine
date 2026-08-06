@@ -88,7 +88,7 @@ export function ProductDetailContent({
   if (!product) {
     return (
       <div className="min-h-svh bg-[#1A1A1A] text-white">
-        <AppHeader activeItem="products" homeHref="/" />
+        <AppHeader />
         <main className="grid min-h-svh place-items-center px-6 text-center">
           <div>
             <p className="text-sm font-semibold tracking-[0.14em] text-primary uppercase">
@@ -106,7 +106,7 @@ export function ProductDetailContent({
 
   return (
     <div className="min-h-svh bg-[#1A1A1A] text-white">
-      <AppHeader activeItem="products" homeHref="/" />
+      <AppHeader />
 
       <main className="mx-auto grid min-h-svh w-full max-w-7xl grid-cols-[minmax(0,1fr)_340px] gap-5 px-6 pt-[92px] pb-10 max-lg:grid-cols-1">
         <section className="min-w-0 rounded-[16px] border border-[#3A3A3A] bg-[#272727] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.3),0_1px_2px_rgba(0,0,0,0.2)]">

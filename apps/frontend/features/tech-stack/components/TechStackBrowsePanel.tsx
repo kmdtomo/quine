@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ListFilterIcon, SearchIcon, XIcon } from "lucide-react";
 
 import type { TechnologyCategory } from "@data/tech-stack";
 
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { cn } from "@/lib/utils";
 
 import type {
@@ -64,17 +65,11 @@ export function TechStackBrowsePanel({
     showFilterControls && filterMode === "selected" && search.length === 0;
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  useKeyboardShortcut({
+    key: "k",
+    metaOrControl: true,
+    onTrigger: () => searchInputRef.current?.focus(),
+  });
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-[linear-gradient(180deg,rgba(39,39,39,0.6),rgba(33,33,33,0.6))] backdrop-blur-[20px]">

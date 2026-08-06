@@ -174,7 +174,6 @@ export function ProfileContent({
   const currentProfile = profile;
   const displayUsername =
     normalizeUsername(profile.user.username) ?? "unknown";
-  const profileHref = getProfileHref(profile.user.username);
   const isOnboardingEdit =
     profile.needsProfileOnboarding && profile.isOwner;
   const canEdit = profile.isOwner && editing;
@@ -391,7 +390,7 @@ export function ProfileContent({
 
   return (
     <div className="h-full bg-[#1A1A1A] text-white">
-      <AppHeader activeItem="home" homeHref={profileHref} />
+      <AppHeader />
 
       <main className="h-full w-full px-8 pt-3 pb-6 min-[1441px]:px-10 min-[1441px]:pt-[84px] min-[1441px]:pb-8 max-[1280px]:px-6 max-[1280px]:pb-5 max-[1024px]:px-4 max-[1024px]:pt-2 max-[1024px]:pb-4">
         <div

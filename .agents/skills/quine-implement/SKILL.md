@@ -32,7 +32,7 @@ Quine の実装を、frontend feature、Convex DB use case、Action workflowを�
 - 長時間処理は public mutation で Run を作り、scheduled internalAction を起動する。
 - feature 固有コードを汎用 `lib/` へ置かない。`lib/` は複数領域が依存する基盤だけにする。
 - `any`、unsafe cast、non-null assertion、理由のない TypeScript 抑制を使わない。
-- mockup は read-only とし、テストファイルは作成・追記しない。
+- テストファイルは作成・追記しない。
 
 ## Reference routing
 

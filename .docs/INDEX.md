@@ -22,5 +22,4 @@
 |---|---|
 | Quine実装全般 | [`quine-implement`](../.agents/skills/quine-implement/SKILL.md) |
 | タスク別reference routing | [`quine-implement` routing](../.agents/skills/quine-implement/SKILL.md#reference-routing) |
-| mockup移植 | [frontend](../.agents/skills/quine-implement/references/frontend.md)、[code rules](../.agents/skills/quine-implement/references/code-rules.md) |
 | Convex初期設定・環境 | [Convex](../.agents/skills/quine-implement/references/convex.md#environment-and-generated-api) |

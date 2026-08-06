@@ -3,7 +3,7 @@
 > セッションを跨いでの進捗追跡。**新しいセッション開始時はこのファイルを最初に読む**。  
 > 区切りごとに更新。チェック済みはコードの実装・接続を示し、実機検証まで済んだとは限らない。
 
-最終更新: 2026-08-01
+最終更新: 2026-08-06
 
 ## 状態の読み方
 
@@ -61,6 +61,8 @@
 - [x] 公式クラウドロゴをSVG優先に整理（AWS / Google Cloud / Azure の公式SVG 111件を `apps/frontend/public/tech_stack_logo/*.svg` としてアプリ表示用に追加。元アイコンパック丸ごとは保持しない）
 - [x] simple-icons に存在する技術ロゴは `simple-icons` package import で解決し、`public/` には複製しない方針へ整理
 - [x] [REFACTORING.md](REFACTORING.md) に`quine-implement`準拠監査、実施状況、外部・移行残件を集約
+- [x] frontendの特殊UI配置ルールを[project structure](../.agents/skills/quine-implement/references/project-structure.md)へ追加。複数featureのDOM lifecycle hookは`hooks/`、feature固有hookはfeature root、描画を持つ汎用animationは`components/motion/`、描画を持たないpresetは`lib/motion/`、feature固有keyframesはfeature内を正規境界とした
+- [x] 2026-08-06にHTML mock移行を完了扱いとし、`mockup/`を削除。独立`signup-profile.html`の責務は`/@username?onboarding=1`へ統合済みで、`/signup/profile`は`/home`への互換redirectとして維持する。以後はproduct docs、実装コード、`quine-implement` referencesを正規ソースとする
 
 ---
 
@@ -105,7 +107,9 @@
 - [x] mockup `tech-stack-detail.html` を `/tech-stack/[technologyKey]` に移植（canonical key、公開Product / Engineer件数、2列Product grid、404、プロフィール技術カード導線）
 - [x] `product/new` / product edit の Product AI chat 実装。Strands tools は `read_repo_context` / `read_attachment_context` / `propose_markdown_edit` / `propose_form_update`。`product_context` / `current_markdown` / `selection_context` / `repo_context_summary` / `conversation_history` は毎回 agent input に注入。Markdown proposal kind は `replace_all` / `replace_selection` / `insert` / `patch` / `outline` / `comment_only` に対応。form proposal は `name` / `tagline` / `projectType` / `teamSize` / `productUrl` / `githubUrl` / `roles` に対応。proposal UI は assistant message 直下に表示し、適用済み / 破棄済みは compact history 行へ畳む。AI message は Markdown / GFM として render する。画像添付は OpenAI vision 解析結果のみ永続化。
 - [x] AppHeader の Home / Quine ロゴ遷移を `/home` resolver に統一。`loading.tsx` で遷移先を即表示し、ログインユーザーと onboarding 状態の解決後に本人の `/@username` または未完了ステップへリダイレクト。
-- [ ] mockup `signup-profile.html` 移植
+- [x] AppHeaderを全app pageの単一contractへ共通化。`usePathname`からactive itemを自動判定し、fixed配置、`/home`・create先・current page copyをcomponent側で管理。page固有の`activeItem` / `homeHref` / `fixed` propsを除去し、guided onboardingだけを明示例外として維持。2026-08-06に`/users`・`/products`でheader 1件、Homeリンク`/home`、active表示、console error 0件をbrowser smoke済み
+- [x] animation / 特殊UI操作を責務別に共通化。Cmd/Ctrl+K・Escapeは`hooks/useKeyboardShortcut.ts`、LPのRAF scrollとdrag scrollはfeature固有hook、`RotatingText`は`components/motion/`、dialog fade/zoomとreduced-motionは`lib/motion/`へ整理。2026-08-06にLP parallax/header progress、Cmd+K focus→Escape blur、create dialog open/closeをbrowser smokeし、`pnpm typecheck` / `pnpm check`成功（lint error 0、既存`<img>`warning 23件）
+- [x] `signup-profile.html`の独立画面は作らず、初回プロフィール入力を`/@username?onboarding=1`へ統合。`/signup/profile`は互換redirectとして維持
 
 ---
 
@@ -131,7 +135,7 @@
 - [x] `features/products/`（products ページ、product-detail、product-edit。Header create modal は mockup の UploadModal 準拠。product-edit UI は mockup の ProductEditHero / ProductEditForm / ProductTechPanel 構造へ再移植し、hero title / subtitle の横並び調整、Project Type / Team Size は共通 `DropdownSelect`、Role は同じ見た目の複数選択用 `DropdownMultiSelect` に統一し dropdown 選択状態は neutral tone に調整、`ProductEdit*Section` / modal / shell コンポーネントへ分離。右側 tech stack パネルは見出しなし・枠なし icon-only edit で上詰めし、カテゴリー名は white、tech-stack/edit と同じ `techStackCategories` のカテゴリー順で表示。新規 product 作成時は GitHub App の repo 選択 modal を自動表示し、選択 repo から name / URL / project type / tech stack をフォームへ反映（tagline / role / content は自動入力しない）。repo 選択 modal は共通 `GlassModal` 土台へ統一し、右上 close は非表示。repo list は主要技術スタックロゴ表示、未検出時は黒背景の Quine mark fallback、loading stuck 対策済み。AI shell は real chat / image attach / proposal card / Apply-Discard / selection rewrite / stale hash guard / profile Product link 接続まで）
 - [x] `features/users/`（users一覧route / query / View / Contentと、検索・Role・技術スタックAND filterを接続済み。browser smoke未実施）
 - [x] `features/tech-stack/`（tech-stack-edit + `/tech-stack/[technologyKey]` 公開詳細）
-- [x] `features/onboarding/`（`/home` resolverと旧signup routeからcanonical導線へのredirectを実装・接続済み。`signup-profile.html`の独立ページ移植は未実施、認証済みbrowser smokeは未実施）
+- [x] `features/onboarding/`（`/home` resolverと旧signup routeからcanonical導線へのredirectを実装・接続済み。プロフィール初回入力は`/@username?onboarding=1`へ統合。認証済みbrowser smokeは未実施）
 - [ ] 専用`features/connections/`は未作成。プロフィール内の追加操作は接続済みだが、承認 / 解除UIは未実装
 
 ### 認証 / ユーザー
@@ -143,7 +147,7 @@
 ### 周辺
 
 - [x] root `.gitignore`確認済み（root / frontendの`.env.local`と`.cursor/mcp.json`をignore、current treeのcredential scanは成功）
-- [ ] Tailwind theme の本番化（mockup のフォント / カラー / spacing 完全移植）
+- [x] Tailwind theme の本番化（現在の`app/globals.css`とproduction UIをcanonicalとし、旧HTML mock依存を終了）
 - [ ] 本番デプロイ準備（`convex deploy`、Vercel など）
 
 ---
