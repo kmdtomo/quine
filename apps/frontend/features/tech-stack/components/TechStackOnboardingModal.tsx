@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { XIcon } from "lucide-react";
 
-import RotatingText from "@/components/RotatingText";
+import RotatingText from "@/components/motion/RotatingText";
 import { QuineLogo } from "@/components/brand/QuineLogo";
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
 

@@ -35,8 +35,10 @@ quine/
 │       │       ├── use-<purpose>.ts      # feature固有hookが必要な場合だけ
 │       │       └── <specific-helper>.ts
 │       ├── components/                  # 複数 feature で使う純 UI
+│       │   ├── motion/                  # 描画を持つ汎用 animation primitive
 │       │   └── ui/                      # shadcn primitive
 │       ├── lib/                         # frontend 横断基盤
+│       │   └── motion/                  # 描画を持たない motion preset / config
 │       ├── hooks/                       # 複数 feature で使う hook
 │       ├── contexts/                    # 複数 feature で使う Context
 │       ├── public/                      # 静的 asset
@@ -58,7 +60,6 @@ quine/
 │   ├── lib/                             # Convex 横断基盤
 │   └── _generated/                      # Convex codegen
 ├── data/                                # frontend/Convex 共有 canonical data
-├── mockup/                              # design source、read-only
 ├── .docs/                               # product docs と進捗
 ├── .agents/skills/                      # 実装 workflow の正規ソース
 ├── package.json
@@ -181,15 +182,33 @@ React hookを実際に使うfeature固有hookが必要な場合だけfeature roo
 
 複数 feature で再利用する純 UI だけを置く。feature固有語彙、Convex hook、業務error codeを持たせない。shadcn由来primitiveは `components/ui/` に限定する。
 
+`components/motion/` は、DOMを描画する再利用可能なanimation primitiveだけを置く。`RotatingText`のようにchildrenや表示状態を受け取るcomponentが対象で、feature固有の文言、CSS module、route、server dataへ依存させない。
+
 ### `apps/frontend/lib/`
 
 env、`cn()`、server/client foundation、provider設定など複数featureが同じ理由で依存する基盤だけを置く。feature固有helper、error mapping、form logicを置かない。
 
 共有化は3箇所目を目安にし、単にコードが似ているだけで昇格しない。
 
+描画を持たない共通animation class、transition preset、timing configは`lib/motion/`へ置く。React hookやDOM listenerをここへ置かず、feature固有keyframesや演出値を汎用presetへ昇格させない。
+
 ### `apps/frontend/hooks/`
 
 複数featureが同じ意味で使うclient hookだけを置く。feature固有hookはfeature rootまたは該当componentの近くに置く。server stateを独自storeへ複製するhookや、名前だけ汎用の`useData`を作らない。
+
+keyboard shortcut、media query、observer、scroll lifecycleのようにDOM listenerの登録とcleanupを共通化するhookは、2つ以上のfeatureで同じ契約が必要になった時だけ`hooks/useX.ts`へ置く。同一feature内だけの操作は`features/<feature>/use-<purpose>.ts`へ置き、feature内に`hooks/`directoryは作らない。
+
+UI操作とanimationの配置は次の境界を正にする。
+
+| 種類 | 配置 |
+| --- | --- |
+| 複数featureで使うDOM lifecycle hook | `hooks/useX.ts` |
+| 同一featureだけのDOM lifecycle hook | `features/<feature>/use-<purpose>.ts` |
+| DOMを描画する汎用animation component | `components/motion/` |
+| 描画を持たない共通motion preset / config | `lib/motion/` |
+| feature固有のkeyframes、CSS module、演出component | 該当`features/<feature>/`内 |
+
+hookはevent listener、observer、timer、animation frameのcleanupまで所有する。見た目、業務判断、Convex dataはhookへ入れず、呼び出し元からcallbackまたはrefとして渡す。
 
 ### `apps/frontend/contexts/`
 
@@ -321,10 +340,6 @@ frontendとConvexが同じ値を参照するcanonical static data、型、その
 - I/O、環境変数、時刻、random、mutable stateを持たない。
 - DB/feature/UIに依存しない。
 - Quineの技術stack keyは `data/tech-stack.ts` を唯一の正規ソースにする。
-
-### `mockup/`
-
-designの真理値。read-only。実装コードからimportせず、直接編集しない。
 
 ### `.docs/`
 

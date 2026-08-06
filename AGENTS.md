@@ -2,7 +2,7 @@
 
 ## Phase and stack
 
-`mockup/`で完成したdesignを、Next.js 16 App Router、TypeScript、Convex、Convex Auth、GitHub App、Tailwind CSS v4、shadcn/ui、pnpmで実装する。
+QuineをNext.js 16 App Router、TypeScript、Convex、Convex Auth、GitHub App、Tailwind CSS v4、shadcn/ui、pnpmで継続開発する。
 
 ConvexはDB、registered functions、realtime、auth、外部処理のserver boundaryでありrootへ置く。別DB、repository layer、別認証基盤を追加しない。
 
@@ -14,7 +14,6 @@ ConvexはDB、registered functions、realtime、auth、外部処理のserver bou
 
 - `.docs/` — product requirementと実装進捗。
 - `.agents/skills/quine-implement/` — workflowと実装ルール。
-- `mockup/` — designの真理値。read-only。
 
 同じ情報を複数referenceへ複製しない。
 
@@ -65,7 +64,6 @@ import aliasは`@/* = apps/frontend/*`、`@convex/* = convex/*`、`@data/* = dat
 - `convex/`配下のmodule pathはcamelCaseにし、hyphenを含めない。
 - 画像・添付はConvex File Storageを使い、data URLや巨大stringをdocument/Action argsへ保存しない。
 - `any`、non-null assertion、unsafe cast、理由のないTypeScript抑制を使わない。
-- mockupを直接編集しない。
 - test fileを作成・追記しない。
 - 無関係なuser変更を編集、format、revertしない。
 
@@ -98,7 +96,6 @@ pnpm verify
 
 ## Out of scope
 
-- `mockup/`のHTML/CSS編集。
 - Supabase、Prisma等、Convex以外のDB/backend導入。
 - Convex Auth以外の認証library追加。
 - taskと無関係なrefactorやcleanup。

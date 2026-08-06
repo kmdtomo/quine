@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { useReducedMotion } from "motion/react";
 
 import styles from "../lp.module.css";
 
@@ -23,12 +24,13 @@ export function RevealOnScroll({
   children,
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (reducedMotion === true) {
       el.classList.add(styles.isRevealed);
       return;
     }
@@ -47,7 +49,7 @@ export function RevealOnScroll({
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [reducedMotion]);
 
   const variantClass =
     variant === "left"

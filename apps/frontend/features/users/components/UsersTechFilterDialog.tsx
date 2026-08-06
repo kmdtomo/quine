@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { CheckIcon, SearchIcon, XIcon } from "lucide-react";
 
@@ -12,6 +12,11 @@ import {
 } from "@data/tech-stack";
 
 import { TechnologyLogo } from "@/components/tech-stack/TechnologyLogo";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import {
+  PRESENCE_FADE_MOTION,
+  PRESENCE_ZOOM_MOTION,
+} from "@/lib/motion/presence";
 import { cn } from "@/lib/utils";
 
 type UsersTechFilterDialogProps = {
@@ -56,21 +61,14 @@ export function UsersTechFilterDialog({
       (category) => category.key === activeCategoryKey,
     )?.name ?? "Technologies";
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key.toLowerCase() === "k"
-      ) {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-        searchInputRef.current?.select();
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  useKeyboardShortcut({
+    key: "k",
+    metaOrControl: true,
+    onTrigger: () => {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    },
+  });
 
   function toggleTechnology(technologyKey: TechnologyKey) {
     setDraftKeys((current) =>
@@ -90,11 +88,20 @@ export function UsersTechFilterDialog({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[80] bg-black/80 backdrop-blur-[4px] duration-150 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0" />
+        <Dialog.Backdrop
+          className={cn(
+            "fixed inset-0 z-[80] bg-black/80 backdrop-blur-[4px] duration-150",
+            PRESENCE_FADE_MOTION,
+          )}
+        />
         <Dialog.Popup
           aria-describedby="users-tech-filter-description"
           aria-labelledby="users-tech-filter-title"
-          className="fixed top-1/2 left-1/2 z-[81] flex h-[min(760px,90vh)] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-[#2A2A2A] bg-[#1A1A1A] text-white shadow-[0_8px_24px_rgba(0,0,0,0.4),0_4px_8px_rgba(0,0,0,0.2)] outline-none duration-150 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+          className={cn(
+            "fixed top-1/2 left-1/2 z-[81] flex h-[min(760px,90vh)] w-[min(1040px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-[#2A2A2A] bg-[#1A1A1A] text-white shadow-[0_8px_24px_rgba(0,0,0,0.4),0_4px_8px_rgba(0,0,0,0.2)] outline-none duration-150",
+            PRESENCE_FADE_MOTION,
+            PRESENCE_ZOOM_MOTION,
+          )}
         >
           <Dialog.Title id="users-tech-filter-title" className="sr-only">
             Filter engineers by tech stack

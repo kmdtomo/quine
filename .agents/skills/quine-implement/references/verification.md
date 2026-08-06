@@ -39,7 +39,7 @@ commandを実行できない時は代替結果と未検証範囲を明示し、�
 - 新しいpublic API、schema/index/storage、env dependencyを特定した。
 - `any`、non-null assertion、unsafe cast、TypeScript抑制が増えていない。
 - debug log、dead code、不要import、secretがない。
-- generated fileとmockupを手動編集していない。
+- generated fileを手動編集していない。
 - test fileを作成・追記していない。
 
 security/Convex変更ではさらに確認する:
@@ -140,7 +140,7 @@ UI変更では実際のrouteをbrowserで操作する。
 - 保存後、reactive queryまたはredirectで正しい画面になる。
 - reload後もserver stateが復元される。
 - keyboard/focus/label等、変更部分の基本accessibilityが壊れていない。
-- mockup対象では主要layoutとinteractionが一致する。
+- 既存UI変更では主要layoutとinteractionが意図せず変わっていない。
 
 auth必須flowをanonymous smokeだけで完了扱いにしない。signed-in sessionが使えない時は、未実施範囲を明記する。
 

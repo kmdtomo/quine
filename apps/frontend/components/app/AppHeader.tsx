@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Grid2X2Icon,
   HomeIcon,
@@ -19,13 +20,8 @@ type AppHeaderItem = "home" | "products" | "search" | "create";
 const HOME_HREF = "/home";
 
 type AppHeaderProps = {
-  activeItem?: AppHeaderItem | null;
-  createProductHref?: string;
-  createTechStackHref?: string;
-  fixed?: boolean;
   guided?: boolean;
   guideHref?: string;
-  homeHref?: string;
 };
 
 const navItems = [
@@ -59,21 +55,17 @@ const navItems = [
 }[];
 
 export function AppHeader({
-  activeItem = "home",
-  createProductHref = "/products/new",
-  createTechStackHref = "/tech-stack/edit",
-  fixed = true,
   guided = false,
-  guideHref = "/",
-  homeHref = HOME_HREF,
+  guideHref = HOME_HREF,
 }: AppHeaderProps) {
+  const pathname = usePathname();
+  const activeItem = getActiveItem(pathname);
   const [createOpen, setCreateOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  async function copyProfileLink() {
-    const url = new URL(homeHref, window.location.origin).href;
+  async function copyPageLink() {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -83,12 +75,7 @@ export function AppHeader({
 
   return (
     <>
-      <header
-        className={cn(
-          "pointer-events-none right-0 left-0 z-[60] h-14",
-          fixed ? "fixed top-3" : "relative",
-        )}
-      >
+      <header className="pointer-events-none fixed top-3 right-0 left-0 z-[60] h-14">
         <div className="mx-auto grid h-full max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-5 px-10">
           <div
             className={cn(
@@ -177,8 +164,8 @@ export function AppHeader({
                 <button
                   type="button"
                   className="relative flex rounded-lg p-2 text-[#6A6A6A] transition hover:text-white"
-                  aria-label="Copy profile link"
-                  onClick={copyProfileLink}
+                  aria-label="Copy page link"
+                  onClick={copyPageLink}
                 >
                   <LinkIcon className="size-5" aria-hidden="true" />
                   {copied ? (
@@ -197,10 +184,44 @@ export function AppHeader({
 
       <CreateItemDialog
         open={createOpen}
-        productHref={createProductHref}
-        techStackHref={createTechStackHref}
+        productHref="/products/new"
+        techStackHref="/tech-stack/edit"
         onOpenChange={setCreateOpen}
       />
     </>
   );
+}
+
+function getActiveItem(pathname: string): AppHeaderItem | null {
+  if (pathname === "/users") {
+    return "search";
+  }
+
+  if (
+    pathname === "/products/new" ||
+    (pathname.startsWith("/products/") && pathname.endsWith("/edit")) ||
+    pathname === "/tech-stack/edit"
+  ) {
+    return "create";
+  }
+
+  if (pathname === "/products") {
+    return "products";
+  }
+
+  const segments = pathname.split("/").filter(Boolean);
+  const profileSegment = segments[0];
+  if (!profileSegment || !isProfileSegment(profileSegment)) {
+    return null;
+  }
+
+  return segments.length === 1 ? "home" : "products";
+}
+
+function isProfileSegment(segment: string) {
+  try {
+    return decodeURIComponent(segment).startsWith("@");
+  } catch {
+    return false;
+  }
 }

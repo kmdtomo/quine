@@ -1,50 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
 import { PROFILE_TECH_RAIL, techLogoSrc } from "../data/showcase";
 import styles from "../lp.module.css";
+import { useDragScroll } from "../use-drag-scroll";
 
 export function ProfileTechRail() {
-  const railRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const rail = railRef.current;
-    if (!rail) return;
-
-    let isDown = false;
-    let startX = 0;
-    let scrollLeft = 0;
-
-    const onDown = (e: MouseEvent) => {
-      isDown = true;
-      rail.classList.add(styles.profileRailDragging);
-      startX = e.pageX - rail.offsetLeft;
-      scrollLeft = rail.scrollLeft;
-    };
-    const stop = () => {
-      isDown = false;
-      rail.classList.remove(styles.profileRailDragging);
-    };
-    const onMove = (e: MouseEvent) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - rail.offsetLeft;
-      rail.scrollLeft = scrollLeft - (x - startX) * 1.4;
-    };
-
-    rail.addEventListener("mousedown", onDown);
-    rail.addEventListener("mouseleave", stop);
-    rail.addEventListener("mouseup", stop);
-    rail.addEventListener("mousemove", onMove);
-
-    return () => {
-      rail.removeEventListener("mousedown", onDown);
-      rail.removeEventListener("mouseleave", stop);
-      rail.removeEventListener("mouseup", stop);
-      rail.removeEventListener("mousemove", onMove);
-    };
-  }, []);
+  const railRef = useDragScroll<HTMLDivElement>({
+    draggingClassName: styles.profileRailDragging,
+    speed: 1.4,
+  });
 
   return (
     <div ref={railRef} className={styles.profileRail}>

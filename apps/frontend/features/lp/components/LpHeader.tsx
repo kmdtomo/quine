@@ -2,38 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useReducedMotion } from "motion/react";
 
 import styles from "../lp.module.css";
+import { useRafScroll } from "../use-raf-scroll";
 
 const COMPACT_SCROLL = 120;
 
 export function LpHeader({ onSignupOpen }: { onSignupOpen: () => void }) {
   const headerRef = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
-  useEffect(() => {
+  useRafScroll(() => {
     const el = headerRef.current;
     if (!el) return;
 
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const p = Math.min(1, window.scrollY / COMPACT_SCROLL);
-      el.style.setProperty("--header-p", String(p));
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, []);
+    const progress = Math.min(1, window.scrollY / COMPACT_SCROLL);
+    el.style.setProperty("--header-p", String(progress));
+  }, reducedMotion !== true);
 
   return (
     <header className={styles.header}>

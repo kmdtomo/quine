@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Dialog } from "@base-ui/react/dialog";
 
+import { PRESENCE_FADE_MOTION } from "@/lib/motion/presence";
 import { cn } from "@/lib/utils";
 
 type CreateItemDialogProps = {
@@ -23,7 +24,10 @@ export function CreateItemDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop
-          className="fixed inset-0 z-[70] cursor-pointer bg-black/80 backdrop-blur-[4px] duration-200 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
+          className={cn(
+            "fixed inset-0 z-[70] cursor-pointer bg-black/80 backdrop-blur-[4px] duration-200",
+            PRESENCE_FADE_MOTION,
+          )}
           onClick={() => onOpenChange(false)}
         />
         <Dialog.Popup

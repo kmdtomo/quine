@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { api } from "@convex/_generated/api";
 import { usePreloadedQuery, type Preloaded } from "convex/react";
@@ -11,6 +11,7 @@ import {
 } from "@data/tech-stack";
 
 import { AppHeader } from "@/components/app/AppHeader";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
 import { UsersFilterSection } from "./UsersFilterSection";
 import { UsersGridSection } from "./UsersGridSection";
@@ -85,32 +86,25 @@ export function UsersContent({ preloadedUsers }: UsersContentProps) {
     role !== ALL_ROLES ||
     selectedTechnologyKeys.length > 0;
 
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (technologyDialogOpen) {
-        return;
-      }
-
-      if (
-        (event.metaKey || event.ctrlKey) &&
-        event.key.toLowerCase() === "k"
-      ) {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-        searchInputRef.current?.select();
-      }
-
-      if (
-        event.key === "Escape" &&
-        document.activeElement === searchInputRef.current
-      ) {
+  useKeyboardShortcut({
+    enabled: !technologyDialogOpen,
+    key: "k",
+    metaOrControl: true,
+    onTrigger: () => {
+      searchInputRef.current?.focus();
+      searchInputRef.current?.select();
+    },
+  });
+  useKeyboardShortcut({
+    enabled: !technologyDialogOpen,
+    key: "Escape",
+    onTrigger: () => {
+      if (document.activeElement === searchInputRef.current) {
         searchInputRef.current?.blur();
       }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [technologyDialogOpen]);
+    },
+    preventDefault: false,
+  });
 
   function clearFilters() {
     setSearch("");
@@ -126,7 +120,7 @@ export function UsersContent({ preloadedUsers }: UsersContentProps) {
 
   return (
     <div className="min-h-svh bg-[#1A1A1A] text-white">
-      <AppHeader activeItem="search" />
+      <AppHeader />
 
       <main className="h-svh overflow-y-auto pt-[68px]">
         <div className="mx-auto w-full max-w-7xl px-4 pb-12 max-[520px]:px-3 max-[520px]:pb-8">

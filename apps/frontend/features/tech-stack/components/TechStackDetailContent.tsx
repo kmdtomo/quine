@@ -32,7 +32,7 @@ export function TechStackDetailContent({
 
   return (
     <div className="min-h-svh bg-[#1A1A1A] text-white">
-      <AppHeader activeItem={null} />
+      <AppHeader />
 
       <main className="h-svh overflow-y-auto pt-[68px]">
         <div className="mx-auto w-full max-w-7xl px-4 pb-12">

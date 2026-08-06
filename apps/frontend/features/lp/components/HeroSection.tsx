@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useReducedMotion } from "motion/react";
 
 import styles from "../lp.module.css";
+import { useRafScroll } from "../use-raf-scroll";
 import { LanguageMarquee } from "./LanguageMarquee";
 import { PrismBackground } from "./PrismBackground";
 import { RevealOnScroll } from "./RevealOnScroll";
@@ -10,43 +12,26 @@ import { RevealOnScroll } from "./RevealOnScroll";
 export function HeroSection({ onSignupOpen }: { onSignupOpen: () => void }) {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
-  useEffect(() => {
+  useRafScroll(() => {
     const stage = stageRef.current;
     const bg = stage?.querySelector<HTMLElement>(`.${styles.stageBg}`);
     const inner = innerRef.current;
     if (!stage) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const stageH = stage.offsetHeight || 1;
+    const scrollTop = window.scrollY;
+    const progress = Math.min(1, Math.max(0, scrollTop / stageH));
 
-    let raf = 0;
-    const apply = () => {
-      raf = 0;
-      const stageH = stage.offsetHeight || 1;
-      const scrollTop = window.scrollY;
-      const p = Math.min(1, Math.max(0, scrollTop / stageH));
-
-      if (bg) {
-        bg.style.transform = `translate3d(0, ${scrollTop * 0.28}px, 0)`;
-      }
-      if (inner) {
-        inner.style.transform = `translate3d(0, ${-scrollTop * 0.16}px, 0)`;
-        inner.style.opacity = String(Math.max(0, 1 - p * 1.35));
-      }
-    };
-
-    const onScroll = () => {
-      if (raf) return;
-      raf = window.requestAnimationFrame(apply);
-    };
-
-    apply();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) window.cancelAnimationFrame(raf);
-    };
-  }, []);
+    if (bg) {
+      bg.style.transform = `translate3d(0, ${scrollTop * 0.28}px, 0)`;
+    }
+    if (inner) {
+      inner.style.transform = `translate3d(0, ${-scrollTop * 0.16}px, 0)`;
+      inner.style.opacity = String(Math.max(0, 1 - progress * 1.35));
+    }
+  }, reducedMotion !== true);
 
   return (
     <div ref={stageRef} className={styles.stage}>

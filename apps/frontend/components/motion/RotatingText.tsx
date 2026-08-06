@@ -125,7 +125,7 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
         const randomIndex = Math.floor(Math.random() * total);
         return Math.abs(randomIndex - index) * staggerDuration;
       }
-      return Math.abs((staggerFrom as number) - index) * staggerDuration;
+      return Math.abs(staggerFrom - index) * staggerDuration;
     },
     [staggerFrom, staggerDuration],
   );
@@ -203,7 +203,10 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
 
   return (
     <motion.span
-      className={cn("relative inline-flex flex-wrap whitespace-pre-wrap", mainClassName)}
+      className={cn(
+        "relative inline-flex flex-wrap whitespace-pre-wrap",
+        mainClassName,
+      )}
       {...rest}
       layout
       transition={transition}
@@ -250,10 +253,10 @@ const RotatingText = forwardRef<RotatingTextRef, RotatingTextProps>(
                       ),
                     }}
                     className={cn("inline-block", elementLevelClassName)}
-	                  >
-	                    {char}
-	                  </motion.span>
-	                ))}
+                  >
+                    {char}
+                  </motion.span>
+                ))}
                 {wordObj.needsSpace && (
                   <span className="whitespace-pre"> </span>
                 )}

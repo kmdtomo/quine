@@ -29,10 +29,7 @@ import {
 } from "./ProductRepoImportModal";
 import { ProductTechPanelSection } from "./ProductTechPanelSection";
 import { ProductTechSelectionModal } from "./ProductTechSelectionModal";
-import {
-  getProfileHref,
-  getProductHref,
-} from "./product-ui";
+import { getProductHref } from "./product-ui";
 import {
   applyMarkdownProposal,
   type MarkdownProposal,
@@ -244,8 +241,8 @@ export function ProductEditContent({
   if (editData === null) {
     return (
       <div className="h-svh bg-[#1A1A1A] text-white">
-        <AppHeader activeItem="create" homeHref="/" />
-        <main className="grid h-svh place-items-center px-6 text-center">
+        <AppHeader />
+        <main className="grid h-svh place-items-center px-6 pt-[68px] text-center">
           <div>
             <p className="text-sm font-semibold tracking-[0.14em] text-primary uppercase">
               Quine
@@ -258,7 +255,6 @@ export function ProductEditContent({
   }
 
   const viewerUsername = editData.viewer.username;
-  const homeHref = getProfileHref(viewerUsername);
   const newProductHref =
     draftKey === undefined
       ? "/products/new"
@@ -550,23 +546,9 @@ export function ProductEditContent({
 
   return (
     <div className="h-svh overflow-hidden bg-[#1A1A1A] text-white">
-      {isCreating ? null : (
-        <AppHeader activeItem="create" homeHref={homeHref} />
-      )}
+      <AppHeader />
 
-      <main
-        className={
-          isCreating
-            ? "relative h-svh overflow-y-auto"
-            : "relative h-svh overflow-y-auto pt-[68px]"
-        }
-      >
-        {isCreating ? (
-          <div className="pt-3">
-            <AppHeader activeItem="create" fixed={false} homeHref={homeHref} />
-          </div>
-        ) : null}
-
+      <main className="relative h-svh overflow-y-auto pt-[68px]">
         <div className="mx-auto w-full max-w-[1280px] px-4 pb-12">
           <ProductEditHeroSection
             isEditing={product !== null}
